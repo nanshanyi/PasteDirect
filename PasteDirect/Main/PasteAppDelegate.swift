@@ -14,11 +14,11 @@ import KeyboardShortcuts
 class PasteAppDelegate: NSObject, NSApplicationDelegate {
     let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     lazy var rMenu = {
-        let menu = NSMenu(title: "Paste 设置")
+        let menu = NSMenu(title: "设置")
         let item1 = NSMenuItem(title: "偏好设置", action: #selector(settingsAction), keyEquivalent: ",")
         menu.addItem(item1)
         menu.addItem(NSMenuItem.separator())
-        let item3 = NSMenuItem(title: "退出Paste", action: #selector(NSApplication.shared.terminate), keyEquivalent: "q")
+        let item3 = NSMenuItem(title: "退出", action: #selector(NSApplication.shared.terminate), keyEquivalent: "q")
         menu.addItem(item3)
         return menu
     }()

@@ -223,11 +223,11 @@
 		CB2CDF5E2924ECAB00E81836 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				CB2CDF5F2924ECAB00E81836 /* PasteShortcutsSettingViewController.xib */,
-				CB2CDF602924ECAB00E81836 /* PasteGeneralSettingsViewController.xib */,
-				CB2CDF612924ECAB00E81836 /* PasteShortcutsSettingViewController.swift */,
-				CB2CDF622924ECAB00E81836 /* PasteMainViewController.swift */,
 				CB2CDF632924ECAB00E81836 /* PasteGeneralSettingsViewController.swift */,
+				CB2CDF5F2924ECAB00E81836 /* PasteShortcutsSettingViewController.xib */,
+				CB2CDF612924ECAB00E81836 /* PasteShortcutsSettingViewController.swift */,
+				CB2CDF602924ECAB00E81836 /* PasteGeneralSettingsViewController.xib */,
+				CB2CDF622924ECAB00E81836 /* PasteMainViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";

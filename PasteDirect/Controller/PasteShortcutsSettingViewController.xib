@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="PasteShortcutsSettingViewController" customModule="PasteDIrect" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="PasteShortcutsSettingViewController" customModule="PasteDirect" customModuleProvider="target">
             <connections>
                 <outlet property="pasteCell" destination="3a6-JY-O6i" id="R2G-np-k0w"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
@@ -36,7 +36,7 @@
                         <gridCell row="cjf-1y-y6r" column="FAH-Bq-yXF" id="oBj-tl-ynm">
                             <textField key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="1Ax-2J-1kI">
                                 <rect key="frame" x="-2" y="10" width="113" height="16"/>
-                                <textFieldCell key="cell" controlSize="large" lineBreakMode="clipping" title="激活PasteDIrect：" id="4kz-3M-dZp">
+                                <textFieldCell key="cell" controlSize="large" lineBreakMode="clipping" title="激活PasteDirect：" id="4kz-3M-dZp">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -45,7 +45,7 @@
                         </gridCell>
                         <gridCell row="cjf-1y-y6r" column="9b6-fU-bbE" id="3a6-JY-O6i">
                             <customView key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="qau-nO-Wr0">
-                                <rect key="frame" x="115" y="3" width="100" height="30"/>
+                                <rect key="frame" x="140" y="3" width="100" height="30"/>
                             </customView>
                         </gridCell>
                     </gridCells>
@@ -56,7 +56,6 @@
                 <constraint firstItem="6KP-P3-MA4" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="97" id="2yE-d0-883"/>
                 <constraint firstItem="6KP-P3-MA4" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" constant="20" id="EsM-hf-lqI"/>
                 <constraint firstAttribute="bottom" secondItem="6KP-P3-MA4" secondAttribute="bottom" constant="30" id="WfR-vG-Ae0"/>
-                <constraint firstItem="6KP-P3-MA4" firstAttribute="centerX" secondItem="Hz6-mo-xeY" secondAttribute="centerX" id="yFh-wy-p1j"/>
             </constraints>
             <point key="canvasLocation" x="163" y="24"/>
         </customView>
