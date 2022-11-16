@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PasteGeneralSettingsViewController" customModule="PasteDirect" customModuleProvider="target">
+            <connections>
+                <outlet property="clearAllButton" destination="STM-fJ-jP7" id="U4T-yJ-mtv"/>
+                <outlet property="clearInfoLabel" destination="k5I-kR-i2X" id="sAZ-ER-Qh5"/>
+                <outlet property="historySlider" destination="FH2-a5-WVC" id="qs2-1m-zUJ"/>
+                <outlet property="onStartButton" destination="YEW-64-qIF" id="tp6-qF-cPv"/>
+                <outlet property="pasteDirectButton" destination="lmU-15-j6g" id="agI-Ud-49P"/>
+                <outlet property="pasteOnlyTextButton" destination="GRi-7E-BZf" id="arg-hx-R3i"/>
+                <outlet property="view" destination="efD-DA-2UH" id="6q2-2y-mkT"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="efD-DA-2UH">
+            <rect key="frame" x="0.0" y="0.0" width="560" height="296"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <gridView xPlacement="leading" yPlacement="bottom" rowAlignment="none" translatesAutoresizingMaskIntoConstraints="NO" id="qOM-6h-bia">
+                    <rect key="frame" x="110" y="30" width="340" height="246"/>
+                    <constraints>
+                        <constraint firstItem="FH2-a5-WVC" firstAttribute="top" secondItem="GRi-7E-BZf" secondAttribute="bottom" constant="18" id="9cs-mN-vnv"/>
+                        <constraint firstAttribute="width" constant="340" id="EWH-nL-7NP"/>
+                        <constraint firstItem="2Ah-nd-eec" firstAttribute="leading" secondItem="qOM-6h-bia" secondAttribute="leading" id="Ndo-h0-c1f"/>
+                        <constraint firstItem="GRi-7E-BZf" firstAttribute="top" secondItem="QWC-Wv-tpD" secondAttribute="bottom" constant="12" id="Xsi-D4-SrM"/>
+                        <constraint firstItem="STM-fJ-jP7" firstAttribute="top" secondItem="FQf-Q4-GBS" secondAttribute="bottom" constant="12" id="YYy-5K-EKj"/>
+                        <constraint firstItem="97Y-rk-AuR" firstAttribute="baseline" secondItem="lmU-15-j6g" secondAttribute="baseline" id="bdX-yF-k07"/>
+                        <constraint firstItem="FH2-a5-WVC" firstAttribute="bottom" secondItem="1rn-0I-djb" secondAttribute="bottom" id="g0f-VU-dPD"/>
+                    </constraints>
+                    <rows>
+                        <gridRow id="pC1-5z-KXZ"/>
+                        <gridRow id="QlD-gE-Klm"/>
+                        <gridRow id="u1i-l6-z9h"/>
+                        <gridRow id="1Qp-Po-ccU"/>
+                        <gridRow id="hZy-oq-wdA"/>
+                        <gridRow id="WHl-7X-3Zw"/>
+                        <gridRow id="2JJ-Sw-d5c"/>
+                        <gridRow id="GsU-le-l3w"/>
+                        <gridRow id="G2S-H1-kHS"/>
+                        <gridRow id="eW1-HF-eu0"/>
+                        <gridRow id="SDz-tE-hFr"/>
+                        <gridRow id="edb-wR-KfE"/>
+                    </rows>
+                    <columns>
+                        <gridColumn xPlacement="trailing" id="L2B-nJ-1zQ"/>
+                        <gridColumn id="YmV-oB-t5Y"/>
+                    </columns>
+                    <gridCells>
+                        <gridCell row="pC1-5z-KXZ" column="L2B-nJ-1zQ" id="NbI-ub-gJa">
+                            <textField key="contentView" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2Ah-nd-eec" userLabel="StartLabel">
+                                <rect key="frame" x="-2" y="230" width="94" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="启动：" id="jla-Mf-Yla">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                        <gridCell row="pC1-5z-KXZ" column="YmV-oB-t5Y" yPlacement="top" id="BIy-gR-poU">
+                            <button key="contentView" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YEW-64-qIF">
+                                <rect key="frame" x="94" y="229" width="165" height="18"/>
+                                <buttonCell key="cell" type="check" title="开机后启动PasteDirect" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="D3l-wq-3Hr">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="onMacStart:" target="-2" id="7jj-Bu-DlR"/>
+                                </connections>
+                            </button>
+                        </gridCell>
+                        <gridCell row="QlD-gE-Klm" column="L2B-nJ-1zQ" id="fzP-aL-GF3"/>
+                        <gridCell row="QlD-gE-Klm" column="YmV-oB-t5Y" id="IaJ-qs-vDu"/>
+                        <gridCell row="u1i-l6-z9h" column="L2B-nJ-1zQ" yPlacement="top" id="FU2-52-FgC">
+                            <textField key="contentView" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="97Y-rk-AuR">
+                                <rect key="frame" x="51" y="202" width="41" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="集成：" id="4mG-bg-cBb">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                        <gridCell row="u1i-l6-z9h" column="YmV-oB-t5Y" yPlacement="top" id="aL1-WO-bab">
+                            <button key="contentView" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lmU-15-j6g">
+                                <rect key="frame" x="94" y="201" width="80" height="18"/>
+                                <buttonCell key="cell" type="check" title="直接粘贴" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="wua-5L-NKZ">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="pasteDirect:" target="-2" id="osu-Cz-rpj"/>
+                                </connections>
+                            </button>
+                        </gridCell>
+                        <gridCell row="1Qp-Po-ccU" column="L2B-nJ-1zQ" id="LSt-jW-SEq"/>
+                        <gridCell row="1Qp-Po-ccU" column="YmV-oB-t5Y" yPlacement="top" id="nvU-Hd-pwv">
+                            <textField key="contentView" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QWC-Wv-tpD">
+                                <rect key="frame" x="94" y="182" width="128" height="14"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="自动插入片段到当前应用" id="Osy-qh-qDj">
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                        <gridCell row="hZy-oq-wdA" column="L2B-nJ-1zQ" id="2Fc-7b-fV7"/>
+                        <gridCell row="hZy-oq-wdA" column="YmV-oB-t5Y" yPlacement="top" id="zwj-02-GGn">
+                            <button key="contentView" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="GRi-7E-BZf">
+                                <rect key="frame" x="94" y="153" width="106" height="18"/>
+                                <buttonCell key="cell" type="check" title="粘贴为纯文本" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="5MK-m2-s5L">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="pasteOnlyText:" target="-2" id="nfO-he-Mfb"/>
+                                </connections>
+                            </button>
+                        </gridCell>
+                        <gridCell row="WHl-7X-3Zw" column="L2B-nJ-1zQ" id="ImE-3u-xy3"/>
+                        <gridCell row="WHl-7X-3Zw" column="YmV-oB-t5Y" id="HQF-zg-aoY"/>
+                        <gridCell row="2JJ-Sw-d5c" column="L2B-nJ-1zQ" id="LTO-zo-dMi"/>
+                        <gridCell row="2JJ-Sw-d5c" column="YmV-oB-t5Y" id="iat-d9-iGo"/>
+                        <gridCell row="GsU-le-l3w" column="L2B-nJ-1zQ" yPlacement="top" id="BbX-ao-xGz">
+                            <textField key="contentView" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1rn-0I-djb">
+                                <rect key="frame" x="-2" y="116" width="94" height="20"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="历史记录容量：" id="6Pv-Hw-Rp0">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                        <gridCell row="GsU-le-l3w" column="YmV-oB-t5Y" yPlacement="top" id="STY-IR-zsV">
+                            <slider key="contentView" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FH2-a5-WVC">
+                                <rect key="frame" x="94" y="110" width="204" height="28"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="tzc-jw-L6B"/>
+                                </constraints>
+                                <sliderCell key="cell" baseWritingDirection="leftToRight" alignment="left" maxValue="100" doubleValue="66.666666666666671" tickMarkPosition="above" numberOfTickMarks="4" allowsTickMarkValuesOnly="YES" sliderType="linear" id="8Ok-Ab-NXG"/>
+                                <connections>
+                                    <action selector="sliderChange:" target="-2" id="7G9-QA-Fmv"/>
+                                </connections>
+                            </slider>
+                        </gridCell>
+                        <gridCell row="G2S-H1-kHS" column="L2B-nJ-1zQ" id="Qg1-Fd-aNJ"/>
+                        <gridCell row="G2S-H1-kHS" column="YmV-oB-t5Y" yPlacement="top" id="uLu-1v-uzQ">
+                            <textField key="contentView" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FQf-Q4-GBS">
+                                <rect key="frame" x="94" y="95" width="218" height="15"/>
+                                <textFieldCell key="cell" controlSize="large" lineBreakMode="clipping" title="天               周               月               永久" id="atc-OT-GMB">
+                                    <font key="font" metaFont="cellTitle"/>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                        <gridCell row="eW1-HF-eu0" column="L2B-nJ-1zQ" id="4uC-dd-fTm"/>
+                        <gridCell row="eW1-HF-eu0" column="YmV-oB-t5Y" id="ppQ-Jm-uys"/>
+                        <gridCell row="SDz-tE-hFr" column="L2B-nJ-1zQ" id="3Le-ta-WJ8"/>
+                        <gridCell row="SDz-tE-hFr" column="YmV-oB-t5Y" yPlacement="top" id="iLO-gr-mrj">
+                            <button key="contentView" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="STM-fJ-jP7">
+                                <rect key="frame" x="96" y="64" width="121" height="19"/>
+                                <buttonCell key="cell" type="recessed" title="清除所有剪切历史" bezelStyle="recessed" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="z3f-r4-Qso">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                    <font key="font" metaFont="systemBold"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="clearAll:" target="-2" id="hCE-NW-xgp"/>
+                                </connections>
+                            </button>
+                        </gridCell>
+                        <gridCell row="edb-wR-KfE" column="L2B-nJ-1zQ" id="sCN-nS-EV3"/>
+                        <gridCell row="edb-wR-KfE" column="YmV-oB-t5Y" id="vjI-8r-vKV">
+                            <textField key="contentView" horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="k5I-kR-i2X">
+                                <rect key="frame" x="94" y="0.0" width="94" height="15"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title=" 已清除所有数据" id="yyF-Y0-a2y">
+                                    <font key="font" metaFont="cellTitle"/>
+                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                    </gridCells>
+                </gridView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="qOM-6h-bia" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="efD-DA-2UH" secondAttribute="leading" constant="80" id="3xf-5X-bDX"/>
+                <constraint firstItem="qOM-6h-bia" firstAttribute="centerX" secondItem="efD-DA-2UH" secondAttribute="centerX" id="XY2-l7-Jw7"/>
+                <constraint firstAttribute="bottom" secondItem="qOM-6h-bia" secondAttribute="bottom" constant="30" id="h9h-Vz-QSI"/>
+                <constraint firstItem="qOM-6h-bia" firstAttribute="top" secondItem="efD-DA-2UH" secondAttribute="top" constant="20" id="tb3-1i-S10"/>
+            </constraints>
+            <point key="canvasLocation" x="117" y="133"/>
+        </customView>
+    </objects>
+</document>

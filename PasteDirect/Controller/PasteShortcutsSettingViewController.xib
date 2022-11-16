@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="PasteShortcutsSettingViewController" customModule="PasteDIrect" customModuleProvider="target">
+            <connections>
+                <outlet property="pasteCell" destination="3a6-JY-O6i" id="R2G-np-k0w"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="Hz6-mo-xeY">
+            <rect key="frame" x="0.0" y="0.0" width="434" height="86"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <gridView xPlacement="leading" yPlacement="bottom" rowAlignment="none" translatesAutoresizingMaskIntoConstraints="NO" id="6KP-P3-MA4">
+                    <rect key="frame" x="97" y="30" width="240" height="36"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="50" id="HIi-XZ-bua"/>
+                        <constraint firstItem="qau-nO-Wr0" firstAttribute="top" secondItem="6KP-P3-MA4" secondAttribute="top" constant="3" id="WHP-ya-mVF"/>
+                        <constraint firstAttribute="width" constant="240" id="jtt-mn-iQB"/>
+                    </constraints>
+                    <rows>
+                        <gridRow yPlacement="center" height="36" id="cjf-1y-y6r"/>
+                    </rows>
+                    <columns>
+                        <gridColumn id="FAH-Bq-yXF"/>
+                        <gridColumn id="9b6-fU-bbE"/>
+                    </columns>
+                    <gridCells>
+                        <gridCell row="cjf-1y-y6r" column="FAH-Bq-yXF" id="oBj-tl-ynm">
+                            <textField key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="1Ax-2J-1kI">
+                                <rect key="frame" x="-2" y="10" width="113" height="16"/>
+                                <textFieldCell key="cell" controlSize="large" lineBreakMode="clipping" title="激活PasteDIrect：" id="4kz-3M-dZp">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </gridCell>
+                        <gridCell row="cjf-1y-y6r" column="9b6-fU-bbE" id="3a6-JY-O6i">
+                            <customView key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="qau-nO-Wr0">
+                                <rect key="frame" x="115" y="3" width="100" height="30"/>
+                            </customView>
+                        </gridCell>
+                    </gridCells>
+                </gridView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="6KP-P3-MA4" secondAttribute="trailing" constant="97" id="2EA-70-xu4"/>
+                <constraint firstItem="6KP-P3-MA4" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="97" id="2yE-d0-883"/>
+                <constraint firstItem="6KP-P3-MA4" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" constant="20" id="EsM-hf-lqI"/>
+                <constraint firstAttribute="bottom" secondItem="6KP-P3-MA4" secondAttribute="bottom" constant="30" id="WfR-vG-Ae0"/>
+                <constraint firstItem="6KP-P3-MA4" firstAttribute="centerX" secondItem="Hz6-mo-xeY" secondAttribute="centerX" id="yFh-wy-p1j"/>
+            </constraints>
+            <point key="canvasLocation" x="163" y="24"/>
+        </customView>
+    </objects>
+</document>
