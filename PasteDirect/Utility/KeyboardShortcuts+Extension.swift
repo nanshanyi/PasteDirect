@@ -6,8 +6,19 @@
 //
 
 import Foundation
+import Carbon
 import KeyboardShortcuts
 extension KeyboardShortcuts.Name {
     
     static let pasteKey = Self("pasteShortcurs", default: Shortcut(.v,modifiers:[.command, .shift]))
 }
+
+extension KeyboardShortcuts {
+    static func postCmdVEvent() {
+        let source = CGEventSource(stateID: .combinedSessionState)
+        let cgEvent = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: true)
+        cgEvent?.flags = .maskCommand
+        cgEvent?.post(tap: .cghidEventTap)
+    }
+}
+

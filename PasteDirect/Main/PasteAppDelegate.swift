@@ -65,6 +65,7 @@ extension PasteAppDelegate {
         let prefs = UserDefaults.standard
         if !prefs.bool(forKey: PrefKey.appAlreadyLaunched.rawValue) {
             LaunchAtLogin.isEnabled = true
+            prefs.set(true, forKey: PrefKey.appAlreadyLaunched.rawValue)
             prefs.set(true, forKey: PrefKey.onStart.rawValue)
             prefs.set(true, forKey: PrefKey.pasteDirect.rawValue)
             prefs.set(HistoryTime.week.rawValue, forKey: PrefKey.historyTime.rawValue)

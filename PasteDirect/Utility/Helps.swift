@@ -6,18 +6,8 @@
 //  Copyright © 2018 Eonil. All rights reserved.
 //
 
-import Carbon
-import KeyboardShortcuts
+import Foundation
 import ServiceManagement
-
-extension KeyboardShortcuts {
-    static func postCmdVEvent() {
-        let source = CGEventSource(stateID: .combinedSessionState)
-        let cgEvent = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_ANSI_V), keyDown: true)
-        cgEvent?.flags = .maskCommand
-        cgEvent?.post(tap: .cghidEventTap)
-    }
-}
 
 public struct LaunchAtLogin {
     private static let id = "\(Bundle.main.bundleIdentifier!).LaunchAtLogin"

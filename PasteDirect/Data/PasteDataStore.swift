@@ -32,9 +32,11 @@ class PasteDataStore {
         dataChange = true
         dataList.removeAll(where: { $0.hashValue == model.hashValue })
         dataList.insert(model, at: 0)
+        
     }
     
     func deleteItem(item: PasteboardModel) {
+        dataList.removeAll(where: { $0.hashValue == item.hashValue })
         deleteItems(filter: hashKey == item.hashValue )
     }
     

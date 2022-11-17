@@ -11,10 +11,6 @@
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
 		CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */; };
 		CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */; };
-		CB2CDF352924E92200E81836 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF342924E92200E81836 /* KeyboardShortcuts */; };
-		CB2CDF382924E93100E81836 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF372924E93100E81836 /* SnapKit */; };
-		CB2CDF3B2924E94700E81836 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF3A2924E94700E81836 /* Preferences */; };
-		CB2CDF3E2924E96200E81836 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF3D2924E96200E81836 /* SQLite */; };
 		CB2CDF572924EB7300E81836 /* LaunchAtLogin.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = CB2CDF442924E9D300E81836 /* LaunchAtLogin.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB2CDF732924ECAD00E81836 /* Helps.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF592924ECAB00E81836 /* Helps.swift */; };
 		CB2CDF742924ECAE00E81836 /* KeyboardShortcuts+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */; };
@@ -39,6 +35,10 @@
 		CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */; };
 		CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF892924ED1D00E81836 /* UIColorHexSwift */; };
 		CB2CDF8C2924EE5B00E81836 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF532924E9FC00E81836 /* main.swift */; };
+		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
+		CB9986FC2925FFFD007E585C /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FB2925FFFD007E585C /* Preferences */; };
+		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
+		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,11 +113,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB2CDF3E2924E96200E81836 /* SQLite in Frameworks */,
+				CB9986FF29260015007E585C /* SQLite in Frameworks */,
+				CB9986FC2925FFFD007E585C /* Preferences in Frameworks */,
 				CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */,
-				CB2CDF352924E92200E81836 /* KeyboardShortcuts in Frameworks */,
-				CB2CDF3B2924E94700E81836 /* Preferences in Frameworks */,
-				CB2CDF382924E93100E81836 /* SnapKit in Frameworks */,
+				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
+				CB99870229260372007E585C /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,6 +153,7 @@
 				CB2CDF082924E8D900E81836 /* PasteDirectUITests */,
 				CB2CDF452924E9D400E81836 /* LaunchAtLogin */,
 				CB2CDEEB2924E8D500E81836 /* Products */,
+				CB8FE2E22925E71A008FEB96 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -265,6 +266,13 @@
 			path = View;
 			sourceTree = "<group>";
 		};
+		CB8FE2E22925E71A008FEB96 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -283,11 +291,11 @@
 			);
 			name = PasteDirect;
 			packageProductDependencies = (
-				CB2CDF342924E92200E81836 /* KeyboardShortcuts */,
-				CB2CDF372924E93100E81836 /* SnapKit */,
-				CB2CDF3A2924E94700E81836 /* Preferences */,
-				CB2CDF3D2924E96200E81836 /* SQLite */,
 				CB2CDF892924ED1D00E81836 /* UIColorHexSwift */,
+				CB9986F52925FF46007E585C /* KeyboardShortcuts */,
+				CB9986FB2925FFFD007E585C /* Preferences */,
+				CB9986FE29260015007E585C /* SQLite */,
+				CB99870129260372007E585C /* SnapKit */,
 			);
 			productName = PasteDirect;
 			productReference = CB2CDEEA2924E8D500E81836 /* PasteDirect.app */;
@@ -382,11 +390,11 @@
 			);
 			mainGroup = CB2CDEE12924E8D500E81836;
 			packageReferences = (
-				CB2CDF332924E92200E81836 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
-				CB2CDF362924E93100E81836 /* XCRemoteSwiftPackageReference "SnapKit" */,
-				CB2CDF392924E94700E81836 /* XCRemoteSwiftPackageReference "Preferences" */,
-				CB2CDF3C2924E96000E81836 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */,
+				CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */,
+				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
+				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = CB2CDEEB2924E8D500E81836 /* Products */;
 			projectDirPath = "";
@@ -626,6 +634,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = "$(SRCROOT)/PasteDirect/info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = PasteDirect;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -654,6 +663,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = "$(SRCROOT)/PasteDirect/info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = PasteDirect;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -846,73 +856,74 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CB2CDF332924E92200E81836 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		CB2CDF362924E93100E81836 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
-			requirement = {
-				branch = develop;
-				kind = branch;
-			};
-		};
-		CB2CDF392924E94700E81836 /* XCRemoteSwiftPackageReference "Preferences" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/Preferences";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		CB2CDF3C2924E96000E81836 /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/yeahdongcn/UIColor-Hex-Swift";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.9;
+			};
+		};
+		CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
+		CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Preferences";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+		CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.14.1;
+			};
+		};
+		CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = versionRange;
+				maximumVersion = 6.0.0;
+				minimumVersion = 5.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CB2CDF342924E92200E81836 /* KeyboardShortcuts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB2CDF332924E92200E81836 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
-			productName = KeyboardShortcuts;
-		};
-		CB2CDF372924E93100E81836 /* SnapKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB2CDF362924E93100E81836 /* XCRemoteSwiftPackageReference "SnapKit" */;
-			productName = SnapKit;
-		};
-		CB2CDF3A2924E94700E81836 /* Preferences */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB2CDF392924E94700E81836 /* XCRemoteSwiftPackageReference "Preferences" */;
-			productName = Preferences;
-		};
-		CB2CDF3D2924E96200E81836 /* SQLite */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB2CDF3C2924E96000E81836 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
-			productName = SQLite;
-		};
 		CB2CDF892924ED1D00E81836 /* UIColorHexSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */;
 			productName = UIColorHexSwift;
+		};
+		CB9986F52925FF46007E585C /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+		CB9986FB2925FFFD007E585C /* Preferences */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */;
+			productName = Preferences;
+		};
+		CB9986FE29260015007E585C /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+		CB99870129260372007E585C /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

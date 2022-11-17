@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
       "state" : {
-        "branch" : "main",
-        "revision" : "a105b136033ac091de2bd8d83cf95ee3920365f0"
+        "revision" : "aa50ffb413ce83a443a8c08eb20c76c226e9bce6",
+        "version" : "1.9.0"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/Preferences",
       "state" : {
-        "branch" : "main",
-        "revision" : "8bd4c0fbc97d89f41637984eda8287b0cb022474"
+        "revision" : "2651cd144615009242c994b087508fef99e9275c",
+        "version" : "2.6.0"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit.git",
       "state" : {
-        "branch" : "develop",
-        "revision" : "58320fe80522414bf3a7e24c88123581dc586752"
+        "revision" : "f222cbdf325885926566172f6f5f06af95473158",
+        "version" : "5.6.0"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/stephencelis/SQLite.swift.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "f06b8df5bc0fb73d6ac46adaf5f047fded953f79"
+        "revision" : "7a2e3cd27de56f6d396e84f63beefd0267b55ccb",
+        "version" : "0.14.1"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/yeahdongcn/UIColor-Hex-Swift",
       "state" : {
-        "branch" : "master",
-        "revision" : "47e08d1ec7802c6e8ea0a1bac0516b250d29de05"
+        "revision" : "f37f97bc1a5b545b39ab5330e133e56fa4f38cff",
+        "version" : "5.1.9"
       }
     }
   ],

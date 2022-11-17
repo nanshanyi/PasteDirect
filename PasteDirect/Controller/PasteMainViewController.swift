@@ -72,11 +72,15 @@ class PasteMainViewController: NSViewController {
         if mainDataStore.dataChange {
             mainDataStore.dataChange = false
             selectIndex = IndexPath(item: 0, section: 0)
-            collectionView.scrollToItems(at: [selectIndex], scrollPosition: .left)
+            if !dataList.isEmpty {
+                collectionView.scrollToItems(at: [selectIndex], scrollPosition: .left)
+            }
         }
         dataList = mainDataStore.dataList
         collectionView.reloadData()
-        collectionView.selectItems(at: [selectIndex], scrollPosition: .top)
+        if !dataList.isEmpty {
+            collectionView.selectItems(at: [selectIndex], scrollPosition: .top)
+        }
     }
     
     func reLayoutFrame() {
