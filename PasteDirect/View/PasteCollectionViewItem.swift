@@ -159,7 +159,9 @@ extension PasteCollectionViewItem {
         if let app = NSApplication.shared.delegate as? PasteAppDelegate {
             app.frontApp?.activate()
             app.dismissWindow {
-                KeyboardShortcuts.postCmdVEvent()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    KeyboardShortcuts.postCmdVEvent()
+                }
             }
         }
     }

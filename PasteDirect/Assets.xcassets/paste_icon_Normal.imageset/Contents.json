@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "paste_icon_Normal.png",
+      "filename" : "p.square.fill.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "paste_icon_Normal@2x.png",
+      "filename" : "p.square.fill@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
