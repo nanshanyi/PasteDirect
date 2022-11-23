@@ -14,7 +14,7 @@ class PasteMainViewController: NSViewController {
     let viewHeight: CGFloat = 360
     var selectIndex: IndexPath = IndexPath(item: 0, section: 0)
     var searchBar: NSSearchField
-    var dataList = mainDataStore.dataList
+    var dataList = [PasteboardModel]()
     var frame: NSRect {
         didSet {
             reLayoutFrame()

@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="PasteCollectionViewItem" customModule="Paste" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="PasteCollectionViewItem" customModule="PasteDirect" customModuleProvider="target">
             <connections>
                 <outlet property="appImageView" destination="xOA-cf-502" id="Qji-Vc-VNb"/>
                 <outlet property="contentImage" destination="JbY-XW-roR" id="Qbg-MQ-HWT"/>
@@ -90,6 +90,6 @@
             </constraints>
             <point key="canvasLocation" x="142" y="-72"/>
         </customView>
-        <collectionViewItem id="y6B-bY-XBd" customClass="PasteCollectionViewItem" customModule="Paste" customModuleProvider="target"/>
+        <collectionViewItem id="y6B-bY-XBd" customClass="PasteCollectionViewItem" customModule="PasteDirect" customModuleProvider="target"/>
     </objects>
 </document>

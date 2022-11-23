@@ -80,6 +80,7 @@ extension PasteAppDelegate {
         self.menuBarItem.button?.image = NSImage(named: "paste_icon_Normal")
         self.menuBarItem.button?.target = self
         self.menuBarItem.button?.action = #selector(statusBarClick)
+        //使用leftMouseDown的话，会导致，新showwindow无法成为焦点
         self.menuBarItem.button?.sendAction(on: [.leftMouseUp,.rightMouseUp])
     }
     

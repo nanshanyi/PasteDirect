@@ -40,6 +40,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             return self.enterKeyDown(with: event)
         }
+        contentLabel.maximumNumberOfLines = 15
     }
     
     deinit {
@@ -50,11 +51,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
     
     override var isSelected: Bool {
         didSet {
-            if isSelected {
-                view.layer?.borderWidth = 4
-            } else {
-                view.layer?.borderWidth = 0
-            }
+            view.layer?.borderWidth = isSelected ? 4 : 0
         }
     }
     
@@ -67,7 +64,11 @@ class PasteCollectionViewItem: NSCollectionViewItem{
             
             topContentView.layer?.backgroundColor = NSColor(red: 41.0/255.0, green: 42.0/255.0, blue: 48.0/255.0, alpha: 1).cgColor
             if let att = pModel.attributeString {
-                contentLabel.attributedStringValue = att
+                var showStr = att
+                if att.string.count > 300 {
+                    showStr = att.attributedSubstring(from: NSMakeRange(0, 300))
+                }
+                contentLabel.attributedStringValue = showStr
                 
                 if att.length > 0, let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
                     view.layer?.backgroundColor = color.cgColor

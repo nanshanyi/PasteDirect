@@ -26,7 +26,5 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>LSApplicationCategory</key>
-	<true/>
 </dict>
 </plist>
