@@ -12,6 +12,7 @@ protocol PasteScrollViewDelegate {
 }
 class PasteScrollView: NSScrollView {
     var delegate: PasteScrollViewDelegate?
+    var isSearching = false
     var isLoding = false
     var noMore = false
     override func scrollWheel(with event: NSEvent) {
@@ -34,7 +35,7 @@ class PasteScrollView: NSScrollView {
     
     override func scroll(_ clipView: NSClipView, to point: NSPoint) {
         super.scroll(clipView, to: point)
-        if noMore { return }
+        if noMore || isSearching { return }
         print("scrollView scroll = \(point)")
         let width = NSScreen.main?.frame.width ?? 2000
         if point.x + width + 500 > clipView.documentRect.width {

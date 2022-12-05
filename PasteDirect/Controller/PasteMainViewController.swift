@@ -62,6 +62,7 @@ class PasteMainViewController: NSViewController {
     }
     
     override func viewDidAppear() {
+        scrollView.isSearching = false
         searchBar.isHidden = false
         searchBar.resignFirstResponder()
         view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: frame.width, height: viewHeight)
@@ -188,9 +189,11 @@ extension PasteMainViewController:NSSearchFieldDelegate {
         guard let textView = obj.object as? NSSearchField else { return }
         let keyWord = textView.stringValue
         if !keyWord.isEmpty {
+            scrollView.isSearching = true
             NSObject.cancelPreviousPerformRequests(withTarget: self)
             perform(#selector(searchWord), with: self, afterDelay: 0.3)
         } else {
+            scrollView.isSearching = false
             dataList = mainDataStore.dataList
             collectionView.reloadData()
         }
