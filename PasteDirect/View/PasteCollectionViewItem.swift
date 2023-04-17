@@ -27,6 +27,16 @@ class PasteCollectionViewItem: NSCollectionViewItem{
     
     @IBOutlet weak var topContentView: NSView!
     
+    @IBOutlet weak var bottomView: NSView!
+    
+    @IBOutlet weak var bottomLabel: NSTextField!
+    
+    var gradenLayer: CAGradientLayer  = {
+        let layer = CAGradientLayer()
+        layer.startPoint = CGPoint(x: 0, y: 1)
+        layer.endPoint = CGPoint(x: 0, y: 0)
+        return layer
+    }()
     var delegate: PasteCollectionViewItemDelegate?
     var indexPath: IndexPath!
     var pModel: PasteboardModel!
@@ -40,6 +50,10 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             return self.enterKeyDown(with: event)
         }
+        bottomView.wantsLayer = true;
+//        bottomView.layer?.backgroundColor = NSColor.clear.cgColor
+        bottomView.layer?.addSublayer(gradenLayer)
+        contentLabel.lineBreakMode = .byTruncatingTail
         contentLabel.maximumNumberOfLines = 15
     }
     
@@ -55,9 +69,15 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         }
     }
     
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        gradenLayer.frame = bottomView.bounds
+    }
+    
     func updateItem(model: PasteboardModel, index: IndexPath) {
         pModel = model
         indexPath = index
+        
         if pModel.type == .string {
             contentImage.isHidden = true
             contentLabel.isHidden = false
@@ -65,32 +85,44 @@ class PasteCollectionViewItem: NSCollectionViewItem{
             topContentView.layer?.backgroundColor = NSColor(red: 41.0/255.0, green: 42.0/255.0, blue: 48.0/255.0, alpha: 1).cgColor
             if let att = pModel.attributeString {
                 var showStr = att
-                if att.string.count > 300 {
-                    showStr = att.attributedSubstring(from: NSMakeRange(0, 300))
+                if att.string.count > 500 {
+                    showStr = att.attributedSubstring(from: NSMakeRange(0, 500))
                 }
                 contentLabel.attributedStringValue = showStr
                 
                 if att.length > 0, let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
                     view.layer?.backgroundColor = color.cgColor
                     //                    contentLabel.layer?.backgroundColor = color.cgColor
+                    let colorstr = color.hexString(false)
+                    let startColor = NSColor("\(colorstr)33") ?? NSColor(white: 0, alpha: 0.2)
+                    let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
+                    gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
+                    
                 } else {
                     view.layer?.backgroundColor = NSColor.white.cgColor
                     contentLabel.textColor = .black
+                    gradenLayer.colors = [NSColor(white: 1, alpha: 0.2).cgColor, NSColor.white.cgColor]
                 }
+                bottomLabel.stringValue = "\(att.string.count)个字符"
             }
             
             itemType.stringValue = "文本"
         } else if pModel.type == .image {
             contentImage.isHidden = false
             contentLabel.isHidden = true
-            contentImage.image = NSImage(data: model.data)
+            let retImage = NSImage(data: model.data)
+            contentImage.image = retImage
             itemType.stringValue = "图片"
+            gradenLayer.colors = [NSColor(white: 0, alpha: 0.2).cgColor, NSColor(white: 0, alpha: 1).cgColor]
+            if let size = retImage?.size {
+                bottomLabel.stringValue = "\(Int(size.width)) ×\(Int(size.height)) 像素"
+            }
         }
         if pModel.appPath.count > 0 {
             appImageView.imageScaling = .scaleAxesIndependently
             let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
             appImageView.image = iconImage
-            //            topContentVIew.layer?.backgroundColor = iconImage.getColors()?.background.cgColor ?? NSColor(white: 0.2, alpha: 1).cgColor
+            self.topContentView.layer?.backgroundColor = mainDataStore.colorWith(model).cgColor
         }
         setViewMenu()
         itemTime.stringValue = getTimeString(model.date)

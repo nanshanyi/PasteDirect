@@ -8,12 +8,15 @@
 import Foundation
 import AppKit
 import SQLite
+import UIColorHexSwift
 
 let mainDataStore = PasteDataStore()
 
 class PasteDataStore {
     
     private var sqlManager = PasteSQLManager.manager
+    private var userDefault = UserDefaults.standard
+    private var colorDic = Dictionary<String, String>()
     var dataList:[PasteboardModel] = []
     var totoalCount: Int = 0
     var pageIndex = 1
@@ -23,6 +26,9 @@ class PasteDataStore {
     init() {
         dataList = getData(limit: pageIndex * pageSize)
         totoalCount = sqlManager.totoalCount()
+        if let dic = userDefault.dictionary(forKey: PrefKey.appColorData.rawValue) as? [String : String] {
+            colorDic = dic
+        }
     }
     
     func addNewItem(item: NSPasteboardItem) {
@@ -32,12 +38,7 @@ class PasteDataStore {
         dataChange = true
         dataList.removeAll(where: { $0.hashValue == model.hashValue })
         dataList.insert(model, at: 0)
-        
-    }
-    
-    func deleteItem(item: PasteboardModel) {
-        dataList.removeAll(where: { $0.hashValue == item.hashValue })
-        deleteItems(filter: hashKey == item.hashValue )
+        updateColor(model);
     }
     
     func loadMoreData() -> [PasteboardModel] {
@@ -77,6 +78,13 @@ class PasteDataStore {
         return items
     }
     
+    func updateTotoalCount() {
+        totoalCount = sqlManager.totoalCount()
+    }
+    
+}
+//MARK: - dataManager
+extension PasteDataStore {
     func clearData(_ type: HistoryTime) {
         
         var dateCom = DateComponents()
@@ -101,8 +109,9 @@ class PasteDataStore {
         sqlManager.dropTable()
     }
     
-    func updateTotoalCount() {
-        totoalCount = sqlManager.totoalCount()
+    func deleteItem(item: PasteboardModel) {
+        dataList.removeAll(where: { $0.hashValue == item.hashValue })
+        deleteItems(filter: hashKey == item.hashValue )
     }
     
     func deleteItems(filter:Expression<Bool>) {
@@ -110,6 +119,36 @@ class PasteDataStore {
         updateTotoalCount()
     }
     
+    func clearExpiredData() {
+        let current = userDefault.integer(forKey: PrefKey.historyTime.rawValue)
+        guard let type = HistoryTime(rawValue: current) else { return }
+        clearData(type);
+    }
+}
+
+extension PasteDataStore {
+    func updateColor(_ model: PasteboardModel) {
+        DispatchQueue.global().async { [self] in
+            let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
+            let colors = iconImage.getColors()
+            if !colorDic.contains(where: { $0.key == model.appName })
+                , let color = colors?.primary {
+                let colorStr = color.hexString(true)
+                guard !colorStr.isEmpty else { return }
+                colorDic[model.appName] = colorStr
+                userDefault.set(colorDic, forKey: PrefKey.appColorData.rawValue)
+            }
+        }
+    }
+    func colorWith(_ model: PasteboardModel) -> NSColor {
+        if let colorStr = colorDic[model.appName], let color = NSColor(colorStr) {
+            return color
+        }
+        let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
+        let colors = iconImage.getColors()
+        updateColor(model)
+        return colors?.primary ?? NSColor.clear
+    }
 }
 
 

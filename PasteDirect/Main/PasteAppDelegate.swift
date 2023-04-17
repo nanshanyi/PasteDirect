@@ -35,6 +35,7 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
         style: .toolbarItems,
         animated: true
     )}()
+
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         setStatus()

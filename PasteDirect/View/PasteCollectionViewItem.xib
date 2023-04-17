@@ -9,6 +9,8 @@
         <customObject id="-2" userLabel="File's Owner" customClass="PasteCollectionViewItem" customModule="PasteDirect" customModuleProvider="target">
             <connections>
                 <outlet property="appImageView" destination="xOA-cf-502" id="Qji-Vc-VNb"/>
+                <outlet property="bottomLabel" destination="WC4-Ug-E5f" id="gNi-js-Tyd"/>
+                <outlet property="bottomView" destination="hOi-z3-OEh" id="tZP-9N-vPa"/>
                 <outlet property="contentImage" destination="JbY-XW-roR" id="Qbg-MQ-HWT"/>
                 <outlet property="contentLabel" destination="3Ih-Bx-OF0" id="CWW-kC-eGy"/>
                 <outlet property="itemTime" destination="3UY-5G-ykQ" id="rr8-GY-mpg"/>
@@ -74,17 +76,39 @@
                     <rect key="frame" x="16" y="8" width="288" height="18"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Jqc-fQ-NKj"/>
                 </imageView>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="hOi-z3-OEh">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="30"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WC4-Ug-E5f">
+                            <rect key="frame" x="-2" y="8" width="324" height="14"/>
+                            <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Label" id="hh2-lc-O5b">
+                                <font key="font" metaFont="system" size="11"/>
+                                <color key="textColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                    </subviews>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="30" id="H3z-Gj-rFC"/>
+                        <constraint firstItem="WC4-Ug-E5f" firstAttribute="leading" secondItem="hOi-z3-OEh" secondAttribute="leading" id="X8f-kS-ixw"/>
+                        <constraint firstItem="WC4-Ug-E5f" firstAttribute="centerY" secondItem="hOi-z3-OEh" secondAttribute="centerY" id="XTw-Ev-te9"/>
+                        <constraint firstAttribute="trailing" secondItem="WC4-Ug-E5f" secondAttribute="trailing" id="fZo-FU-iN0"/>
+                    </constraints>
+                </customView>
             </subviews>
             <constraints>
+                <constraint firstAttribute="bottom" secondItem="hOi-z3-OEh" secondAttribute="bottom" id="3nr-2x-Udj"/>
                 <constraint firstAttribute="bottom" secondItem="3Ih-Bx-OF0" secondAttribute="bottom" constant="10" id="76h-DM-H7a"/>
                 <constraint firstItem="Pud-CV-SPC" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" id="7cA-d7-8s1"/>
                 <constraint firstItem="3Ih-Bx-OF0" firstAttribute="top" secondItem="Pud-CV-SPC" secondAttribute="bottom" constant="8" id="9ek-Ix-m5E"/>
                 <constraint firstItem="3Ih-Bx-OF0" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="16" id="Hys-wc-pc7"/>
                 <constraint firstAttribute="trailing" secondItem="Pud-CV-SPC" secondAttribute="trailing" id="OoN-2K-lYH"/>
                 <constraint firstAttribute="trailing" secondItem="JbY-XW-roR" secondAttribute="trailing" constant="16" id="WXv-Yr-i43"/>
+                <constraint firstAttribute="trailing" secondItem="hOi-z3-OEh" secondAttribute="trailing" id="YSj-KE-7Ef"/>
                 <constraint firstAttribute="trailing" secondItem="3Ih-Bx-OF0" secondAttribute="trailing" constant="16" id="alh-Kx-HQG"/>
                 <constraint firstItem="JbY-XW-roR" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="16" id="cVW-Lv-GWK"/>
                 <constraint firstItem="JbY-XW-roR" firstAttribute="top" secondItem="Pud-CV-SPC" secondAttribute="bottom" constant="8" id="kNR-Xt-ylw"/>
+                <constraint firstItem="hOi-z3-OEh" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" id="krf-cf-SxG"/>
                 <constraint firstAttribute="bottom" secondItem="JbY-XW-roR" secondAttribute="bottom" constant="8" id="oMX-MT-Usr"/>
                 <constraint firstItem="Pud-CV-SPC" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" id="ojW-8Z-txR"/>
             </constraints>

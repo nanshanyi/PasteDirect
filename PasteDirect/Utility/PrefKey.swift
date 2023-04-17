@@ -18,6 +18,8 @@ enum PrefKey: String {
     case historyTime
     ///是否启动过App
     case appAlreadyLaunched
+    ///本地APP颜色表
+    case appColorData
 }
 
 enum HistoryTime: Int {
