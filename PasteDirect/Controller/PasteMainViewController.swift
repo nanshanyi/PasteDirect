@@ -177,7 +177,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
         let model = dataList[indexPath.item]
-        cItem.updateItem(model:model, index: indexPath)
+        cItem.updateItem(model:model)
         return cItem
     }
     
@@ -228,7 +228,6 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
         mainDataStore.deleteItem(item: item)
         dataList = mainDataStore.dataList
         collectionView.deleteItems(at: [indePath])
-        collectionView.reloadData()
     }
     
 }

@@ -38,7 +38,6 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         return layer
     }()
     var delegate: PasteCollectionViewItemDelegate?
-    var indexPath: IndexPath!
     var pModel: PasteboardModel!
     private var keyMonitor: Any?
     override func viewDidLoad() {
@@ -74,9 +73,8 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         gradenLayer.frame = bottomView.bounds
     }
     
-    func updateItem(model: PasteboardModel, index: IndexPath) {
+    func updateItem(model: PasteboardModel ) {
         pModel = model
-        indexPath = index
         
         if pModel.type == .string {
             contentImage.isHidden = true
@@ -210,6 +208,9 @@ extension PasteCollectionViewItem {
         }
     }
     @objc func deleteItem() {
-        delegate?.deleteItem(pModel, indePath: indexPath)
+        if let indexPath = collectionView?.indexPath(for: self) {
+            delegate?.deleteItem(pModel, indePath: indexPath)
+        }
+        
     }
 }

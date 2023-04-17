@@ -42,10 +42,7 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
         PasteBoard.main.startListening()
         setDefaultPrefs()
         KeyboardShortcuts.onKeyDown(for: .pasteKey) {
-            var curFrame: NSRect?
-            if let frame = NSScreen.main?.frame {
-                curFrame = frame
-            }
+            let curFrame = NSScreen.main?.frame
             self.showOrDismissWindow(curFrame)
         }
     }
