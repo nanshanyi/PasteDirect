@@ -39,6 +39,7 @@
 		CB9986FC2925FFFD007E585C /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FB2925FFFD007E585C /* Preferences */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
+		CBABF7862B344A6600D3A095 /* Then.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBABF7852B344A6600D3A095 /* Then.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +107,7 @@
 		CB2CDF712924ECAD00E81836 /* PasteCollectionViewItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PasteCollectionViewItem.xib; sourceTree = "<group>"; };
 		CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
 		CB2CDF8F2924EFF700E81836 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +215,7 @@
 		CB2CDF582924ECAB00E81836 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				CBABF7842B344A2F00D3A095 /* Extension */,
 				CB2CDF592924ECAB00E81836 /* Helps.swift */,
 				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CB2CDF5B2924ECAB00E81836 /* UIImageColors.swift */,
@@ -271,6 +274,14 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		CBABF7842B344A2F00D3A095 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				CBABF7852B344A6600D3A095 /* Then.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -455,6 +466,7 @@
 				CB2CDF7A2924ECAE00E81836 /* PasteMainViewController.swift in Sources */,
 				CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */,
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,
+				CBABF7862B344A6600D3A095 /* Then.swift in Sources */,
 				CB2CDF7C2924ECAE00E81836 /* PasteMainWindow.swift in Sources */,
 				CB2CDF812924ECAE00E81836 /* PasteboardModel.swift in Sources */,
 				CB2CDF792924ECAE00E81836 /* PasteShortcutsSettingViewController.swift in Sources */,

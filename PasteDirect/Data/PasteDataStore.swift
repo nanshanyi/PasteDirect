@@ -41,6 +41,14 @@ class PasteDataStore {
         updateColor(model);
     }
     
+    func addOldModel(_ model: PasteboardModel) {
+        sqlManager.insert(item: model)
+        updateTotoalCount()
+        dataChange = true
+        dataList.removeAll(where: { $0.hashValue == model.hashValue })
+        dataList.insert(model, at: 0)
+    }
+    
     func loadMoreData() -> [PasteboardModel] {
         if dataList.count >= pageSize * pageIndex {
             pageIndex += 1

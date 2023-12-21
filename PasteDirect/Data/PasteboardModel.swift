@@ -33,7 +33,7 @@ struct PasteboardModel {
     let appName: String
     var dataString: String = ""
     
-    lazy var pType: NSPasteboard.PasteboardType = {
+    var pType: NSPasteboard.PasteboardType {
         switch pasteBoardType {
         case .rtf: return .rtf
         case .rtfd: return .rtfd
@@ -42,9 +42,9 @@ struct PasteboardModel {
         case .png: return .png
         default: return .string
         }
-    }()
+    }
     
-    lazy var attributeString: NSAttributedString? = {
+    var attributeString: NSAttributedString? {
         switch pasteBoardType {
         case .rtf:
            return NSAttributedString(rtf:data , documentAttributes: nil)
@@ -55,9 +55,9 @@ struct PasteboardModel {
         default:
             return nil
         }
-    }()
+    }
     
-    lazy var type: ModelType = {
+    var type: ModelType {
         let pTypes:[PasteboardType] = [.rtf, .rtfd, .string]
         if pTypes.contains(pasteBoardType) {
             return .string
@@ -65,7 +65,7 @@ struct PasteboardModel {
             return .image
         }
         return .none
-    }()
+    }
     
     static func model(with item: NSPasteboardItem) -> PasteboardModel? {
         let app = WindowInfo.appOwningFrontmostWindow()
@@ -97,4 +97,10 @@ struct PasteboardModel {
         return nil
     }
     
+}
+
+extension PasteboardModel: Equatable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.hashValue == rhs.hashValue
+    }
 }

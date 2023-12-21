@@ -84,7 +84,7 @@
                             <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Label" id="hh2-lc-O5b">
                                 <font key="font" metaFont="system" size="11"/>
                                 <color key="textColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                             </textFieldCell>
                         </textField>
                     </subviews>

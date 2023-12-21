@@ -13,7 +13,6 @@ class PasteMainViewController: NSViewController {
 
     let viewHeight: CGFloat = 360
     var selectIndex: IndexPath = IndexPath(item: 0, section: 0)
-    var searchBar: NSSearchField
     var dataList = [PasteboardModel]()
     var frame: NSRect {
         didSet {
@@ -22,7 +21,6 @@ class PasteMainViewController: NSViewController {
     }
     
     init(_ f: NSRect? = nil) {
-        searchBar = NSSearchField()
         frame = f ?? NSRect(x: 0, y: 0, width: 2000, height: viewHeight)
         super.init(nibName: nil, bundle: nil)
     }
@@ -38,16 +36,7 @@ class PasteMainViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.wantsLayer = true
-        view.layer?.backgroundColor = NSColor.clear.cgColor
-
-        view.addSubview(veView)
-        view.addSubview(scrollView)
-        searchBar.delegate = self
-        searchBar.refusesFirstResponder = true
-        searchBar.placeholderString = "搜索"
-        view.addSubview(searchBar)
-        reLayoutFrame()
+        initSubviews()
     }
     
     override func viewWillDisappear() {
@@ -84,7 +73,16 @@ class PasteMainViewController: NSViewController {
         }
     }
     
-    func reLayoutFrame() {
+    private func initSubviews() {
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.clear.cgColor
+        view.addSubview(veView)
+        view.addSubview(scrollView)
+        view.addSubview(searchBar)
+        reLayoutFrame()
+    }
+    
+    private func reLayoutFrame() {
         veView.snp.remakeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -113,8 +111,7 @@ class PasteMainViewController: NSViewController {
     
     
     //MARK: - lazy propty
-    lazy var collectionView = {
-        let collectionView = NSCollectionView()
+    private lazy var collectionView = NSCollectionView().then {
         let flowLayout = NSCollectionViewFlowLayout()
         let height = 280;
         flowLayout.itemSize = NSSize(width: height, height: height)
@@ -122,36 +119,44 @@ class PasteMainViewController: NSViewController {
         flowLayout.scrollDirection = .horizontal
         flowLayout.headerReferenceSize = NSSize(width: 20, height: height)
         flowLayout.footerReferenceSize = NSSize(width: 20, height: height)
-        collectionView.frame = self.view.bounds
-        collectionView.wantsLayer = true
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.backgroundColors = [.clear]
-        collectionView.collectionViewLayout = flowLayout
-        collectionView.isSelectable = true
-        collectionView.register(NSNib(nibNamed: "PasteCollectionViewItem", bundle: Bundle.main), forItemWithIdentifier: NSUserInterfaceItemIdentifier(rawValue: "PasteCollectionViewItem"))
-        return collectionView
-    }()
+        $0.frame = self.view.bounds
+        $0.wantsLayer = true
+        $0.delegate = self
+        $0.dataSource = self
+        $0.backgroundColors = [.clear]
+        $0.collectionViewLayout = flowLayout
+        $0.isSelectable = true
+        $0.register(NSNib(nibNamed: "PasteCollectionViewItem", bundle: Bundle.main), forItemWithIdentifier: NSUserInterfaceItemIdentifier(rawValue: "PasteCollectionViewItem"))
+    }
     
-    lazy var scrollView = {
-        let scrollView = PasteScrollView()
+    private lazy var scrollView = PasteScrollView().then {
         let clipView = NSClipView(frame: self.view.bounds)
         clipView.documentView = collectionView
-        scrollView.contentView = clipView
-        scrollView.scrollerStyle = .overlay
-        scrollView.horizontalScrollElasticity = .automatic
-        scrollView.autoresizingMask = [.width, .height]
-        scrollView.scrollerInsets = NSEdgeInsets(top: 0, left: 0, bottom: -100, right: 0)
-        scrollView.delegate = self
-        return scrollView
-    }()
+        $0.contentView = clipView
+        $0.scrollerStyle = .overlay
+        $0.horizontalScrollElasticity = .automatic
+        $0.autoresizingMask = [.width, .height]
+        $0.scrollerInsets = NSEdgeInsets(top: 0, left: 0, bottom: -100, right: 0)
+        $0.delegate = self
+    }
     
-    lazy var veView = {
-        let vibrant = NSVisualEffectView(frame: self.view.bounds)
-        vibrant.blendingMode = .behindWindow
-        return vibrant
-    }()
+    private lazy var veView = NSVisualEffectView().then {
+        $0.frame = self.view.frame
+        $0.blendingMode = .behindWindow
+    }
     
+    private lazy var searchBar = NSSearchField().then {
+        $0.wantsLayer = true
+        $0.layer?.masksToBounds = true
+        $0.layer?.borderWidth = 1
+        $0.layer?.borderColor = NSColor.lightGray.cgColor
+        $0.layer?.cornerRadius = 15
+        $0.focusRingType = .none
+        $0.delegate = self
+        $0.refusesFirstResponder = true
+        $0.placeholderString = "搜索"
+    }
+
 }
 
 extension PasteMainViewController: NSCollectionViewDelegate {
@@ -183,7 +188,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
     
 }
 
-extension PasteMainViewController:NSSearchFieldDelegate {
+extension PasteMainViewController: NSSearchFieldDelegate {
     
     func controlTextDidChange(_ obj: Notification) {
         guard let textView = obj.object as? NSSearchField else { return }

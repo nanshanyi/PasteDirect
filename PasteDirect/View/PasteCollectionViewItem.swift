@@ -50,7 +50,6 @@ class PasteCollectionViewItem: NSCollectionViewItem{
             return self.enterKeyDown(with: event)
         }
         bottomView.wantsLayer = true;
-//        bottomView.layer?.backgroundColor = NSColor.clear.cgColor
         bottomView.layer?.addSublayer(gradenLayer)
         contentLabel.lineBreakMode = .byTruncatingTail
         contentLabel.maximumNumberOfLines = 15
@@ -92,14 +91,14 @@ class PasteCollectionViewItem: NSCollectionViewItem{
                     view.layer?.backgroundColor = color.cgColor
                     //                    contentLabel.layer?.backgroundColor = color.cgColor
                     let colorstr = color.hexString(false)
-                    let startColor = NSColor("\(colorstr)33") ?? NSColor(white: 0, alpha: 0.2)
+                    let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
                     let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
                     gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
                     
                 } else {
                     view.layer?.backgroundColor = NSColor.white.cgColor
                     contentLabel.textColor = .black
-                    gradenLayer.colors = [NSColor(white: 1, alpha: 0.2).cgColor, NSColor.white.cgColor]
+                    gradenLayer.colors = [NSColor(white: 1, alpha: 0).cgColor, NSColor.white.cgColor]
                 }
                 bottomLabel.stringValue = "\(att.string.count)个字符"
             }
@@ -111,7 +110,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
             let retImage = NSImage(data: model.data)
             contentImage.image = retImage
             itemType.stringValue = "图片"
-            gradenLayer.colors = [NSColor(white: 0, alpha: 0.2).cgColor, NSColor(white: 0, alpha: 1).cgColor]
+            gradenLayer.colors = [NSColor(white: 0, alpha: 0).cgColor, NSColor(white: 0, alpha: 1).cgColor]
             if let size = retImage?.size {
                 bottomLabel.stringValue = "\(Int(size.width)) ×\(Int(size.height)) 像素"
             }

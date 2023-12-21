@@ -15,6 +15,7 @@ class PasteBoard {
     private let pasteboard = NSPasteboard.general
     private let timerInterval = 1.0
     private var changeCount: Int
+    private var pasteModel: PasteboardModel?
     
     init() {
         changeCount = pasteboard.changeCount
@@ -28,10 +29,16 @@ class PasteBoard {
                              userInfo: nil,
                              repeats: true)
     }
-    
+
     
     @objc func checkForChangesInPasteboard() {
         guard pasteboard.changeCount != changeCount else {
+            return
+        }
+        
+        if let model = pasteModel {
+            mainDataStore.addOldModel(model)
+            pasteModel = nil
             return
         }
         
@@ -39,9 +46,9 @@ class PasteBoard {
         mainDataStore.addNewItem(item: item)
         changeCount = pasteboard.changeCount
     }
-    
+
     func setData(_ data: PasteboardModel, _ isAttribute:Bool = true) {
-        var data = data
+        pasteModel = data
         NSPasteboard.general.clearContents()
         if data.type == .string && !isAttribute{
             NSPasteboard.general.setString(data.attributeString?.string ?? "", forType: .string)
@@ -50,3 +57,4 @@ class PasteBoard {
         }        
     }
 }
+
