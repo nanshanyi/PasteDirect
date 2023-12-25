@@ -43,7 +43,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
     override func viewDidLoad() {
         super.viewDidLoad()
         view.wantsLayer = true
-        view.layer?.cornerRadius = 4
+        view.layer?.cornerRadius = 12
         view.layer?.borderColor = NSColor("#3970ff")?.cgColor
         topContentView.wantsLayer = true
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in

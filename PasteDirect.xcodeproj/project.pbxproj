@@ -35,6 +35,7 @@
 		CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */; };
 		CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF892924ED1D00E81836 /* UIColorHexSwift */; };
 		CB2CDF8C2924EE5B00E81836 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF532924E9FC00E81836 /* main.swift */; };
+		CB5320AC2B3596B5006C4B5D /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5320AB2B3596B5006C4B5D /* SearchField.swift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FC2925FFFD007E585C /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FB2925FFFD007E585C /* Preferences */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
@@ -107,6 +108,7 @@
 		CB2CDF712924ECAD00E81836 /* PasteCollectionViewItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PasteCollectionViewItem.xib; sourceTree = "<group>"; };
 		CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
 		CB2CDF8F2924EFF700E81836 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CB5320AB2B3596B5006C4B5D /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -265,6 +267,7 @@
 				CB2CDF702924ECAD00E81836 /* PasteScrollView.swift */,
 				CB2CDF712924ECAD00E81836 /* PasteCollectionViewItem.xib */,
 				CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */,
+				CB5320AB2B3596B5006C4B5D /* SearchField.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -465,6 +468,7 @@
 				CB2CDF802924ECAE00E81836 /* PasteWindowInfo.swift in Sources */,
 				CB2CDF7A2924ECAE00E81836 /* PasteMainViewController.swift in Sources */,
 				CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */,
+				CB5320AC2B3596B5006C4B5D /* SearchField.swift in Sources */,
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,
 				CBABF7862B344A6600D3A095 /* Then.swift in Sources */,
 				CB2CDF7C2924ECAE00E81836 /* PasteMainWindow.swift in Sources */,

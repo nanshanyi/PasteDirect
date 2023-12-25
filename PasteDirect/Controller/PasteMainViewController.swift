@@ -8,6 +8,7 @@
 import Cocoa
 import AppKit
 import SnapKit
+import Carbon
 
 class PasteMainViewController: NSViewController {
 
@@ -103,6 +104,12 @@ class PasteMainViewController: NSViewController {
     }
     
     public func vcDismiss(completionHandler:(() -> Void)? = nil) {
+        print("vcDismiss\(searchBar.isHighlighted)")
+        if searchBar.isEditing {
+            searchBar.abortEditing()
+            searchBar.resignFirstResponder()
+            return
+        }
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.25
             self.view.animator().setFrameOrigin(NSPoint(x: 0, y: -view.bounds.height))
@@ -145,7 +152,7 @@ class PasteMainViewController: NSViewController {
         $0.blendingMode = .behindWindow
     }
     
-    private lazy var searchBar = NSSearchField().then {
+    private lazy var searchBar = SearchField().then {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
         $0.layer?.borderWidth = 1
