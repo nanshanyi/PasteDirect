@@ -51,7 +51,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         }
         bottomView.wantsLayer = true;
         bottomView.layer?.addSublayer(gradenLayer)
-        contentLabel.lineBreakMode = .byTruncatingTail
+        contentLabel.lineBreakMode = .byCharWrapping
         contentLabel.maximumNumberOfLines = 15
     }
     
@@ -84,10 +84,11 @@ class PasteCollectionViewItem: NSCollectionViewItem{
                 var showStr = att
                 if att.string.count > 500 {
                     showStr = att.attributedSubstring(from: NSMakeRange(0, 500))
+                    contentLabel.lineBreakMode = .byTruncatingTail
                 }
-                contentLabel.attributedStringValue = showStr
                 
                 if att.length > 0, let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
+                    contentLabel.attributedStringValue = showStr
                     view.layer?.backgroundColor = color.cgColor
                     //                    contentLabel.layer?.backgroundColor = color.cgColor
                     let colorstr = color.hexString(false)
@@ -97,6 +98,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
                     
                 } else {
                     view.layer?.backgroundColor = NSColor.white.cgColor
+                    contentLabel.stringValue = showStr.string
                     contentLabel.textColor = .black
                     gradenLayer.colors = [NSColor(white: 1, alpha: 0).cgColor, NSColor.white.cgColor]
                 }

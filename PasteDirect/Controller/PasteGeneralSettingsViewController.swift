@@ -51,6 +51,7 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     }
     @IBAction func clearAll(_ sender: NSButton) {
         mainDataStore.clearAllData()
+        prefs.set(nil, forKey: PrefKey.appColorData.rawValue)
         clearInfoLabel.isHidden = false
     }
     

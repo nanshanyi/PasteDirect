@@ -149,6 +149,7 @@ class PasteMainViewController: NSViewController {
     
     private lazy var veView = NSVisualEffectView().then {
         $0.frame = self.view.frame
+        $0.state = .active
         $0.blendingMode = .behindWindow
     }
     
@@ -239,7 +240,7 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath) {
         mainDataStore.deleteItem(item: item)
         dataList = mainDataStore.dataList
-        collectionView.deleteItems(at: [indePath])
+        collectionView.animator().deleteItems(at: [indePath])
     }
     
 }

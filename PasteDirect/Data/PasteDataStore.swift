@@ -137,17 +137,18 @@ extension PasteDataStore {
 extension PasteDataStore {
     func updateColor(_ model: PasteboardModel) {
         DispatchQueue.global().async { [self] in
-            let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
-            let colors = iconImage.getColors()
-            if !colorDic.contains(where: { $0.key == model.appName })
-                , let color = colors?.primary {
-                let colorStr = color.hexString(true)
-                guard !colorStr.isEmpty else { return }
-                colorDic[model.appName] = colorStr
-                userDefault.set(colorDic, forKey: PrefKey.appColorData.rawValue)
+            if !colorDic.contains(where: { $0.key == model.appName }) {
+                let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
+                let colors = iconImage.getColors()
+                if let colorStr = colors?.primary.hexString(true),
+                   !colorStr.isEmpty {
+                    colorDic[model.appName] = colorStr
+                    userDefault.set(colorDic, forKey: PrefKey.appColorData.rawValue)
+                }
             }
         }
     }
+    
     func colorWith(_ model: PasteboardModel) -> NSColor {
         if let colorStr = colorDic[model.appName], let color = NSColor(colorStr) {
             return color
