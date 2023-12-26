@@ -84,7 +84,6 @@ class PasteCollectionViewItem: NSCollectionViewItem{
                 var showStr = att
                 if att.string.count > 500 {
                     showStr = att.attributedSubstring(from: NSMakeRange(0, 500))
-                    contentLabel.lineBreakMode = .byTruncatingTail
                 }
                 
                 if att.length > 0, let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
