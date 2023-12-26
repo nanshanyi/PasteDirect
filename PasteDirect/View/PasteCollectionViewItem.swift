@@ -99,7 +99,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
                     view.layer?.backgroundColor = NSColor.white.cgColor
                     contentLabel.stringValue = showStr.string
                     contentLabel.textColor = .black
-                    gradenLayer.colors = [NSColor(white: 1, alpha: 0).cgColor, NSColor.white.cgColor]
+                    gradenLayer.colors = [NSColor(white: 1, alpha: 0).cgColor, NSColor(white: 1, alpha: 0.8).cgColor]
                 }
                 bottomLabel.stringValue = "\(att.string.count)个字符"
             }
