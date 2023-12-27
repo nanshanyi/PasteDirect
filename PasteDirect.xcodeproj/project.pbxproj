@@ -35,6 +35,8 @@
 		CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */; };
 		CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF892924ED1D00E81836 /* UIColorHexSwift */; };
 		CB2CDF8C2924EE5B00E81836 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF532924E9FC00E81836 /* main.swift */; };
+		CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438B2B3AF29D00816B52 /* Log.swift */; };
+		CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */; };
 		CB5320AC2B3596B5006C4B5D /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5320AB2B3596B5006C4B5D /* SearchField.swift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FC2925FFFD007E585C /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FB2925FFFD007E585C /* Preferences */; };
@@ -108,6 +110,8 @@
 		CB2CDF712924ECAD00E81836 /* PasteCollectionViewItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PasteCollectionViewItem.xib; sourceTree = "<group>"; };
 		CB2CDF722924ECAD00E81836 /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
 		CB2CDF8F2924EFF700E81836 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CB3A438B2B3AF29D00816B52 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceItemIdentifier.swift; sourceTree = "<group>"; };
 		CB5320AB2B3596B5006C4B5D /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -222,6 +226,8 @@
 				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CB2CDF5B2924ECAB00E81836 /* UIImageColors.swift */,
 				CB2CDF5D2924ECAB00E81836 /* PrefKey.swift */,
+				CB3A438B2B3AF29D00816B52 /* Log.swift */,
+				CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -470,7 +476,9 @@
 				CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */,
 				CB5320AC2B3596B5006C4B5D /* SearchField.swift in Sources */,
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,
+				CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */,
 				CBABF7862B344A6600D3A095 /* Then.swift in Sources */,
+				CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */,
 				CB2CDF7C2924ECAE00E81836 /* PasteMainWindow.swift in Sources */,
 				CB2CDF812924ECAE00E81836 /* PasteboardModel.swift in Sources */,
 				CB2CDF792924ECAE00E81836 /* PasteShortcutsSettingViewController.swift in Sources */,

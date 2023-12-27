@@ -14,9 +14,10 @@ protocol PasteCollectionViewItemDelegate {
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath)
 }
 
-class PasteCollectionViewItem: NSCollectionViewItem{
+class PasteCollectionViewItem: NSCollectionViewItem {
     
     @IBOutlet weak var contentLabel: NSTextField!
+    
     @IBOutlet weak var contentImage: NSImageView!
     
     @IBOutlet weak var appImageView: NSImageView!
@@ -31,15 +32,15 @@ class PasteCollectionViewItem: NSCollectionViewItem{
     
     @IBOutlet weak var bottomLabel: NSTextField!
     
-    var gradenLayer: CAGradientLayer  = {
-        let layer = CAGradientLayer()
-        layer.startPoint = CGPoint(x: 0, y: 1)
-        layer.endPoint = CGPoint(x: 0, y: 0)
-        return layer
-    }()
     var delegate: PasteCollectionViewItemDelegate?
-    var pModel: PasteboardModel!
+    private var pModel: PasteboardModel!
     private var keyMonitor: Any?
+        
+    private lazy var gradenLayer = CAGradientLayer().then {
+        $0.startPoint = CGPoint(x: 0, y: 1)
+        $0.endPoint = CGPoint(x: 0, y: 0)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.wantsLayer = true
@@ -72,14 +73,20 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         gradenLayer.frame = bottomView.bounds
     }
     
+    override func mouseDown(with event: NSEvent) {
+        super.mouseDown(with: event)
+        if event.type == .leftMouseDown {
+            if event.clickCount == 2 {
+                pasteText(true)
+            }
+        }
+    }
+    
     func updateItem(model: PasteboardModel ) {
         pModel = model
-        
         if pModel.type == .string {
             contentImage.isHidden = true
             contentLabel.isHidden = false
-            
-            topContentView.layer?.backgroundColor = NSColor(red: 41.0/255.0, green: 42.0/255.0, blue: 48.0/255.0, alpha: 1).cgColor
             if let att = pModel.attributeString {
                 var showStr = att
                 if att.string.count > 500 {
@@ -89,7 +96,6 @@ class PasteCollectionViewItem: NSCollectionViewItem{
                 if att.length > 0, let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
                     contentLabel.attributedStringValue = showStr
                     view.layer?.backgroundColor = color.cgColor
-                    //                    contentLabel.layer?.backgroundColor = color.cgColor
                     let colorstr = color.hexString(false)
                     let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
                     let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
@@ -120,22 +126,15 @@ class PasteCollectionViewItem: NSCollectionViewItem{
             appImageView.imageScaling = .scaleAxesIndependently
             let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
             appImageView.image = iconImage
-            self.topContentView.layer?.backgroundColor = mainDataStore.colorWith(model).cgColor
+            topContentView.layer?.backgroundColor = mainDataStore.colorWith(model).cgColor
+        } else {
+            topContentView.layer?.backgroundColor = NSColor(red: 41.0/255.0, green: 42.0/255.0, blue: 48.0/255.0, alpha: 1).cgColor
         }
         setViewMenu()
         itemTime.stringValue = getTimeString(model.date)
     }
     
-    override func mouseDown(with event: NSEvent) {
-        super.mouseDown(with: event)
-        if event.type == .leftMouseDown {
-            if event.clickCount == 2 {
-                pasteText(true)
-            }
-        }
-    }
-    
-    func setViewMenu() {
+    private func setViewMenu() {
         let menu = NSMenu()
         if let app = NSApplication.shared.delegate as? PasteAppDelegate, let name = app.frontApp?.localizedName {
             let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(menuAttributeText), keyEquivalent: "")
@@ -153,7 +152,7 @@ class PasteCollectionViewItem: NSCollectionViewItem{
         view.menu = menu
     }
     
-    func getTimeString(_ date:Date) -> String {
+    private func getTimeString(_ date:Date) -> String {
         let diffDate = NSCalendar.current.dateComponents([.month, .day, .hour, .minute], from: date, to: Date())
         if let month = diffDate.month, month > 0 {
             return "\(month)月前"
@@ -167,14 +166,18 @@ class PasteCollectionViewItem: NSCollectionViewItem{
             return "刚刚"
         }
     }
-
-    func enterKeyDown(with event: NSEvent) -> NSEvent? {
+    
+    private func enterKeyDown(with event: NSEvent) -> NSEvent? {
         if isSelected && event.type == .keyDown && event.keyCode == kVK_Return {
             pasteText(true)
             return nil
         }
         return event
     }
+}
+
+extension PasteCollectionViewItem: UserInterfaceItemIdentifier {
+    static var identifier: NSUserInterfaceItemIdentifier = .init(rawValue: "PasteCollectionViewItem")
 }
 
 extension PasteCollectionViewItem {
@@ -207,6 +210,7 @@ extension PasteCollectionViewItem {
             app.frontApp?.activate()
         }
     }
+    
     @objc func deleteItem() {
         if let indexPath = collectionView?.indexPath(for: self) {
             delegate?.deleteItem(pModel, indePath: indexPath)

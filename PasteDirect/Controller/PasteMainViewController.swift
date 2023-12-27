@@ -12,10 +12,10 @@ import Carbon
 
 class PasteMainViewController: NSViewController {
 
-    let viewHeight: CGFloat = 360
-    var selectIndex: IndexPath = IndexPath(item: 0, section: 0)
-    var dataList = [PasteboardModel]()
-    var frame: NSRect {
+    private let viewHeight: CGFloat = 360
+    private var selectIndex: IndexPath = IndexPath(item: 0, section: 0)
+    private var dataList = [PasteboardModel]()
+    public var frame: NSRect {
         didSet {
             reLayoutFrame()
         }
@@ -77,14 +77,14 @@ class PasteMainViewController: NSViewController {
     private func initSubviews() {
         view.wantsLayer = true
         view.layer?.backgroundColor = NSColor.clear.cgColor
-        view.addSubview(veView)
+        view.addSubview(effectView)
         view.addSubview(scrollView)
         view.addSubview(searchBar)
         reLayoutFrame()
     }
     
     private func reLayoutFrame() {
-        veView.snp.remakeConstraints { make in
+        effectView.snp.remakeConstraints { make in
             make.edges.equalToSuperview()
         }
         scrollView.contentView.snp.remakeConstraints { make in
@@ -104,7 +104,6 @@ class PasteMainViewController: NSViewController {
     }
     
     public func vcDismiss(completionHandler:(() -> Void)? = nil) {
-        print("vcDismiss\(searchBar.isHighlighted)")
         if searchBar.isEditing {
             searchBar.abortEditing()
             searchBar.resignFirstResponder()
@@ -133,7 +132,7 @@ class PasteMainViewController: NSViewController {
         $0.backgroundColors = [.clear]
         $0.collectionViewLayout = flowLayout
         $0.isSelectable = true
-        $0.register(NSNib(nibNamed: "PasteCollectionViewItem", bundle: Bundle.main), forItemWithIdentifier: NSUserInterfaceItemIdentifier(rawValue: "PasteCollectionViewItem"))
+        $0.register(NSNib(nibNamed: "PasteCollectionViewItem", bundle: Bundle.main), forItemWithIdentifier: PasteCollectionViewItem.identifier)
     }
     
     private lazy var scrollView = PasteScrollView().then {
@@ -147,7 +146,7 @@ class PasteMainViewController: NSViewController {
         $0.delegate = self
     }
     
-    private lazy var veView = NSVisualEffectView().then {
+    private lazy var effectView = NSVisualEffectView().then {
         $0.frame = self.view.frame
         $0.state = .active
         $0.blendingMode = .behindWindow
@@ -172,7 +171,7 @@ extension PasteMainViewController: NSCollectionViewDelegate {
         if let indexPath = indexPaths.first {
             selectIndex = indexPath
         }
-        print("选中\(indexPaths.description)")
+        Log("选中\(indexPaths.description)")
         return indexPaths
     }
 }
@@ -181,16 +180,16 @@ extension PasteMainViewController: NSCollectionViewDataSource {
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
         return 1
     }
+    
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return  dataList.count
+        return dataList.count
     }
     
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        let item = collectionView.makeItem(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "PasteCollectionViewItem"), for: indexPath)
+        let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
-        let model = dataList[indexPath.item]
-        cItem.updateItem(model:model)
+        cItem.updateItem(model:dataList[indexPath.item])
         return cItem
     }
     

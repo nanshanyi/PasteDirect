@@ -38,7 +38,7 @@ class PasteDataStore {
         dataChange = true
         dataList.removeAll(where: { $0.hashValue == model.hashValue })
         dataList.insert(model, at: 0)
-        updateColor(model);
+        updateColor(model)
     }
     
     func addOldModel(_ model: PasteboardModel) {
