@@ -23,7 +23,7 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
         return menu
     }()
     
-    private lazy var mainWindow: PasteMainWindowController = {
+    public lazy var mainWindow: PasteMainWindowController = {
         let mainWindow = PasteMainWindowController()
         return mainWindow
     }()
@@ -59,7 +59,7 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension PasteAppDelegate {
-    func setDefaultPrefs() {
+    private func setDefaultPrefs() {
         let prefs = UserDefaults.standard
         if !prefs.bool(forKey: PrefKey.appAlreadyLaunched.rawValue) {
             LaunchAtLogin.isEnabled = true
@@ -73,7 +73,7 @@ extension PasteAppDelegate {
 
 extension PasteAppDelegate {
     
-    func setStatus() {
+    private func setStatus() {
         menuBarItem.isVisible = true
         self.menuBarItem.button?.image = NSImage(named: "paste_icon_Normal")
         self.menuBarItem.button?.target = self
@@ -82,7 +82,7 @@ extension PasteAppDelegate {
         self.menuBarItem.button?.sendAction(on: [.leftMouseUp,.rightMouseUp])
     }
     
-    @objc func statusBarClick(sender: NSStatusBarButton) {
+    @objc private func statusBarClick(sender: NSStatusBarButton) {
         guard let event = NSApplication.shared.currentEvent else { return }
         let frame = sender.window?.screen?.frame
         if event.type == .leftMouseUp {
@@ -92,7 +92,7 @@ extension PasteAppDelegate {
         }
     }
     
-    @objc func settingsAction() {
+    @objc private func settingsAction() {
         self.settingsWindowController.show()
     }
     

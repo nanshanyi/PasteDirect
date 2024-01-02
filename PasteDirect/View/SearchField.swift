@@ -10,16 +10,15 @@ import Cocoa
 class SearchField: NSSearchField {
     
     public var isEditing = false
-    
-    @discardableResult
-    override func becomeFirstResponder() -> Bool {
-        isEditing = true
-        return super.becomeFirstResponder()
+    public var isFirstResponder: Bool {
+        currentEditor() != nil && currentEditor() == window?.firstResponder
     }
     
-    @discardableResult
-    override func resignFirstResponder() -> Bool {
-        isEditing = false
-        return super.resignFirstResponder()
+    override var canBecomeKeyView: Bool {
+        true
+    }
+    
+    override var acceptsFirstResponder: Bool {
+        true
     }
 }

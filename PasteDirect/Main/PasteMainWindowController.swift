@@ -25,13 +25,6 @@ class PasteMainWindowController: NSWindowController, NSWindowDelegate {
         mainWindow.level = .statusBar
         mainWindow.hasShadow = false
         mainWindow.backgroundColor = .clear
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if event.type == .keyDown && event.keyCode == kVK_Escape {
-                self.dismissWindow()
-                return nil
-            }
-            return event
-        }
     }
 
     required init?(coder: NSCoder) {
@@ -43,7 +36,7 @@ class PasteMainWindowController: NSWindowController, NSWindowDelegate {
             dismissWindow()
         #endif
     }
-    func dismissWindow(completionHandler: (() -> Void)? = nil) {
+    public func dismissWindow(completionHandler: (() -> Void)? = nil) {
         mainVC.vcDismiss {
             self.mainWindow.resignFirstResponder()
             self.mainWindow.setIsVisible(false)

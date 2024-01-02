@@ -82,7 +82,10 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         }
     }
     
-    func updateItem(model: PasteboardModel ) {
+}
+
+extension PasteCollectionViewItem {
+    public func updateItem(model: PasteboardModel ) {
         pModel = model
         if pModel.type == .string {
             contentImage.isHidden = true
@@ -176,10 +179,7 @@ class PasteCollectionViewItem: NSCollectionViewItem {
     }
 }
 
-extension PasteCollectionViewItem: UserInterfaceItemIdentifier {
-    static var identifier: NSUserInterfaceItemIdentifier = .init(rawValue: "PasteCollectionViewItem")
-}
-
+// MARK: - 事件处理
 extension PasteCollectionViewItem {
     
     @objc func pasteText(_ isAttribute:Bool = false) {
@@ -218,3 +218,8 @@ extension PasteCollectionViewItem {
         
     }
 }
+
+extension PasteCollectionViewItem: UserInterfaceItemIdentifier {
+    static var identifier: NSUserInterfaceItemIdentifier = .init(rawValue: "PasteCollectionViewItem")
+}
+

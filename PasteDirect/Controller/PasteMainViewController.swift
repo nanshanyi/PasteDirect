@@ -30,79 +30,6 @@ class PasteMainViewController: NSViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func loadView() {
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: frame.width, height: viewHeight))
-        self.view = view
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        initSubviews()
-    }
-    
-    override func viewWillDisappear() {
-        super.viewWillDisappear()
-        searchBar.objectValue = nil
-        searchBar.endEditing(NSText())
-
-    }
-    override func viewDidDisappear() {
-        super.viewDidDisappear()
-        searchBar.isHidden = true
-    }
-    
-    override func viewDidAppear() {
-        scrollView.isSearching = false
-        searchBar.isHidden = false
-        searchBar.resignFirstResponder()
-        view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: frame.width, height: viewHeight)
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25
-            self.view.animator().setFrameOrigin(NSPoint())
-        }
-        if mainDataStore.dataChange {
-            mainDataStore.dataChange = false
-            selectIndex = IndexPath(item: 0, section: 0)
-            if !dataList.isEmpty {
-                collectionView.scrollToItems(at: [selectIndex], scrollPosition: .left)
-            }
-        }
-        dataList = mainDataStore.dataList
-        collectionView.reloadData()
-        if !dataList.isEmpty {
-            collectionView.selectItems(at: [selectIndex], scrollPosition: .top)
-        }
-    }
-    
-    private func initSubviews() {
-        view.wantsLayer = true
-        view.layer?.backgroundColor = NSColor.clear.cgColor
-        view.addSubview(effectView)
-        view.addSubview(scrollView)
-        view.addSubview(searchBar)
-        reLayoutFrame()
-    }
-    
-    private func reLayoutFrame() {
-        effectView.snp.remakeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        scrollView.contentView.snp.remakeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        scrollView.snp.remakeConstraints { make in
-            make.leading.trailing.bottom.equalToSuperview()
-            make.top.equalTo(view).offset(50)
-        }
-        searchBar.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.greaterThanOrEqualTo(view).offset(5)
-            make.bottom.greaterThanOrEqualTo(scrollView.snp.top).offset(-5)
-            make.height.equalTo(30)
-            make.width.equalTo(200)
-        }
-    }
-    
     public func vcDismiss(completionHandler:(() -> Void)? = nil) {
         if searchBar.isEditing {
             searchBar.abortEditing()
@@ -166,6 +93,126 @@ class PasteMainViewController: NSViewController {
 
 }
 
+// MARK: - lifeCycle
+extension PasteMainViewController {
+    override func loadView() {
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: frame.width, height: viewHeight))
+        self.view = view
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        initSubviews()
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownEvent(_:))
+    }
+    
+    override func viewWillDisappear() {
+        super.viewWillDisappear()
+        searchBar.objectValue = nil
+        self.view.window?.makeFirstResponder(self.collectionView)
+
+    }
+    
+    override func viewDidDisappear() {
+        super.viewDidDisappear()
+        searchBar.isHidden = true
+    }
+    
+    override func viewDidAppear() {
+        scrollView.isSearching = false
+        searchBar.isHidden = false
+        self.view.window?.makeFirstResponder(self.collectionView)
+        view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: frame.width, height: viewHeight)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25
+            self.view.animator().setFrameOrigin(NSPoint())
+        }
+        if mainDataStore.dataChange {
+            mainDataStore.dataChange = false
+            selectIndex = IndexPath(item: 0, section: 0)
+            if !dataList.isEmpty {
+                collectionView.scrollToItems(at: [selectIndex], scrollPosition: .left)
+            }
+        }
+        dataList = mainDataStore.dataList
+        collectionView.reloadData()
+        if !dataList.isEmpty {
+            collectionView.selectItems(at: [selectIndex], scrollPosition: .top)
+        }
+    }
+}
+
+// MARK: - UI
+extension PasteMainViewController {
+    private func initSubviews() {
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.clear.cgColor
+        view.addSubview(effectView)
+        view.addSubview(scrollView)
+        view.addSubview(searchBar)
+        reLayoutFrame()
+    }
+    
+    private func reLayoutFrame() {
+        effectView.snp.remakeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        scrollView.contentView.snp.remakeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        scrollView.snp.remakeConstraints { make in
+            make.leading.trailing.bottom.equalToSuperview()
+            make.top.equalTo(view).offset(50)
+        }
+        searchBar.snp.remakeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.top.greaterThanOrEqualTo(view).offset(5)
+            make.bottom.greaterThanOrEqualTo(scrollView.snp.top).offset(-5)
+            make.height.equalTo(30)
+            make.width.equalTo(200)
+        }
+    }
+}
+
+// MARK: - 私有方法
+extension PasteMainViewController {
+    @objc private func searchWord() {
+        let keyWord = searchBar.stringValue
+        selectIndex = IndexPath(item: 0, section: 0)
+        dataList = mainDataStore.searchData(keyWord)
+        collectionView.reloadData()
+        collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+    }
+    
+    private func resetToDefaultList() {
+        scrollView.isSearching = false
+        dataList = mainDataStore.dataList
+        collectionView.reloadData()
+        collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+    }
+    
+    private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
+        if KeyHelper.numberChacraer.contains(where: { $0 == event.keyCode }) {
+            if !searchBar.isFirstResponder {
+                view.window?.makeFirstResponder(searchBar)
+            }
+        } else if event.keyCode == kVK_Escape {
+            if searchBar.isFirstResponder {
+                searchBar.objectValue = nil
+                view.window?.makeFirstResponder(collectionView)
+                resetToDefaultList()
+                return nil
+            } else {
+                let app = NSApplication.shared.delegate as? PasteAppDelegate
+                app?.mainWindow.dismissWindow()
+            }
+        }
+        return event
+    }
+
+}
+
+// MARK: - NSCollectionViewDelegate
 extension PasteMainViewController: NSCollectionViewDelegate {
     func collectionView(_ collectionView: NSCollectionView, shouldSelectItemsAt indexPaths: Set<IndexPath>) -> Set<IndexPath> {
         if let indexPath = indexPaths.first {
@@ -176,6 +223,7 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     }
 }
 
+// MARK: - NSCollectionViewDataSource
 extension PasteMainViewController: NSCollectionViewDataSource {
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
         return 1
@@ -195,6 +243,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
     
 }
 
+// MARK: - NSSearchFieldDelegate
 extension PasteMainViewController: NSSearchFieldDelegate {
     
     func controlTextDidChange(_ obj: Notification) {
@@ -205,21 +254,12 @@ extension PasteMainViewController: NSSearchFieldDelegate {
             NSObject.cancelPreviousPerformRequests(withTarget: self)
             perform(#selector(searchWord), with: self, afterDelay: 0.3)
         } else {
-            scrollView.isSearching = false
-            dataList = mainDataStore.dataList
-            collectionView.reloadData()
+            resetToDefaultList()
         }
     }
-    
-    @objc func searchWord() {
-        let keyWord = searchBar.stringValue
-        selectIndex = IndexPath(item: 0, section: 0)
-        dataList = mainDataStore.searchData(keyWord)
-        collectionView.reloadData()
-    }
-
 }
 
+// MARK: - PasteScrollViewDelegate
 extension PasteMainViewController: PasteScrollViewDelegate {
     
     func loadMoreData() {
@@ -234,6 +274,7 @@ extension PasteMainViewController: PasteScrollViewDelegate {
     }
 }
 
+// MARK: - PasteCollectionViewItemDelegate
 extension PasteMainViewController: PasteCollectionViewItemDelegate {
     
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath) {
