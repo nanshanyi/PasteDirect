@@ -9,11 +9,9 @@ import Carbon
 import Cocoa
 
 class PasteMainWindowController: NSWindowController, NSWindowDelegate {
-    var mainVC: PasteMainViewController
-    let mainWindow: PasteMainWindow
-    var isVisable: Bool {
-        mainWindow.isVisible
-    }
+    private var mainVC: PasteMainViewController
+    private let mainWindow: PasteMainWindow
+    public var isVisable: Bool { mainWindow.isVisible }
 
     init() {
         mainVC = PasteMainViewController(NSScreen.main?.frame)
@@ -36,6 +34,7 @@ class PasteMainWindowController: NSWindowController, NSWindowDelegate {
             dismissWindow()
         #endif
     }
+    
     public func dismissWindow(completionHandler: (() -> Void)? = nil) {
         mainVC.vcDismiss {
             self.mainWindow.resignFirstResponder()

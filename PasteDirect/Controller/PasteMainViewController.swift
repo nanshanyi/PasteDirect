@@ -5,13 +5,12 @@
 //  Created by 南山忆 on 2022/10/20.
 //
 
-import Cocoa
 import AppKit
-import SnapKit
 import Carbon
+import Cocoa
+import SnapKit
 
 class PasteMainViewController: NSViewController {
-
     private let viewHeight: CGFloat = 360
     private var selectIndex: IndexPath = IndexPath(item: 0, section: 0)
     private var dataList = [PasteboardModel]()
@@ -20,17 +19,17 @@ class PasteMainViewController: NSViewController {
             reLayoutFrame()
         }
     }
-    
+
     init(_ f: NSRect? = nil) {
         frame = f ?? NSRect(x: 0, y: 0, width: 2000, height: viewHeight)
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    public func vcDismiss(completionHandler:(() -> Void)? = nil) {
+
+    public func vcDismiss(completionHandler: (() -> Void)? = nil) {
         if searchBar.isEditing {
             searchBar.abortEditing()
             searchBar.resignFirstResponder()
@@ -41,12 +40,12 @@ class PasteMainViewController: NSViewController {
             self.view.animator().setFrameOrigin(NSPoint(x: 0, y: -view.bounds.height))
         }, completionHandler: completionHandler)
     }
-    
-    
-    //MARK: - lazy propty
+
+    // MARK: - lazy property
+
     private lazy var collectionView = NSCollectionView().then {
         let flowLayout = NSCollectionViewFlowLayout()
-        let height = 280;
+        let height = 280
         flowLayout.itemSize = NSSize(width: height, height: height)
         flowLayout.minimumLineSpacing = 20
         flowLayout.scrollDirection = .horizontal
@@ -61,7 +60,7 @@ class PasteMainViewController: NSViewController {
         $0.isSelectable = true
         $0.register(NSNib(nibNamed: "PasteCollectionViewItem", bundle: Bundle.main), forItemWithIdentifier: PasteCollectionViewItem.identifier)
     }
-    
+
     private lazy var scrollView = PasteScrollView().then {
         let clipView = NSClipView(frame: self.view.bounds)
         clipView.documentView = collectionView
@@ -72,13 +71,13 @@ class PasteMainViewController: NSViewController {
         $0.scrollerInsets = NSEdgeInsets(top: 0, left: 0, bottom: -100, right: 0)
         $0.delegate = self
     }
-    
+
     private lazy var effectView = NSVisualEffectView().then {
         $0.frame = self.view.frame
         $0.state = .active
         $0.blendingMode = .behindWindow
     }
-    
+
     private lazy var searchBar = SearchField().then {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
@@ -90,59 +89,54 @@ class PasteMainViewController: NSViewController {
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
     }
-
 }
 
 // MARK: - lifeCycle
+
 extension PasteMainViewController {
     override func loadView() {
         let view = NSView(frame: NSRect(x: 0, y: 0, width: frame.width, height: viewHeight))
         self.view = view
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
         NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownEvent(_:))
     }
-    
+
     override func viewWillDisappear() {
         super.viewWillDisappear()
         searchBar.objectValue = nil
-        self.view.window?.makeFirstResponder(self.collectionView)
-
+        view.window?.makeFirstResponder(collectionView)
     }
-    
+
     override func viewDidDisappear() {
         super.viewDidDisappear()
         searchBar.isHidden = true
     }
-    
+
     override func viewDidAppear() {
         scrollView.isSearching = false
         searchBar.isHidden = false
-        self.view.window?.makeFirstResponder(self.collectionView)
+        view.window?.makeFirstResponder(collectionView)
         view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: frame.width, height: viewHeight)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
             self.view.animator().setFrameOrigin(NSPoint())
         }
         if mainDataStore.dataChange {
-            mainDataStore.dataChange = false
+            dataList = mainDataStore.dataList
+            collectionView.reloadData()
+            mainDataStore.dataChange.toggle()
             selectIndex = IndexPath(item: 0, section: 0)
-            if !dataList.isEmpty {
-                collectionView.scrollToItems(at: [selectIndex], scrollPosition: .left)
-            }
-        }
-        dataList = mainDataStore.dataList
-        collectionView.reloadData()
-        if !dataList.isEmpty {
-            collectionView.selectItems(at: [selectIndex], scrollPosition: .top)
+            collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
         }
     }
 }
 
 // MARK: - UI
+
 extension PasteMainViewController {
     private func initSubviews() {
         view.wantsLayer = true
@@ -152,7 +146,7 @@ extension PasteMainViewController {
         view.addSubview(searchBar)
         reLayoutFrame()
     }
-    
+
     private func reLayoutFrame() {
         effectView.snp.remakeConstraints { make in
             make.edges.equalToSuperview()
@@ -175,6 +169,7 @@ extension PasteMainViewController {
 }
 
 // MARK: - 私有方法
+
 extension PasteMainViewController {
     @objc private func searchWord() {
         let keyWord = searchBar.stringValue
@@ -183,14 +178,14 @@ extension PasteMainViewController {
         collectionView.reloadData()
         collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
     }
-    
+
     private func resetToDefaultList() {
         scrollView.isSearching = false
         dataList = mainDataStore.dataList
         collectionView.reloadData()
         collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
     }
-    
+
     private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
         if KeyHelper.numberChacraer.contains(where: { $0 == event.keyCode }) {
             if !searchBar.isFirstResponder {
@@ -204,15 +199,15 @@ extension PasteMainViewController {
                 return nil
             } else {
                 let app = NSApplication.shared.delegate as? PasteAppDelegate
-                app?.mainWindow.dismissWindow()
+                app?.mainWindowController.dismissWindow()
             }
         }
         return event
     }
-
 }
 
 // MARK: - NSCollectionViewDelegate
+
 extension PasteMainViewController: NSCollectionViewDelegate {
     func collectionView(_ collectionView: NSCollectionView, shouldSelectItemsAt indexPaths: Set<IndexPath>) -> Set<IndexPath> {
         if let indexPath = indexPaths.first {
@@ -224,28 +219,28 @@ extension PasteMainViewController: NSCollectionViewDelegate {
 }
 
 // MARK: - NSCollectionViewDataSource
+
 extension PasteMainViewController: NSCollectionViewDataSource {
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
         return 1
     }
-    
+
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
         return dataList.count
     }
-    
+
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
         let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
-        cItem.updateItem(model:dataList[indexPath.item])
+        cItem.updateItem(model: dataList[indexPath.item])
         return cItem
     }
-    
 }
 
 // MARK: - NSSearchFieldDelegate
+
 extension PasteMainViewController: NSSearchFieldDelegate {
-    
     func controlTextDidChange(_ obj: Notification) {
         guard let textView = obj.object as? NSSearchField else { return }
         let keyWord = textView.stringValue
@@ -260,28 +255,26 @@ extension PasteMainViewController: NSSearchFieldDelegate {
 }
 
 // MARK: - PasteScrollViewDelegate
+
 extension PasteMainViewController: PasteScrollViewDelegate {
-    
     func loadMoreData() {
         if dataList.count == mainDataStore.totoalCount {
             scrollView.noMore = true
             scrollView.isLoding = false
             return
         }
-        dataList = mainDataStore.loadMoreData()
+        dataList = mainDataStore.loadNextPage()
         collectionView.reloadData()
         scrollView.isLoding = false
     }
 }
 
 // MARK: - PasteCollectionViewItemDelegate
+
 extension PasteMainViewController: PasteCollectionViewItemDelegate {
-    
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath) {
-        mainDataStore.deleteItem(item: item)
-        dataList = mainDataStore.dataList
+        mainDataStore.deleteItem(item)
+        dataList.removeAll(where: { $0 == item })
         collectionView.animator().deleteItems(at: [indePath])
     }
-    
 }
-

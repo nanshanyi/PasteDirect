@@ -10,12 +10,12 @@ import AppKit
 
 struct PasteboardModel {
     
-    enum ModelType {
+    public enum ModelType {
         case none
         case image
         case string
     }
-    enum PasteboardType: Int {
+    public enum PasteboardType: Int {
         case none
         case rtf
         case rtfd
@@ -25,15 +25,15 @@ struct PasteboardModel {
     }
     
     
-    let pasteBoardType: PasteboardType
-    let data: Data
-    let hashValue: Int
-    let date:Date
-    let appPath: String
-    let appName: String
-    var dataString: String = ""
+    public let pasteBoardType: PasteboardType
+    public let data: Data
+    public let hashValue: Int
+    public let date:Date
+    public let appPath: String
+    public let appName: String
+    public var dataString: String = ""
     
-    var pType: NSPasteboard.PasteboardType {
+    public var pType: NSPasteboard.PasteboardType {
         switch pasteBoardType {
         case .rtf: return .rtf
         case .rtfd: return .rtfd
@@ -44,7 +44,7 @@ struct PasteboardModel {
         }
     }
     
-    var attributeString: NSAttributedString? {
+    public var attributeString: NSAttributedString? {
         switch pasteBoardType {
         case .rtf:
            return NSAttributedString(rtf:data , documentAttributes: nil)
@@ -57,7 +57,7 @@ struct PasteboardModel {
         }
     }
     
-    var type: ModelType {
+    public var type: ModelType {
         let pTypes:[PasteboardType] = [.rtf, .rtfd, .string]
         if pTypes.contains(pasteBoardType) {
             return .string

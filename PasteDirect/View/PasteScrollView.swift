@@ -5,21 +5,24 @@
 //  Created by 南山忆 on 2022/11/7.
 //
 
-import Foundation
 import Cocoa
+import Foundation
+
 protocol PasteScrollViewDelegate {
     func loadMoreData()
 }
+
 class PasteScrollView: NSScrollView {
-    var delegate: PasteScrollViewDelegate?
-    var isSearching = false
-    var isLoding = false
-    var noMore = false
+    public var delegate: PasteScrollViewDelegate?
+    public var isSearching = false
+    public var isLoding = false
+    public var noMore = false
+    
     override func scrollWheel(with event: NSEvent) {
         if event.subtype == .mouseEvent {
             if let cgEvent = event.cgEvent?.copy() {
-                cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis2, value: Double( event.scrollingDeltaY))
-                cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis1, value:0.0)
+                cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis2, value: Double(event.scrollingDeltaY))
+                cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis1, value: 0.0)
                 if let nEvent = NSEvent(cgEvent: cgEvent) {
                     super.scrollWheel(with: nEvent)
                 } else {
@@ -32,7 +35,7 @@ class PasteScrollView: NSScrollView {
             super.scrollWheel(with: event)
         }
     }
-    
+
     override func scroll(_ clipView: NSClipView, to point: NSPoint) {
         super.scroll(clipView, to: point)
         if noMore || isSearching { return }
@@ -44,5 +47,4 @@ class PasteScrollView: NSScrollView {
             }
         }
     }
-    
 }

@@ -186,6 +186,7 @@
 				CB2CDF642924ECAC00E81836 /* Main */,
 				CB2CDF582924ECAB00E81836 /* Utility */,
 				CB2CDF6F2924ECAD00E81836 /* View */,
+				CB2CDF682924ECAC00E81836 /* main.swift */,
 				CB2CDF8F2924EFF700E81836 /* Info.plist */,
 				CB2CDEF12924E8D800E81836 /* Assets.xcassets */,
 				CB2CDEF62924E8D800E81836 /* PasteDirect.entitlements */,
@@ -253,7 +254,6 @@
 				CB2CDF652924ECAC00E81836 /* PasteMainWindow.swift */,
 				CB2CDF662924ECAC00E81836 /* PasteMainWindowController.swift */,
 				CB2CDF672924ECAC00E81836 /* PasteAppDelegate.swift */,
-				CB2CDF682924ECAC00E81836 /* main.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";

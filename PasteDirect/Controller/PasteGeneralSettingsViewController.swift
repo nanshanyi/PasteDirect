@@ -65,7 +65,7 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
             alert.addButton(withTitle: "取消")
             alert.beginSheetModal(for: self.view.window!) { res in
                 if res == .alertFirstButtonReturn, let type = HistoryTime(rawValue: sender.integerValue) {
-                    mainDataStore.clearData(type)
+                    mainDataStore.clearData(for: type)
                     UserDefaults.standard.set(sender.integerValue, forKey: PrefKey.historyTime.rawValue)
                 } else if res == .alertSecondButtonReturn {
                     sender.integerValue = current
