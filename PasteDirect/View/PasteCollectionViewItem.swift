@@ -113,19 +113,20 @@ extension PasteCollectionViewItem {
         contentLabel.isHidden = false
         if let att = pModel.attributeString {
             var showStr = att
-
+            
             if att.length > 500 {
                 showStr = att.attributedSubstring(from: NSMakeRange(0, 500))
             }
-
-            if att.length > 0, let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
+            
+            if att.length > 0,
+                let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
+               let colorstr = color.usingColorSpace(.deviceRGB)?.hexString(false) {
                 contentLabel.attributedStringValue = showStr
                 view.layer?.backgroundColor = color.cgColor
-                let colorstr = color.hexString(false)
                 let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
                 let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
                 gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
-
+                
             } else {
                 view.layer?.backgroundColor = NSColor.white.cgColor
                 contentLabel.stringValue = showStr.string
