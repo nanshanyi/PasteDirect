@@ -39,7 +39,7 @@
                             <rect key="frame" x="18" y="8" width="49" height="15"/>
                             <textFieldCell key="cell" lineBreakMode="clipping" title="Label" id="sAR-mc-hXw">
                                 <font key="font" metaFont="cellTitle"/>
-                                <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
                         </textField>
@@ -47,7 +47,7 @@
                             <rect key="frame" x="18" y="27" width="49" height="21"/>
                             <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Label" id="PWa-rY-l3w">
                                 <font key="font" metaFont="systemMedium" size="18"/>
-                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
                         </textField>
