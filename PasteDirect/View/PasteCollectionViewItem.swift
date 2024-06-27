@@ -14,6 +14,8 @@ protocol PasteCollectionViewItemDelegate {
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath)
 }
 
+let maxLength = 500
+
 class PasteCollectionViewItem: NSCollectionViewItem {
     @IBOutlet var contentLabel: NSTextField!
 
@@ -114,8 +116,8 @@ extension PasteCollectionViewItem {
         if let att = pModel.attributeString {
             var showStr = att
             
-            if att.length > 500 {
-                showStr = att.attributedSubstring(from: NSMakeRange(0, 500))
+            if att.length > maxLength {
+                showStr = att.attributedSubstring(from: NSMakeRange(0, maxLength))
             }
             
             if att.length > 0,

@@ -39,6 +39,8 @@
 		CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438B2B3AF29D00816B52 /* Log.swift */; };
 		CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */; };
 		CB5320AC2B3596B5006C4B5D /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5320AB2B3596B5006C4B5D /* SearchField.swift */; };
+		CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = CB9641792C2D752C0099F12F /* RxCocoa */; };
+		CB96417C2C2D752C0099F12F /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB96417B2C2D752C0099F12F /* RxSwift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FC2925FFFD007E585C /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FB2925FFFD007E585C /* Preferences */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
@@ -123,11 +125,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */,
 				CB9986FF29260015007E585C /* SQLite in Frameworks */,
 				CB9986FC2925FFFD007E585C /* Preferences in Frameworks */,
 				CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */,
 				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
 				CB99870229260372007E585C /* SnapKit in Frameworks */,
+				CB96417C2C2D752C0099F12F /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,10 +243,10 @@
 		CB2CDF5E2924ECAB00E81836 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				CB2CDF602924ECAB00E81836 /* PasteGeneralSettingsViewController.xib */,
 				CB2CDF632924ECAB00E81836 /* PasteGeneralSettingsViewController.swift */,
 				CB2CDF5F2924ECAB00E81836 /* PasteShortcutsSettingViewController.xib */,
 				CB2CDF612924ECAB00E81836 /* PasteShortcutsSettingViewController.swift */,
-				CB2CDF602924ECAB00E81836 /* PasteGeneralSettingsViewController.xib */,
 				CB2CDF622924ECAB00E81836 /* PasteMainViewController.swift */,
 			);
 			path = Controller;
@@ -319,6 +323,8 @@
 				CB9986FB2925FFFD007E585C /* Preferences */,
 				CB9986FE29260015007E585C /* SQLite */,
 				CB99870129260372007E585C /* SnapKit */,
+				CB9641792C2D752C0099F12F /* RxCocoa */,
+				CB96417B2C2D752C0099F12F /* RxSwift */,
 			);
 			productName = PasteDirect;
 			productReference = CB2CDEEA2924E8D500E81836 /* PasteDirect.app */;
@@ -418,6 +424,7 @@
 				CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */,
 				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
+				CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */,
 			);
 			productRefGroup = CB2CDEEB2924E8D500E81836 /* Products */;
 			projectDirPath = "";
@@ -908,6 +915,14 @@
 				minimumVersion = 5.1.9;
 			};
 		};
+		CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.7.1;
+			};
+		};
 		CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -948,6 +963,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */;
 			productName = UIColorHexSwift;
+		};
+		CB9641792C2D752C0099F12F /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		CB96417B2C2D752C0099F12F /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
 		};
 		CB9986F52925FF46007E585C /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;

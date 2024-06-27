@@ -20,9 +20,12 @@ enum PrefKey: String {
     case appAlreadyLaunched
     ///本地APP颜色表
     case appColorData
+    ///上次清理时间
+    case lastClearDate
 }
 
 enum HistoryTime: Int {
+    case now = -1
     case day = 0
     case week = 33
     case month = 66

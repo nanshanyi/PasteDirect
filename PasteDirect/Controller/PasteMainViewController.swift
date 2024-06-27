@@ -114,6 +114,7 @@ extension PasteMainViewController {
     override func viewDidDisappear() {
         super.viewDidDisappear()
         searchBar.isHidden = true
+        mainDataStore.clearExpiredData()
     }
 
     override func viewDidAppear() {
@@ -258,7 +259,7 @@ extension PasteMainViewController: NSSearchFieldDelegate {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.count == mainDataStore.totoalCount {
+        if dataList.count == mainDataStore.totoalCount.value {
             scrollView.noMore = true
             scrollView.isLoding = false
             return

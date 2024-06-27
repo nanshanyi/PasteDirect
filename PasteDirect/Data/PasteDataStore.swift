@@ -9,6 +9,8 @@ import AppKit
 import Foundation
 import SQLite
 import UIColorHexSwift
+import RxSwift
+import RxRelay
 
 let mainDataStore = PasteDataStore()
 
@@ -19,12 +21,12 @@ class PasteDataStore {
     private var pageIndex = 1
     private let pageSize = 50
     var dataList: [PasteboardModel] = []
-    var totoalCount: Int = 0
+    var totoalCount = BehaviorRelay<Int>(value: 0)
     var dataChange = true
 
     init() {
         dataList = getItem(limit: pageIndex * pageSize)
-        totoalCount = sqlManager.totoalCount()
+        totoalCount.accept(sqlManager.totoalCount())
         if let dic = userDefault.dictionary(forKey: PrefKey.appColorData.rawValue) as? [String: String] {
             colorDic = dic
         }
@@ -54,7 +56,7 @@ class PasteDataStore {
 
 extension PasteDataStore {
     private func updateTotoalCount() {
-        totoalCount = sqlManager.totoalCount()
+        totoalCount.accept(sqlManager.totoalCount())
     }
     
     private func getItem(limit: Int = 50) -> [PasteboardModel] {
@@ -123,6 +125,10 @@ extension PasteDataStore {
 
     /// 删除过期数据
     public func clearExpiredData() {
+        let lastDate = userDefault.string(forKey: PrefKey.lastClearDate.rawValue)
+        let dateStr = Date().formatted(date: .numeric, time: .omitted)
+        if lastDate == dateStr { return }
+        userDefault.set(dateStr, forKey: PrefKey.lastClearDate.rawValue)
         let current = userDefault.integer(forKey: PrefKey.historyTime.rawValue)
         guard let type = HistoryTime(rawValue: current) else { return }
         clearData(for: type)
@@ -133,6 +139,8 @@ extension PasteDataStore {
     public func clearData(for type: HistoryTime) {
         var dateCom = DateComponents()
         switch type {
+        case .now:
+            dateCom = DateComponents(calendar: NSCalendar.current)
         case .day:
             dateCom = DateComponents(calendar: NSCalendar.current, day: -1)
         case .week:
@@ -151,7 +159,8 @@ extension PasteDataStore {
     /// 删除所有数据
     public func clearAllData() {
         dataList.removeAll()
-        sqlManager.dropTable()
+        clearData(for: .now)
+        updateTotoalCount()
     }
 }
 

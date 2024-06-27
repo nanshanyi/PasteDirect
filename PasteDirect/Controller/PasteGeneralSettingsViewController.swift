@@ -8,6 +8,7 @@
 import Cocoa
 import Preferences
 import ServiceManagement
+import RxSwift
 
 class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     let preferencePaneIdentifier = Settings.PaneIdentifier.general
@@ -15,6 +16,7 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     let preferencePaneTitle = "通用"
     override var nibName: NSNib.Name? { "PasteGeneralSettingsViewController" }
     let prefs = UserDefaults.standard
+    let disposeBag = DisposeBag()
     @IBOutlet weak var onStartButton: NSButton!
     
     @IBOutlet weak var pasteOnlyTextButton: NSButton!
@@ -23,18 +25,36 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     @IBOutlet weak var clearAllButton: NSButton!
     @IBOutlet weak var historySlider: NSSlider!
     
+    @IBOutlet weak var totalLabel: NSTextField!
     @IBOutlet weak var clearInfoLabel: NSTextField!
     
     var toolbarItemIcon: NSImage {
         NSImage(systemSymbolName: "switch.2", accessibilityDescription: nil)!
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        initRx()
         onStartButton.state = LaunchAtLogin.isEnabled ? .on : .off
         pasteOnlyTextButton.state = prefs.bool(forKey: PrefKey.pasteOnlyText.rawValue) ? .on : .off
         pasteDirectButton.state = prefs.bool(forKey: PrefKey.pasteDirect.rawValue) ? .on : .off
         historySlider.integerValue = prefs.integer(forKey: PrefKey.historyTime.rawValue)
         clearInfoLabel.isHidden = true
+    }
+    
+    override func viewDidDisappear() {
+        super.viewDidDisappear()
+        clearInfoLabel.isHidden = true
+    }
+    
+    private func initRx() {
+        mainDataStore.totoalCount
+            .subscribe(
+                with: self,
+                onNext: { wrapper, value in
+                    wrapper.totalLabel.stringValue = "\(value)条"
+                })
+            .disposed(by: disposeBag)
     }
     
     @IBAction func onMacStart(_ sender: NSButton) {
