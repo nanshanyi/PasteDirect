@@ -17,7 +17,7 @@ class PasteScrollView: NSScrollView {
     public var isSearching = false
     public var isLoding = false
     public var noMore = false
-    
+
     override func scrollWheel(with event: NSEvent) {
         if event.subtype == .mouseEvent {
             if let cgEvent = event.cgEvent?.copy() {

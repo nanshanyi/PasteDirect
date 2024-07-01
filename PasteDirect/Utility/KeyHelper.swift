@@ -5,11 +5,11 @@
 //  Created by 南山忆 on 2024/1/2.
 //
 
-import Foundation
 import Carbon
+import Foundation
 
-struct KeyHelper {
-    static let numberChacraer:[Int] = [
+enum KeyHelper {
+    static let numberChacraer: [Int] = [
         kVK_ANSI_A,
         kVK_ANSI_S,
         kVK_ANSI_D,

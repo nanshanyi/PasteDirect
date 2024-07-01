@@ -69,12 +69,12 @@ class PasteCollectionViewItem: NSCollectionViewItem {
 
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
-        if event.type == .leftMouseDown
-            && event.clickCount == 2 {
+        if event.type == .leftMouseDown,
+            event.clickCount == 2 {
             pasteText(true)
         }
     }
-    
+
     private func initSubviews() {
         view.wantsLayer = true
         view.layer?.cornerRadius = 12
@@ -102,12 +102,12 @@ extension PasteCollectionViewItem {
             appImageView.imageScaling = .scaleAxesIndependently
             let iconImage = NSWorkspace.shared.icon(forFile: pModel.appPath)
             appImageView.image = iconImage
-            topContentView.layer?.backgroundColor = mainDataStore.colorWith(pModel).cgColor
+            topContentView.layer?.backgroundColor = PasteDataStore.main.colorWith(pModel).cgColor
         } else {
             topContentView.layer?.backgroundColor = NSColor(red: 41.0 / 255.0, green: 42.0 / 255.0, blue: 48.0 / 255.0, alpha: 1).cgColor
         }
         setViewMenu()
-        itemTime.stringValue = getTimeString(model.date)
+        itemTime.stringValue = model.date.timeAgo
     }
 
     private func setStringItem() {
@@ -115,20 +115,20 @@ extension PasteCollectionViewItem {
         contentLabel.isHidden = false
         if let att = pModel.attributeString {
             var showStr = att
-            
+
             if att.length > maxLength {
                 showStr = att.attributedSubstring(from: NSMakeRange(0, maxLength))
             }
-            
+
             if att.length > 0,
-                let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
+               let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
                let colorstr = color.usingColorSpace(.deviceRGB)?.hexString(false) {
                 contentLabel.attributedStringValue = showStr
                 view.layer?.backgroundColor = color.cgColor
                 let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
                 let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
                 gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
-                
+
             } else {
                 view.layer?.backgroundColor = NSColor.white.cgColor
                 contentLabel.stringValue = showStr.string
@@ -170,41 +170,24 @@ extension PasteCollectionViewItem {
         menu.addItem(item3)
         view.menu = menu
     }
-
-    private func getTimeString(_ date: Date) -> String {
-        let diffDate = NSCalendar.current.dateComponents([.month, .day, .hour, .minute], from: date, to: Date())
-        if let month = diffDate.month, month > 0 {
-            return "\(month)月前"
-        } else if let day = diffDate.day, day > 0 {
-            return "\(day)天前"
-        } else if let hour = diffDate.hour, hour > 0 {
-            return "\(hour)小时前"
-        } else if let minute = diffDate.minute, minute > 0 {
-            return "\(minute)分钟前"
-        } else {
-            return "刚刚"
-        }
-    }
-
 }
 
 // MARK: - 事件处理
 
 extension PasteCollectionViewItem {
-    
     private func enterKeyDown(with event: NSEvent) -> NSEvent? {
-        if isSelected && event.type == .keyDown && event.keyCode == kVK_Return {
+        if isSelected, event.type == .keyDown, event.keyCode == kVK_Return {
             pasteText(true)
             return nil
         }
         return event
     }
-    
-    @objc func pasteText(_ isAttribute: Bool = false) {
+
+    @objc private func pasteText(_ isAttribute: Bool = false) {
         let direct = UserDefaults.standard.bool(forKey: PrefKey.pasteDirect.rawValue)
         let attri = isAttribute && !UserDefaults.standard.bool(forKey: PrefKey.pasteOnlyText.rawValue)
         PasteBoard.main.pasteData(pModel, attri)
-        if !direct { return }
+        guard direct else { return }
         if let app = NSApplication.shared.delegate as? PasteAppDelegate {
             app.frontApp?.activate()
             app.dismissWindow {

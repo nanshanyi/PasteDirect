@@ -66,9 +66,9 @@ class PasteSQLManager: NSObject {
         delete(filter: hashKey == item.hashValue)
         let insert = query.insert(hashKey <- item.hashValue, type <- item.pasteBoardType.rawValue, data <- item.data, date <- item.date, appPath <- item.appPath, appName <- item.appName, dataString <- item.dataString)
         if let rowId = try? db.run(insert) {
-            print("插入成功：\(rowId)")
+            Log("插入成功：\(rowId)")
         } else {
-            print("插入失败")
+            Log("插入失败")
         }
     }
 
@@ -76,17 +76,17 @@ class PasteSQLManager: NSObject {
     public func delete(filter: Expression<Bool>) {
         let query = table.filter(filter)
         if let count = try? db.run(query.delete()) {
-            print("删除的条数为：\(count)")
+            Log("删除的条数为：\(count)")
         } else {
-            print("删除失败")
+            Log("删除失败")
         }
     }
 
     public func dropTable() {
         if let d = try? db.run(table.drop()) {
-            print("删除所有\(d.columnCount)")
+            Log("删除所有\(d.columnCount)")
         } else {
-            print("删除失败")
+            Log("删除失败")
         }
     }
 
@@ -95,9 +95,9 @@ class PasteSQLManager: NSObject {
 //        guard var query = table else { return }
 //        let update = getTable().filter(rowid == id)
 //        if let count = try? getDB().run(update.update(value_column <- item["value"].doubleValue, tag_column <- item["tag"].stringValue , detail_column <- item["detail"].stringValue)) {
-//            print("修改的结果为：\(count == 1)")
+//            Log("修改的结果为：\(count == 1)")
 //        } else {
-//            print("修改失败")
+//            Log("修改失败")
 //        }
 //
 //    }

@@ -5,12 +5,12 @@
 //  Created by 南山忆 on 2022/11/15.
 //
 
-import Foundation
 import Carbon
+import Foundation
 import KeyboardShortcuts
+
 extension KeyboardShortcuts.Name {
-    
-    static let pasteKey = Self("pasteShortcurs", default: Shortcut(.v,modifiers:[.command, .shift]))
+    static let pasteKey = Self("pasteShortcurs", default: Shortcut(.v, modifiers: [.command, .shift]))
 }
 
 extension KeyboardShortcuts {
@@ -21,4 +21,3 @@ extension KeyboardShortcuts {
         cgEvent?.post(tap: .cghidEventTap)
     }
 }
-

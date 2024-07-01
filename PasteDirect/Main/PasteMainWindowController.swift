@@ -25,6 +25,7 @@ class PasteMainWindowController: NSWindowController, NSWindowDelegate {
         mainWindow.backgroundColor = .clear
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -34,7 +35,7 @@ class PasteMainWindowController: NSWindowController, NSWindowDelegate {
             dismissWindow()
         #endif
     }
-    
+
     public func dismissWindow(completionHandler: (() -> Void)? = nil) {
         mainVC.vcDismiss {
             self.mainWindow.resignFirstResponder()

@@ -48,7 +48,7 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     }
     
     private func initRx() {
-        mainDataStore.totoalCount
+        PasteDataStore.main.totoalCount
             .subscribe(
                 with: self,
                 onNext: { wrapper, value in
@@ -70,7 +70,7 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
         prefs.set(isOn, forKey: PrefKey.pasteOnlyText.rawValue)
     }
     @IBAction func clearAll(_ sender: NSButton) {
-        mainDataStore.clearAllData()
+        PasteDataStore.main.clearAllData()
         prefs.set(nil, forKey: PrefKey.appColorData.rawValue)
         clearInfoLabel.isHidden = false
     }
@@ -85,7 +85,7 @@ class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
             alert.addButton(withTitle: "取消")
             alert.beginSheetModal(for: self.view.window!) { res in
                 if res == .alertFirstButtonReturn, let type = HistoryTime(rawValue: sender.integerValue) {
-                    mainDataStore.clearData(for: type)
+                    PasteDataStore.main.clearData(for: type)
                     UserDefaults.standard.set(sender.integerValue, forKey: PrefKey.historyTime.rawValue)
                 } else if res == .alertSecondButtonReturn {
                     sender.integerValue = current

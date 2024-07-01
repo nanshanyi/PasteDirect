@@ -46,6 +46,7 @@
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
 		CBABF7862B344A6600D3A095 /* Then.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBABF7852B344A6600D3A095 /* Then.swift */; };
+		CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC127172C32D17900E5DBEF /* Date+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +119,7 @@
 		CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceItemIdentifier.swift; sourceTree = "<group>"; };
 		CB5320AB2B3596B5006C4B5D /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
+		CBC127172C32D17900E5DBEF /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -296,6 +298,7 @@
 			isa = PBXGroup;
 			children = (
 				CBABF7852B344A6600D3A095 /* Then.swift */,
+				CBC127172C32D17900E5DBEF /* Date+Extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -483,6 +486,7 @@
 				CB2CDF752924ECAE00E81836 /* UIImageColors.swift in Sources */,
 				CB2CDF802924ECAE00E81836 /* PasteWindowInfo.swift in Sources */,
 				CB2CDF7A2924ECAE00E81836 /* PasteMainViewController.swift in Sources */,
+				CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */,
 				CB2CDF872924ECAE00E81836 /* PasteCollectionViewItem.swift in Sources */,
 				CB5320AC2B3596B5006C4B5D /* SearchField.swift in Sources */,
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,

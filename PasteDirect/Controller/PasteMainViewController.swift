@@ -12,7 +12,7 @@ import SnapKit
 
 class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
-    private var selectIndex: IndexPath = IndexPath(item: 0, section: 0)
+    private var selectIndex: IndexPath = .init(item: 0, section: 0)
     private var dataList = [PasteboardModel]()
     public var frame: NSRect {
         didSet {
@@ -25,6 +25,7 @@ class PasteMainViewController: NSViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -114,7 +115,7 @@ extension PasteMainViewController {
     override func viewDidDisappear() {
         super.viewDidDisappear()
         searchBar.isHidden = true
-        mainDataStore.clearExpiredData()
+        PasteDataStore.main.clearExpiredData()
     }
 
     override func viewDidAppear() {
@@ -126,10 +127,10 @@ extension PasteMainViewController {
             context.duration = 0.25
             self.view.animator().setFrameOrigin(NSPoint())
         }
-        if mainDataStore.dataChange {
-            dataList = mainDataStore.dataList
+        if PasteDataStore.main.dataChange {
+            dataList = PasteDataStore.main.dataList
             collectionView.reloadData()
-            mainDataStore.dataChange.toggle()
+            PasteDataStore.main.dataChange.toggle()
             selectIndex = IndexPath(item: 0, section: 0)
             collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
         }
@@ -175,14 +176,14 @@ extension PasteMainViewController {
     @objc private func searchWord() {
         let keyWord = searchBar.stringValue
         selectIndex = IndexPath(item: 0, section: 0)
-        dataList = mainDataStore.searchData(keyWord)
+        dataList = PasteDataStore.main.searchData(keyWord)
         collectionView.reloadData()
         collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
     }
 
     private func resetToDefaultList() {
         scrollView.isSearching = false
-        dataList = mainDataStore.dataList
+        dataList = PasteDataStore.main.dataList
         collectionView.reloadData()
         collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
     }
@@ -259,12 +260,12 @@ extension PasteMainViewController: NSSearchFieldDelegate {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.count == mainDataStore.totoalCount.value {
+        if dataList.count == PasteDataStore.main.totoalCount.value {
             scrollView.noMore = true
             scrollView.isLoding = false
             return
         }
-        dataList = mainDataStore.loadNextPage()
+        dataList = PasteDataStore.main.loadNextPage()
         collectionView.reloadData()
         scrollView.isLoding = false
     }
@@ -274,7 +275,7 @@ extension PasteMainViewController: PasteScrollViewDelegate {
 
 extension PasteMainViewController: PasteCollectionViewItemDelegate {
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath) {
-        mainDataStore.deleteItem(item)
+        PasteDataStore.main.deleteItem(item)
         dataList.removeAll(where: { $0 == item })
         collectionView.animator().deleteItems(at: [indePath])
     }

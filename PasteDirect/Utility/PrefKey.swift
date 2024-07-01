@@ -12,15 +12,15 @@ enum PrefKey: String {
     case onStart
     /// 直接粘贴
     case pasteDirect
-    ///粘贴为纯文本
+    /// 粘贴为纯文本
     case pasteOnlyText
-    ///历史容量时间
+    /// 历史容量时间
     case historyTime
-    ///是否启动过App
+    /// 是否启动过App
     case appAlreadyLaunched
-    ///本地APP颜色表
+    /// 本地APP颜色表
     case appColorData
-    ///上次清理时间
+    /// 上次清理时间
     case lastClearDate
 }
 

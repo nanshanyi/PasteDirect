@@ -7,17 +7,16 @@
 
 import AppKit
 import Foundation
+import RxRelay
+import RxSwift
 import SQLite
 import UIColorHexSwift
-import RxSwift
-import RxRelay
-
-let mainDataStore = PasteDataStore()
 
 class PasteDataStore {
+    static let main = PasteDataStore()
     private var sqlManager = PasteSQLManager.manager
     private var userDefault = UserDefaults.standard
-    private var colorDic = Dictionary<String, String>()
+    private var colorDic = [String: String]()
     private var pageIndex = 1
     private let pageSize = 50
     var dataList: [PasteboardModel] = []
@@ -32,7 +31,6 @@ class PasteDataStore {
         }
     }
 
-    
     /// 加载下一页
     /// - Returns: 返回从0到当前页所有数据list
     public func loadNextPage() -> [PasteboardModel] {
@@ -42,7 +40,7 @@ class PasteDataStore {
         }
         return dataList
     }
-    
+
     /// 数据搜索
     /// - Parameter keyWord: 搜索关键词
     /// - Returns: 搜索结果list
@@ -58,12 +56,12 @@ extension PasteDataStore {
     private func updateTotoalCount() {
         totoalCount.accept(sqlManager.totoalCount())
     }
-    
+
     private func getItem(limit: Int = 50) -> [PasteboardModel] {
         let rows = sqlManager.search(limit: limit)
         return getItems(rows: rows)
     }
-    
+
     private func getItems(rows: [Row]) -> [PasteboardModel] {
         var item: PasteboardModel
         var items = [PasteboardModel]()

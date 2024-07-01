@@ -21,34 +21,32 @@ class PasteBoard {
     }
 
     func startListening() {
-        Timer.scheduledTimer(timeInterval: timerInterval,
-                             target: self,
-                             selector: #selector(checkForChangesInPasteboard),
-                             userInfo: nil,
-                             repeats: true)
+        Timer.scheduledTimer(withTimeInterval: timerInterval, repeats: true) {[weak self] _ in
+            self?.checkForChangesInPasteboard()
+        }
     }
 
-    @objc func checkForChangesInPasteboard() {
+    private func checkForChangesInPasteboard() {
         guard pasteboard.changeCount != changeCount else {
             return
         }
 
         if let model = pasteModel {
             changeCount = pasteboard.changeCount
-            mainDataStore.addOldModel(model)
+            PasteDataStore.main.addOldModel(model)
             pasteModel = nil
             return
         }
 
         guard let item = pasteboard.pasteboardItems?.first else { return }
-        mainDataStore.addNewItem(item)
+        PasteDataStore.main.addNewItem(item)
         changeCount = pasteboard.changeCount
     }
 
-    func pasteData(_ data: PasteboardModel, _ isAttribute: Bool = true) {
+    public func pasteData(_ data: PasteboardModel, _ isAttribute: Bool = true) {
         pasteModel = data
         NSPasteboard.general.clearContents()
-        if data.type == .string && !isAttribute {
+        if data.type == .string, !isAttribute {
             NSPasteboard.general.setString(data.attributeString?.string ?? "", forType: .string)
         } else {
             NSPasteboard.general.setData(data.data, forType: data.pType)

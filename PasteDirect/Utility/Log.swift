@@ -8,9 +8,7 @@
 import Foundation
 
 public func Log(_ info: String, file: String = #file, function: String = #function, line: UInt = #line) {
-#if DEBUG
-    print("【\(file.components(separatedBy: "/").last ?? "")】func-\(function)line-\(line): \(info)")
-#endif
+    #if DEBUG
+        print("【\(file.components(separatedBy: "/").last ?? "")】func-\(function)line-\(line): \(info)")
+    #endif
 }
-
-

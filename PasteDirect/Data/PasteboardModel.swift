@@ -5,16 +5,16 @@
 //  Created by 南山忆 on 2022/10/21.
 //
 
-import Foundation
 import AppKit
+import Foundation
 
 struct PasteboardModel {
-    
     public enum ModelType {
         case none
         case image
         case string
     }
+
     public enum PasteboardType: Int {
         case none
         case rtf
@@ -24,11 +24,10 @@ struct PasteboardModel {
         case png
     }
     
-    
     public let pasteBoardType: PasteboardType
     public let data: Data
     public let hashValue: Int
-    public let date:Date
+    public let date: Date
     public let appPath: String
     public let appName: String
     public var dataString: String = ""
@@ -47,7 +46,7 @@ struct PasteboardModel {
     public var attributeString: NSAttributedString? {
         switch pasteBoardType {
         case .rtf:
-           return NSAttributedString(rtf:data , documentAttributes: nil)
+            return NSAttributedString(rtf: data, documentAttributes: nil)
         case .rtfd:
             return NSAttributedString(rtfd: data, documentAttributes: nil)
         case .string:
@@ -58,7 +57,7 @@ struct PasteboardModel {
     }
     
     public var type: ModelType {
-        let pTypes:[PasteboardType] = [.rtf, .rtfd, .string]
+        let pTypes: [PasteboardType] = [.rtf, .rtfd, .string]
         if pTypes.contains(pasteBoardType) {
             return .string
         } else if pasteBoardType == .png {
@@ -96,7 +95,6 @@ struct PasteboardModel {
         }
         return nil
     }
-    
 }
 
 extension PasteboardModel: Equatable {
