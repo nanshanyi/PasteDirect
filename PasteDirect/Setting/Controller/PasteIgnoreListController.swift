@@ -19,7 +19,7 @@ enum PasteIgnoreType {
 final class PasteIgnoreListController: NSViewController, SettingsPane {
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var addButton: NSButton!
-    @IBOutlet weak var addTextField: PasteTextField!
+    @IBOutlet weak var addTextField: NSTextField!
     
     let preferencePaneIdentifier = Settings.PaneIdentifier.ignore
     let preferencePaneTitle = "忽略列表"

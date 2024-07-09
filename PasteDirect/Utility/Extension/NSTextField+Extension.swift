@@ -1,5 +1,5 @@
 //
-//  PasteTextField.swift
+//  NSTextField+Extension.swift
 //  PasteDirect
 //
 //  Created by 南山忆 on 2024/7/9.
@@ -7,12 +7,11 @@
 
 import Cocoa
 
-final class PasteTextField: NSTextField {
-
-    private let commandKey = NSEvent.ModifierFlags.command.rawValue
-    private let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue
-
-    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+extension NSTextField {
+    open override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        let commandKey = NSEvent.ModifierFlags.command.rawValue
+        let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue
+        
         if event.type == NSEvent.EventType.keyDown {
             if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == commandKey {
                 switch event.charactersIgnoringModifiers! {

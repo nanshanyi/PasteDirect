@@ -7,7 +7,7 @@
 
 import Cocoa
 
-class SearchField: NSSearchField {
+class PasteSearchField: NSSearchField {
     
     public var isEditing = false
     public var isFirstResponder: Bool {

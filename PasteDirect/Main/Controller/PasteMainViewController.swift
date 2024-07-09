@@ -79,7 +79,7 @@ class PasteMainViewController: NSViewController {
         $0.blendingMode = .behindWindow
     }
 
-    private lazy var searchBar = SearchField().then {
+    private lazy var searchBar = PasteSearchField().then {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
         $0.layer?.borderWidth = 1

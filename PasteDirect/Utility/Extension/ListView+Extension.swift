@@ -15,11 +15,3 @@ extension NSCollectionView {
         register(T.self, forItemWithIdentifier: T.identifier)
     }
 }
-
-extension NSTableView  {
-    func register<T: NSTableCellView>(_: T.Type) where T: UserInterfaceItemIdentifier {
-        if let nib = T.nib {
-            register(nib, forIdentifier: T.identifier)
-        }
-    }
-}
