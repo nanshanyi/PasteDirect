@@ -175,7 +175,7 @@ extension PasteDataStore {
         withUnsafeCurrentTask { _ in
             if !colorDic.contains(where: { $0.key == model.appName }) {
                 let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
-                let colors = iconImage.getColors()
+                let colors = iconImage.getColors(quality: .highest)
                 if let colorStr = colors?.primary.hexString(true),
                    !colorStr.isEmpty {
                     colorDic[model.appName] = colorStr

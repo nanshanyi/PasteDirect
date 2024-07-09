@@ -150,6 +150,7 @@ extension PasteCollectionViewItem {
         let retImage = NSImage(data: pModel.data)
         contentImage.image = retImage
         itemType.stringValue = "图片"
+        view.layer?.backgroundColor = NSColor.white.cgColor
         gradenLayer.colors = [NSColor(white: 0, alpha: 0).cgColor, NSColor(white: 0, alpha: 1).cgColor]
         if let size = retImage?.size {
             bottomLabel.stringValue = "\(Int(size.width)) ×\(Int(size.height)) 像素"
