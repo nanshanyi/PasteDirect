@@ -24,7 +24,7 @@ class PasteDataStore {
     var dataChange = true
 
     init() {
-        dataList = getItem(limit: pageIndex * pageSize)
+        dataList = getItems(limit: pageIndex * pageSize)
         totoalCount.accept(sqlManager.totoalCount())
         if let dic = userDefault.dictionary(forKey: PrefKey.appColorData.rawValue) as? [String: String] {
             colorDic = dic
@@ -33,20 +33,25 @@ class PasteDataStore {
 
     /// 加载下一页
     /// - Returns: 返回从0到当前页所有数据list
-    public func loadNextPage() -> [PasteboardModel] {
-        if dataList.count >= pageSize * pageIndex {
-            pageIndex += 1
-            dataList = getItem(limit: pageIndex * pageSize)
+    public func loadNextPage() async -> [PasteboardModel] {
+        withUnsafeCurrentTask { task in
+            Log("loadNextPage\(Thread.current)")
+            if dataList.count < totoalCount.value {
+                dataList += getItems(limit: pageSize, offset: pageSize * pageIndex)
+                pageIndex += 1
+            }
+            return dataList
         }
-        return dataList
     }
 
     /// 数据搜索
     /// - Parameter keyWord: 搜索关键词
     /// - Returns: 搜索结果list
-    public func searchData(_ keyWord: String) -> [PasteboardModel] {
-        let rows = sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
-        return getItems(rows: rows)
+    public func searchData(_ keyWord: String) async -> [PasteboardModel] {
+        withUnsafeCurrentTask { _ in
+            let rows = sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
+            return getItems(rows: rows)
+        }
     }
 }
 
@@ -57,8 +62,8 @@ extension PasteDataStore {
         totoalCount.accept(sqlManager.totoalCount())
     }
 
-    private func getItem(limit: Int = 50) -> [PasteboardModel] {
-        let rows = sqlManager.search(limit: limit)
+    private func getItems(limit: Int = 50, offset: Int? = nil) -> [PasteboardModel] {
+        let rows = sqlManager.search(limit: limit, offset: offset)
         return getItems(rows: rows)
     }
 
@@ -94,7 +99,9 @@ extension PasteDataStore {
         dataChange = true
         dataList.removeAll(where: { $0 == model })
         dataList.insert(model, at: 0)
-        updateColor(model)
+        Task {
+            await updateColor(model)
+        }
     }
 
     /// 移动已有数据
@@ -163,8 +170,9 @@ extension PasteDataStore {
 }
 
 extension PasteDataStore {
-    func updateColor(_ model: PasteboardModel) {
-        DispatchQueue.global().async { [self] in
+    @discardableResult
+    func updateColor(_ model: PasteboardModel) async -> NSColor {
+        withUnsafeCurrentTask { _ in
             if !colorDic.contains(where: { $0.key == model.appName }) {
                 let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
                 let colors = iconImage.getColors()
@@ -173,17 +181,16 @@ extension PasteDataStore {
                     colorDic[model.appName] = colorStr
                     userDefault.set(colorDic, forKey: PrefKey.appColorData.rawValue)
                 }
+                return colors?.primary ?? .clear
             }
+            return .clear
         }
     }
 
-    func colorWith(_ model: PasteboardModel) -> NSColor {
+    func colorWith(_ model: PasteboardModel) async -> NSColor {
         if let colorStr = colorDic[model.appName], let color = NSColor(colorStr) {
             return color
         }
-        let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
-        let colors = iconImage.getColors()
-        updateColor(model)
-        return colors?.primary ?? NSColor.clear
+        return await updateColor(model)
     }
 }

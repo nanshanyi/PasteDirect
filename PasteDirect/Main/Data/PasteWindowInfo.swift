@@ -9,6 +9,24 @@ import Foundation
 import AppKit
 
 struct WindowInfo {
+    
+    static let defaultList = [
+        "com.apple.dock",
+        "com.apple.notificationcenterui",
+        "com.apple.screencaptureui",
+        "com.apple.PIPAgent",
+        "com.nanshanyi.PasteDirect",
+    ]
+    
+    static var customList: [String] {
+        get {
+            UserDefaults.standard.stringArray(forKey: PrefKey.ignoreList.rawValue) ?? []
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: PrefKey.ignoreList.rawValue)
+        }
+    }
+    
     struct Owner {
         let name: String
         let processIdentifier: Int
@@ -88,14 +106,10 @@ extension WindowInfo {
         guard !window.owner.name.lowercased().hasSuffix("agent") else {
             return false
         }
+        
+        let list = UserDefaults.standard.stringArray(forKey: PrefKey.ignoreList.rawValue) ?? []
 
-        let appIgnoreList = [
-            "com.apple.dock",
-            "com.apple.notificationcenterui",
-            "com.apple.screencaptureui",
-            "com.apple.PIPAgent",
-            "com.sindresorhus.Pasteboard-Viewer"
-        ]
+        let appIgnoreList = defaultList + list
 
         if appIgnoreList.contains(window.owner.bundleIdentifier ?? "") {
             return false

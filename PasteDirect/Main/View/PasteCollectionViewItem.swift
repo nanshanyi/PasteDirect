@@ -102,7 +102,10 @@ extension PasteCollectionViewItem {
             appImageView.imageScaling = .scaleAxesIndependently
             let iconImage = NSWorkspace.shared.icon(forFile: pModel.appPath)
             appImageView.image = iconImage
-            topContentView.layer?.backgroundColor = PasteDataStore.main.colorWith(pModel).cgColor
+            Task {
+                let color = await PasteDataStore.main.colorWith(pModel).cgColor
+                topContentView.layer?.backgroundColor = color
+            }
         } else {
             topContentView.layer?.backgroundColor = NSColor(red: 41.0 / 255.0, green: 42.0 / 255.0, blue: 48.0 / 255.0, alpha: 1).cgColor
         }
@@ -217,6 +220,4 @@ extension PasteCollectionViewItem {
     }
 }
 
-extension PasteCollectionViewItem: UserInterfaceItemIdentifier {
-    static var identifier: NSUserInterfaceItemIdentifier = .init(rawValue: "PasteCollectionViewItem")
-}
+extension PasteCollectionViewItem: UserInterfaceItemIdentifier {}

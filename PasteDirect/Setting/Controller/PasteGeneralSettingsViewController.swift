@@ -10,7 +10,7 @@ import Preferences
 import ServiceManagement
 import RxSwift
 
-class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
+final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     let preferencePaneIdentifier = Settings.PaneIdentifier.general
     
     let preferencePaneTitle = "通用"

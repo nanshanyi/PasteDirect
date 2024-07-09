@@ -59,7 +59,7 @@ class PasteMainViewController: NSViewController {
         $0.backgroundColors = [.clear]
         $0.collectionViewLayout = flowLayout
         $0.isSelectable = true
-        $0.register(NSNib(nibNamed: "PasteCollectionViewItem", bundle: Bundle.main), forItemWithIdentifier: PasteCollectionViewItem.identifier)
+        $0.register(PasteCollectionViewItem.self)
     }
 
     private lazy var scrollView = PasteScrollView().then {
@@ -125,7 +125,7 @@ extension PasteMainViewController {
         view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: frame.width, height: viewHeight)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
-            self.view.animator().setFrameOrigin(NSPoint())
+            self.view.animator().setFrameOrigin(.zero)
         }
         if PasteDataStore.main.dataChange {
             dataList = PasteDataStore.main.dataList
@@ -176,9 +176,11 @@ extension PasteMainViewController {
     @objc private func searchWord() {
         let keyWord = searchBar.stringValue
         selectIndex = IndexPath(item: 0, section: 0)
-        dataList = PasteDataStore.main.searchData(keyWord)
-        collectionView.reloadData()
-        collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+        Task {
+            dataList = await PasteDataStore.main.searchData(keyWord)
+            collectionView.reloadData()
+            collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+        }
     }
 
     private func resetToDefaultList() {
@@ -260,14 +262,16 @@ extension PasteMainViewController: NSSearchFieldDelegate {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.count == PasteDataStore.main.totoalCount.value {
+        if dataList.count >= PasteDataStore.main.totoalCount.value {
             scrollView.noMore = true
             scrollView.isLoding = false
             return
         }
-        dataList = PasteDataStore.main.loadNextPage()
-        collectionView.reloadData()
-        scrollView.isLoding = false
+        Task {
+            dataList = await PasteDataStore.main.loadNextPage()
+            collectionView.reloadData()
+            scrollView.isLoding = false
+        }
     }
 }
 

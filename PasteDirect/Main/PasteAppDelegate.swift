@@ -26,7 +26,8 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var settingsWindowController = SettingsWindowController(
         preferencePanes: [PasteGeneralSettingsViewController(),
-                          PasteShortcutsSettingViewController()],
+                          PasteShortcutsSettingViewController(),
+                         PasteIgnoreListController()],
         style: .toolbarItems,
         animated: true
     )
@@ -102,4 +103,5 @@ extension PasteAppDelegate {
 extension Settings.PaneIdentifier {
     static let general = Self("general")
     static let shortcuts = Self("shortcuts")
+    static let ignore = Self("ignore")
 }

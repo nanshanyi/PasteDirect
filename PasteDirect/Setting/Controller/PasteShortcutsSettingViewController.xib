@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="22505" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22690"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -44,7 +44,7 @@
                         </gridCell>
                         <gridCell row="cjf-1y-y6r" column="9b6-fU-bbE" id="3a6-JY-O6i">
                             <customView key="contentView" translatesAutoresizingMaskIntoConstraints="NO" id="qau-nO-Wr0">
-                                <rect key="frame" x="140" y="3" width="100" height="30"/>
+                                <rect key="frame" x="112" y="3" width="100" height="30"/>
                             </customView>
                         </gridCell>
                     </gridCells>

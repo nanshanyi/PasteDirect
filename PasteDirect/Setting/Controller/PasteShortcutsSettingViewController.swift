@@ -9,9 +9,8 @@ import Cocoa
 import KeyboardShortcuts
 import Preferences
 
-class PasteShortcutsSettingViewController: NSViewController, SettingsPane {
-    @IBOutlet var pasteCell: NSGridCell!
-    @IBOutlet var shortcutsView: NSView!
+final class PasteShortcutsSettingViewController: NSViewController, SettingsPane {
+    @IBOutlet weak var pasteCell: NSGridCell!
 
     let preferencePaneIdentifier = Settings.PaneIdentifier.shortcuts
     let preferencePaneTitle = "快捷键"

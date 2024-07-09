@@ -22,6 +22,8 @@ enum PrefKey: String {
     case appColorData
     /// 上次清理时间
     case lastClearDate
+    /// 忽略的APP
+    case ignoreList
 }
 
 enum HistoryTime: Int {
