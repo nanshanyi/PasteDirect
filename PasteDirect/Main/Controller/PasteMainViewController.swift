@@ -9,11 +9,14 @@ import AppKit
 import Carbon
 import Cocoa
 import SnapKit
+import RxSwift
+import RxCocoa
 
 class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
     private var selectIndex: IndexPath = .init(item: 0, section: 0)
     private var dataList = [PasteboardModel]()
+    private let disposeBag = DisposeBag()
     public var frame: NSRect {
         didSet {
             reLayoutFrame()
@@ -103,6 +106,7 @@ extension PasteMainViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
+        initRx()
         NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownEvent(_:))
     }
 
@@ -168,18 +172,39 @@ extension PasteMainViewController {
             make.width.equalTo(200)
         }
     }
+    
+    private func initRx() {
+        searchBar.rx.text.orEmpty
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .subscribe(
+                with: self,
+                onNext: { wrapper, text in
+                    wrapper.scrollView.isSearching = true
+                    if text.isEmpty {
+                        wrapper.resetToDefaultList()
+                    } else {
+                        wrapper.searchWord()
+                    }
+                }
+            )
+            .disposed(by: disposeBag)
+    }
 }
 
 // MARK: - 私有方法
 
 extension PasteMainViewController {
-    @objc private func searchWord() {
+    private func searchWord() {
         let keyWord = searchBar.stringValue
         selectIndex = IndexPath(item: 0, section: 0)
+        Log("search start: \(keyWord)")
         Task {
             dataList = await PasteDataStore.main.searchData(keyWord)
             collectionView.reloadData()
-            collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+            if !dataList.isEmpty {
+                collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+            }
+            Log("search result: \(dataList.count) word: \(keyWord)")
         }
     }
 
@@ -187,7 +212,9 @@ extension PasteMainViewController {
         scrollView.isSearching = false
         dataList = PasteDataStore.main.dataList
         collectionView.reloadData()
-        collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+        if !dataList.isEmpty {
+            collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+        }
     }
 
     private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
@@ -244,19 +271,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
 
 // MARK: - NSSearchFieldDelegate
 
-extension PasteMainViewController: NSSearchFieldDelegate {
-    func controlTextDidChange(_ obj: Notification) {
-        guard let textView = obj.object as? NSSearchField else { return }
-        let keyWord = textView.stringValue
-        if !keyWord.isEmpty {
-            scrollView.isSearching = true
-            NSObject.cancelPreviousPerformRequests(withTarget: self)
-            perform(#selector(searchWord), with: self, afterDelay: 0.3)
-        } else {
-            resetToDefaultList()
-        }
-    }
-}
+extension PasteMainViewController: NSSearchFieldDelegate {}
 
 // MARK: - PasteScrollViewDelegate
 
