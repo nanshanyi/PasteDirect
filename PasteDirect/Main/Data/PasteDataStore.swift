@@ -34,7 +34,7 @@ class PasteDataStore {
     /// 加载下一页
     /// - Returns: 返回从0到当前页所有数据list
     public func loadNextPage() async -> [PasteboardModel] {
-        withUnsafeCurrentTask { task in
+        withUnsafeCurrentTask { _ in
             Log("loadNextPage\(Thread.current)")
             if dataList.count < totoalCount.value {
                 dataList += getItems(limit: pageSize, offset: pageSize * pageIndex)
@@ -74,7 +74,8 @@ extension PasteDataStore {
             if let type = try? row.get(type),
                let data = try? row.get(data),
                let hashV = try? row.get(hashKey),
-               let date = try? row.get(date) {
+               let date = try? row.get(date)
+            {
                 let appName = try? row.get(appName)
                 let appPath = try? row.get(appPath)
                 let dataString = try? row.get(dataString)
@@ -177,7 +178,8 @@ extension PasteDataStore {
                 let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
                 let colors = iconImage.getColors(quality: .highest)
                 if let colorStr = colors?.primary.hexString(true),
-                   !colorStr.isEmpty {
+                   !colorStr.isEmpty
+                {
                     colorDic[model.appName] = colorStr
                     userDefault.set(colorDic, forKey: PrefKey.appColorData.rawValue)
                 }
