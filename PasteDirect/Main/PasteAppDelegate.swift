@@ -9,6 +9,7 @@ import Carbon
 import Cocoa
 import KeyboardShortcuts
 import Preferences
+import ApplicationServices
 
 class PasteAppDelegate: NSObject, NSApplicationDelegate {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -40,6 +41,7 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
             let curFrame = NSScreen.main?.frame
             self.showOrDismissWindow(curFrame)
         }
+        showPromptAccessibility()
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -49,13 +51,22 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
 
 extension PasteAppDelegate {
     private func setDefaultPrefs() {
-        let prefs = UserDefaults.standard
-        if !prefs.bool(forKey: PrefKey.appAlreadyLaunched.rawValue) {
+        if !PasteUserDefaults.appAlreadyLaunched {
             LaunchAtLogin.isEnabled = true
-            prefs.set(true, forKey: PrefKey.appAlreadyLaunched.rawValue)
-            prefs.set(true, forKey: PrefKey.onStart.rawValue)
-            prefs.set(true, forKey: PrefKey.pasteDirect.rawValue)
-            prefs.set(HistoryTime.week.rawValue, forKey: PrefKey.historyTime.rawValue)
+            PasteUserDefaults.appAlreadyLaunched = true
+        }
+    }
+    
+    private func showPromptAccessibility() {
+        let checkOptPrompt = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as NSString
+        let accessEnabled = AXIsProcessTrustedWithOptions([checkOptPrompt: false] as CFDictionary?)
+        if (!accessEnabled) {
+            let alert = NSAlert()
+            alert.messageText = "PasteDirect 需要获取辅助功能权限"
+            alert.informativeText = "点击确定跳转到系统设置页，如果列表中已存在PasteDirect，请删除后重新添加，并打开权限开关"
+            alert.addButton(withTitle: "确定")
+            alert.runModal()
+            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
         }
     }
 }

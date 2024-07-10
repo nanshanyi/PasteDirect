@@ -163,7 +163,7 @@ extension PasteCollectionViewItem {
             let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(menuAttributeText), keyEquivalent: "")
             menu.addItem(item)
         }
-        if !UserDefaults.standard.bool(forKey: PrefKey.pasteOnlyText.rawValue) {
+        if !PasteUserDefaults.pasteOnlyText {
             let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteText), keyEquivalent: "")
             menu.addItem(item1)
         }
@@ -188,14 +188,14 @@ extension PasteCollectionViewItem {
     }
 
     @objc private func pasteText(_ isAttribute: Bool = false) {
-        let direct = UserDefaults.standard.bool(forKey: PrefKey.pasteDirect.rawValue)
-        let attri = isAttribute && !UserDefaults.standard.bool(forKey: PrefKey.pasteOnlyText.rawValue)
+        let direct = PasteUserDefaults.pasteDirect
+        let attri = isAttribute && !PasteUserDefaults.pasteOnlyText
         PasteBoard.main.pasteData(pModel, attri)
         guard direct else { return }
         if let app = NSApplication.shared.delegate as? PasteAppDelegate {
             app.frontApp?.activate()
             app.dismissWindow {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
                     KeyboardShortcuts.postCmdVEvent()
                 }
             }

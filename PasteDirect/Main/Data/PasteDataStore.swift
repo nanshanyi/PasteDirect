@@ -15,7 +15,6 @@ import UIColorHexSwift
 class PasteDataStore {
     static let main = PasteDataStore()
     private var sqlManager = PasteSQLManager.manager
-    private var userDefault = UserDefaults.standard
     private var colorDic = [String: String]()
     private var pageIndex = 1
     private let pageSize = 50
@@ -26,9 +25,7 @@ class PasteDataStore {
     init() {
         dataList = getItems(limit: pageIndex * pageSize)
         totoalCount.accept(sqlManager.totoalCount())
-        if let dic = userDefault.dictionary(forKey: PrefKey.appColorData.rawValue) as? [String: String] {
-            colorDic = dic
-        }
+        colorDic = PasteUserDefaults.appColorData
     }
 
     /// 加载下一页
@@ -131,11 +128,11 @@ extension PasteDataStore {
 
     /// 删除过期数据
     public func clearExpiredData() {
-        let lastDate = userDefault.string(forKey: PrefKey.lastClearDate.rawValue)
+        let lastDate = PasteUserDefaults.lastClearDate
         let dateStr = Date().formatted(date: .numeric, time: .omitted)
         if lastDate == dateStr { return }
-        userDefault.set(dateStr, forKey: PrefKey.lastClearDate.rawValue)
-        let current = userDefault.integer(forKey: PrefKey.historyTime.rawValue)
+        PasteUserDefaults.lastClearDate = dateStr
+        let current = PasteUserDefaults.historyTime
         guard let type = HistoryTime(rawValue: current) else { return }
         clearData(for: type)
     }
@@ -181,7 +178,7 @@ extension PasteDataStore {
                    !colorStr.isEmpty
                 {
                     colorDic[model.appName] = colorStr
-                    userDefault.set(colorDic, forKey: PrefKey.appColorData.rawValue)
+                    PasteUserDefaults.appColorData = colorDic
                 }
                 return colors?.primary ?? .clear
             }

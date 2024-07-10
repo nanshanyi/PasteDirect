@@ -52,6 +52,7 @@
 		CBD5E39E2C3BDB6500F0F95F /* PasteIgnoreListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E39B2C3BDB6500F0F95F /* PasteIgnoreListController.swift */; };
 		CBD5E3A32C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3A22C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift */; };
 		CBD5E3AB2C3D0B6A00F0F95F /* NSTextField+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3AA2C3D0B6A00F0F95F /* NSTextField+Extension.swift */; };
+		CBD5E3B12C3E3EF100F0F95F /* PasteUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B02C3E3EF100F0F95F /* PasteUserDefaults.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +131,7 @@
 		CBD5E39C2C3BDB6500F0F95F /* PasteIgnoreListController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PasteIgnoreListController.xib; sourceTree = "<group>"; };
 		CBD5E3A22C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteIgnoreListCellView.swift; sourceTree = "<group>"; };
 		CBD5E3AA2C3D0B6A00F0F95F /* NSTextField+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTextField+Extension.swift"; sourceTree = "<group>"; };
+		CBD5E3B02C3E3EF100F0F95F /* PasteUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUserDefaults.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,6 +242,7 @@
 			children = (
 				CBABF7842B344A2F00D3A095 /* Extension */,
 				CB2CDF592924ECAB00E81836 /* Helps.swift */,
+				CBD5E3B02C3E3EF100F0F95F /* PasteUserDefaults.swift */,
 				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CB2CDF5B2924ECAB00E81836 /* UIImageColors.swift */,
 				CB2CDF5D2924ECAB00E81836 /* PrefKey.swift */,
@@ -536,6 +539,7 @@
 				CBABF7862B344A6600D3A095 /* Then.swift in Sources */,
 				CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */,
 				CB2CDF7C2924ECAE00E81836 /* PasteMainWindow.swift in Sources */,
+				CBD5E3B12C3E3EF100F0F95F /* PasteUserDefaults.swift in Sources */,
 				CB2CDF812924ECAE00E81836 /* PasteboardModel.swift in Sources */,
 				CB2CDF792924ECAE00E81836 /* PasteShortcutsSettingViewController.swift in Sources */,
 				CB2CDF7E2924ECAE00E81836 /* PasteAppDelegate.swift in Sources */,

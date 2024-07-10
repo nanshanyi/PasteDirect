@@ -12,10 +12,8 @@ import RxSwift
 
 final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     let preferencePaneIdentifier = Settings.PaneIdentifier.general
-    
     let preferencePaneTitle = "通用"
     override var nibName: NSNib.Name? { "PasteGeneralSettingsViewController" }
-    let prefs = UserDefaults.standard
     let disposeBag = DisposeBag()
     @IBOutlet weak var onStartButton: NSButton!
     
@@ -36,9 +34,9 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
         super.viewDidLoad()
         initRx()
         onStartButton.state = LaunchAtLogin.isEnabled ? .on : .off
-        pasteOnlyTextButton.state = prefs.bool(forKey: PrefKey.pasteOnlyText.rawValue) ? .on : .off
-        pasteDirectButton.state = prefs.bool(forKey: PrefKey.pasteDirect.rawValue) ? .on : .off
-        historySlider.integerValue = prefs.integer(forKey: PrefKey.historyTime.rawValue)
+        pasteOnlyTextButton.state = PasteUserDefaults.pasteOnlyText ? .on : .off
+        pasteDirectButton.state = PasteUserDefaults.pasteDirect ? .on : .off
+        historySlider.integerValue = PasteUserDefaults.historyTime
         clearInfoLabel.isHidden = true
     }
     
@@ -63,20 +61,20 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     }
     @IBAction func pasteDirect(_ sender: NSButton) {
         let isOn = sender.state == .on
-        prefs.set(isOn, forKey: PrefKey.pasteDirect.rawValue)
+        PasteUserDefaults.pasteDirect = isOn
     }
     @IBAction func pasteOnlyText(_ sender: NSButton) {
         let isOn = sender.state == .on
-        prefs.set(isOn, forKey: PrefKey.pasteOnlyText.rawValue)
+        PasteUserDefaults.pasteOnlyText = isOn
     }
     @IBAction func clearAll(_ sender: NSButton) {
         PasteDataStore.main.clearAllData()
-        prefs.set(nil, forKey: PrefKey.appColorData.rawValue)
+        PasteUserDefaults.appColorData = [:]
         clearInfoLabel.isHidden = false
     }
     
     @IBAction func sliderChange(_ sender: NSSlider) {
-        let current = prefs.integer(forKey: PrefKey.historyTime.rawValue)
+        let current = PasteUserDefaults.historyTime
         if sender.integerValue < current {
             let alert = NSAlert()
             alert.messageText = "剪贴板的内容数量已经超过预设，要删除旧的条目来减少容量吗？"
@@ -86,13 +84,13 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
             alert.beginSheetModal(for: self.view.window!) { res in
                 if res == .alertFirstButtonReturn, let type = HistoryTime(rawValue: sender.integerValue) {
                     PasteDataStore.main.clearData(for: type)
-                    UserDefaults.standard.set(sender.integerValue, forKey: PrefKey.historyTime.rawValue)
+                    PasteUserDefaults.historyTime = sender.integerValue
                 } else if res == .alertSecondButtonReturn {
                     sender.integerValue = current
                 }
             }
         } else {
-            UserDefaults.standard.set(sender.integerValue, forKey: PrefKey.historyTime.rawValue)
+            PasteUserDefaults.historyTime = sender.integerValue
         }
     }
     

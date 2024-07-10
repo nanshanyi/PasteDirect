@@ -20,10 +20,10 @@ struct WindowInfo {
     
     static var customList: [String] {
         get {
-            UserDefaults.standard.stringArray(forKey: PrefKey.ignoreList.rawValue) ?? []
+            PasteUserDefaults.ignoreList
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: PrefKey.ignoreList.rawValue)
+            PasteUserDefaults.ignoreList = newValue
         }
     }
     
@@ -107,7 +107,7 @@ extension WindowInfo {
             return false
         }
         
-        let list = UserDefaults.standard.stringArray(forKey: PrefKey.ignoreList.rawValue) ?? []
+        let list = PasteUserDefaults.ignoreList
 
         let appIgnoreList = defaultList + list
 
