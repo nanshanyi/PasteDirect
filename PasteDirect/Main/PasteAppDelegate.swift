@@ -41,7 +41,9 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
             let curFrame = NSScreen.main?.frame
             self.showOrDismissWindow(curFrame)
         }
+#if !DEBUG
         showPromptAccessibility()
+#endif
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
