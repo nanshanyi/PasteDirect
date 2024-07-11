@@ -13,10 +13,10 @@ import Foundation
 }
 
 class PasteScrollView: NSScrollView {
-    public weak var delegate: PasteScrollViewDelegate?
-    public var isSearching = false
-    public var isLoding = false
-    public var noMore = false
+    weak var delegate: PasteScrollViewDelegate?
+    var isSearching = false
+    var isLoding = false
+    var noMore = false
 
     override func scrollWheel(with event: NSEvent) {
         if event.subtype == .mouseEvent {

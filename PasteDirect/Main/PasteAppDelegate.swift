@@ -11,7 +11,7 @@ import KeyboardShortcuts
 import Preferences
 import ApplicationServices
 
-class PasteAppDelegate: NSObject, NSApplicationDelegate {
+class PasteAppDelegate: NSObject {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private lazy var rMenu = NSMenu(title: "设置").then {
         let item1 = NSMenuItem(title: "偏好设置", action: #selector(settingsAction), keyEquivalent: ",")
@@ -21,9 +21,9 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
         $0.addItem(item3)
     }
 
-    public lazy var mainWindowController = PasteMainWindowController()
+    private lazy var mainWindowController = PasteMainWindowController()
 
-    public var frontApp: NSRunningApplication?
+    var frontApp: NSRunningApplication?
 
     private lazy var settingsWindowController = SettingsWindowController(
         preferencePanes: [PasteGeneralSettingsViewController(),
@@ -33,17 +33,13 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
         animated: true
     )
 
+}
+
+// MARK: - NSApplicationDelegate
+
+extension PasteAppDelegate: NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        setStatusItem()
-        PasteBoard.main.startListening()
-        setDefaultPrefs()
-        KeyboardShortcuts.onKeyDown(for: .pasteKey) {
-            let curFrame = NSScreen.main?.frame
-            self.showOrDismissWindow(curFrame)
-        }
-#if !DEBUG
-        showPromptAccessibility()
-#endif
+        initPaste()
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -51,12 +47,32 @@ class PasteAppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+// MARK: - 私有方法
+
 extension PasteAppDelegate {
-    private func setDefaultPrefs() {
+    private func initPaste() {
+        /// 设置状态栏
+        setStatusItem()
+        /// 开启剪贴板监听
+        PasteBoard.main.startListening()
+        /// 记录是否第一次启动 设置开机自启
         if !PasteUserDefaults.appAlreadyLaunched {
             LaunchAtLogin.isEnabled = true
             PasteUserDefaults.appAlreadyLaunched = true
         }
+        /// 初始化DataStore
+        let _ = PasteDataStore.main
+        /// 注册快捷键
+        KeyboardShortcuts.onKeyDown(for: .pasteKey) { [self] in
+            let curFrame = NSScreen.main?.frame
+            showOrDismissWindow(curFrame)
+        }
+        
+#if !DEBUG
+        /// 检查辅助功能权限
+        showPromptAccessibility()
+#endif
+
     }
     
     private func showPromptAccessibility() {
@@ -71,9 +87,7 @@ extension PasteAppDelegate {
             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
         }
     }
-}
-
-extension PasteAppDelegate {
+    
     private func setStatusItem() {
         menuBarItem.isVisible = true
         menuBarItem.button?.image = NSImage(named: "paste_icon_Normal")
@@ -83,7 +97,8 @@ extension PasteAppDelegate {
         menuBarItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
     }
 
-    @objc private func statusBarClick(sender: NSStatusBarButton) {
+    @objc
+    private func statusBarClick(sender: NSStatusBarButton) {
         guard let event = NSApplication.shared.currentEvent else { return }
         let frame = sender.window?.screen?.frame
         if event.type == .leftMouseUp {
@@ -93,17 +108,20 @@ extension PasteAppDelegate {
         }
     }
 
-    @objc private func settingsAction() {
+    @objc
+    private func settingsAction() {
         settingsWindowController.show()
     }
 }
 
+// MARK: - 对外方法
+
 extension PasteAppDelegate {
-    public func dismissWindow(completionHandler: (() -> Void)? = nil) {
+    func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
         mainWindowController.dismissWindow(completionHandler: completionHandler)
     }
 
-    public func showOrDismissWindow(_ frame: NSRect? = nil) {
+    func showOrDismissWindow(_ frame: NSRect? = nil) {
         if mainWindowController.isVisable {
             mainWindowController.dismissWindow()
         } else {

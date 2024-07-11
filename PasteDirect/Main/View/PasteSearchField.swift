@@ -9,8 +9,8 @@ import Cocoa
 
 class PasteSearchField: NSSearchField {
     
-    public var isEditing = false
-    public var isFirstResponder: Bool {
+    var isEditing = false
+    var isFirstResponder: Bool {
         currentEditor() != nil && currentEditor() == window?.firstResponder
     }
     

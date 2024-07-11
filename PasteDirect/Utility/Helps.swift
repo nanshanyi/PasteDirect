@@ -9,10 +9,10 @@
 import Foundation
 import ServiceManagement
 
-public struct LaunchAtLogin {
+struct LaunchAtLogin {
     private static let id = "\(Bundle.main.bundleIdentifier!).LaunchAtLogin"
 
-    public static var isEnabled: Bool {
+    static var isEnabled: Bool {
         get {
             guard let jobs = (LaunchAtLogin.self as DeprecationWarningWorkaround.Type).jobsDict else {
                 return false

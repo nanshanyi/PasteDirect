@@ -7,19 +7,19 @@
 
 #if os(OSX)
     import AppKit
-    public typealias UIImage = NSImage
-    public typealias UIColor = NSColor
+    typealias UIImage = NSImage
+    typealias UIColor = NSColor
 #else
     import UIKit
 #endif
 
-public struct UIImageColors {
-    public var background: UIColor!
-    public var primary: UIColor!
-    public var secondary: UIColor!
-    public var detail: UIColor!
+struct UIImageColors {
+    var background: UIColor!
+    var primary: UIColor!
+    var secondary: UIColor!
+    var detail: UIColor!
   
-    public init(background: UIColor, primary: UIColor, secondary: UIColor, detail: UIColor) {
+    init(background: UIColor, primary: UIColor, secondary: UIColor, detail: UIColor) {
       self.background = background
       self.primary = primary
       self.secondary = secondary
@@ -27,7 +27,7 @@ public struct UIImageColors {
     }
 }
 
-public enum UIImageColorsQuality: CGFloat {
+enum UIImageColorsQuality: CGFloat {
     case lowest = 50 // 50px
     case low = 100 // 100px
     case high = 250 // 250px
@@ -204,7 +204,7 @@ extension UIImage {
         }
     #endif
 
-    public func getColors(quality: UIImageColorsQuality = .high, _ completion: @escaping (UIImageColors?) -> Void) {
+    func getColors(quality: UIImageColorsQuality = .high, _ completion: @escaping (UIImageColors?) -> Void) {
         DispatchQueue.global().async {
             let result = self.getColors(quality: quality)
             DispatchQueue.main.async {
@@ -213,7 +213,7 @@ extension UIImage {
         }
     }
 
-    public func getColors(quality: UIImageColorsQuality = .high) -> UIImageColors? {
+    func getColors(quality: UIImageColorsQuality = .high) -> UIImageColors? {
         var scaleDownSize: CGSize = self.size
         if quality != .highest {
             if self.size.width < self.size.height {

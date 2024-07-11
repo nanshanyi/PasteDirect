@@ -19,6 +19,7 @@ let dataString = Expression<String>("dataString")
 
 class PasteSQLManager: NSObject {
     static let manager = PasteSQLManager()
+
     private lazy var db: Connection = {
         let path = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
@@ -52,8 +53,12 @@ class PasteSQLManager: NSObject {
         }))
         return tab
     }()
+}
 
-    public func totoalCount() -> Int {
+// MARK: - 数据库操作 对外接口
+
+extension PasteSQLManager {
+    var totoalCount: Int {
         if let count = try? db.scalar(table.count) {
             return count
         }
@@ -61,7 +66,7 @@ class PasteSQLManager: NSObject {
     }
 
     // 增
-    public func insert(item: PasteboardModel) {
+    func insert(item: PasteboardModel) {
         let query = table
         delete(filter: hashKey == item.hashValue)
         let insert = query.insert(hashKey <- item.hashValue, type <- item.pasteBoardType.rawValue, data <- item.data, date <- item.date, appPath <- item.appPath, appName <- item.appName, dataString <- item.dataString)
@@ -73,7 +78,7 @@ class PasteSQLManager: NSObject {
     }
 
     // 根据条件删除
-    public func delete(filter: Expression<Bool>) {
+    func delete(filter: Expression<Bool>) {
         let query = table.filter(filter)
         if let count = try? db.run(query.delete()) {
             Log("删除的条数为：\(count)")
@@ -82,7 +87,7 @@ class PasteSQLManager: NSObject {
         }
     }
 
-    public func dropTable() {
+    func dropTable() {
         if let d = try? db.run(table.drop()) {
             Log("删除所有\(d.columnCount)")
         } else {
@@ -103,7 +108,7 @@ class PasteSQLManager: NSObject {
 //    }
 
     // 查
-    public func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) -> [Row] {
+    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) -> [Row] {
         var query = table.select(select).order(order)
         if let f = filter {
             query = query.filter(f)

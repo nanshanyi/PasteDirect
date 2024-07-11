@@ -14,36 +14,9 @@ import RxCocoa
 
 class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
-    private var selectIndex: IndexPath = .init(item: 0, section: 0)
+    private var selectIndex = IndexPath(item: 0, section: 0)
     private var dataList = [PasteboardModel]()
     private let disposeBag = DisposeBag()
-    public var frame: NSRect {
-        didSet {
-            reLayoutFrame()
-        }
-    }
-
-    init(_ f: NSRect? = nil) {
-        frame = f ?? NSRect(x: 0, y: 0, width: 2000, height: viewHeight)
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    public func vcDismiss(completionHandler: (() -> Void)? = nil) {
-        if searchBar.isEditing {
-            searchBar.abortEditing()
-            searchBar.resignFirstResponder()
-            return
-        }
-        NSAnimationContext.runAnimationGroup({ context in
-            context.duration = 0.25
-            self.view.animator().setFrameOrigin(NSPoint(x: 0, y: -view.bounds.height))
-        }, completionHandler: completionHandler)
-    }
 
     // MARK: - lazy property
 
@@ -89,19 +62,14 @@ class PasteMainViewController: NSViewController {
         $0.layer?.borderColor = NSColor.lightGray.cgColor
         $0.layer?.cornerRadius = 15
         $0.focusRingType = .none
-        $0.delegate = self
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
     }
 }
 
-// MARK: - lifeCycle
+// MARK: - 生命周期
 
 extension PasteMainViewController {
-    override func loadView() {
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: frame.width, height: viewHeight))
-        self.view = view
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,7 +94,7 @@ extension PasteMainViewController {
         scrollView.isSearching = false
         searchBar.isHidden = false
         view.window?.makeFirstResponder(collectionView)
-        view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: frame.width, height: viewHeight)
+        view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: view.frame.width, height: viewHeight)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
             self.view.animator().setFrameOrigin(.zero)
@@ -136,12 +104,15 @@ extension PasteMainViewController {
             collectionView.reloadData()
             PasteDataStore.main.dataChange.toggle()
             selectIndex = IndexPath(item: 0, section: 0)
-            collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+            if !dataList.isEmpty {
+                collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
+            }
         }
     }
+
 }
 
-// MARK: - UI
+// MARK: - UI & 对外方法
 
 extension PasteMainViewController {
     private func initSubviews() {
@@ -150,10 +121,6 @@ extension PasteMainViewController {
         view.addSubview(effectView)
         view.addSubview(scrollView)
         view.addSubview(searchBar)
-        reLayoutFrame()
-    }
-
-    private func reLayoutFrame() {
         effectView.snp.remakeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -172,7 +139,7 @@ extension PasteMainViewController {
             make.width.equalTo(200)
         }
     }
-    
+
     private func initRx() {
         searchBar.rx.text.orEmpty
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
@@ -188,6 +155,18 @@ extension PasteMainViewController {
                 }
             )
             .disposed(by: disposeBag)
+    }
+    
+    func dismissVC(completionHandler: (() -> Void)? = nil) {
+        if searchBar.isEditing {
+            searchBar.abortEditing()
+            searchBar.resignFirstResponder()
+            return
+        }
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.25
+            self.view.animator().setFrameOrigin(NSPoint(x: 0, y: -view.bounds.height))
+        }, completionHandler: completionHandler)
     }
 }
 
@@ -230,7 +209,7 @@ extension PasteMainViewController {
                 return nil
             } else {
                 let app = NSApplication.shared.delegate as? PasteAppDelegate
-                app?.mainWindowController.dismissWindow()
+                app?.dismissWindow()
             }
         }
         return event
@@ -268,10 +247,6 @@ extension PasteMainViewController: NSCollectionViewDataSource {
         return cItem
     }
 }
-
-// MARK: - NSSearchFieldDelegate
-
-extension PasteMainViewController: NSSearchFieldDelegate {}
 
 // MARK: - PasteScrollViewDelegate
 

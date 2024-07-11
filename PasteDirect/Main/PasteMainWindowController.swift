@@ -8,21 +8,13 @@
 import Carbon
 import Cocoa
 
-class PasteMainWindowController: NSWindowController, NSWindowDelegate {
-    private var mainVC: PasteMainViewController
-    private let mainWindow: PasteMainWindow
-    public var isVisable: Bool { mainWindow.isVisible }
+class PasteMainWindowController: NSWindowController {
+    var isVisable: Bool { window?.isVisible ?? false }
 
     init() {
-        mainVC = PasteMainViewController(NSScreen.main?.frame)
-        mainWindow = PasteMainWindow()
-        super.init(window: mainWindow)
-        mainWindow.contentViewController = mainVC
-        mainWindow.delegate = self
-        mainWindow.styleMask = [.borderless, .fullSizeContentView]
-        mainWindow.level = .statusBar
-        mainWindow.hasShadow = false
-        mainWindow.backgroundColor = .clear
+        let window = PasteMainWindow(contentViewController: PasteMainViewController())
+        super.init(window: window)
+        setUpWindow()
     }
 
     @available(*, unavailable)
@@ -30,26 +22,38 @@ class PasteMainWindowController: NSWindowController, NSWindowDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func windowDidResignKey(_ notification: Notification) {
-        #if !DEBUG
-            dismissWindow()
-        #endif
+    private func setUpWindow() {
+        window?.delegate = self
+        window?.styleMask = [.borderless, .fullSizeContentView]
+        window?.level = .statusBar
+        window?.hasShadow = false
+        window?.backgroundColor = .clear
     }
 
-    public func dismissWindow(completionHandler: (() -> Void)? = nil) {
-        mainVC.vcDismiss {
-            self.mainWindow.resignFirstResponder()
-            self.mainWindow.setIsVisible(false)
+    func dismissWindow(completionHandler: (() -> Void)? = nil) {
+        let mainViewController = window?.contentViewController as? PasteMainViewController
+        mainViewController?.dismissVC { [weak self] in
+            self?.window?.resignFirstResponder()
+            self?.window?.setIsVisible(false)
             completionHandler?()
         }
     }
 
-    public func show(in frame: NSRect?) {
-        let origin = frame?.origin ?? NSPoint(x: 0, y: 0)
-        mainVC.frame = frame ?? NSRect(x: 0, y: 0, width: 2000, height: 400)
-        mainWindow.setFrameOrigin(origin)
-        mainWindow.setIsVisible(true)
-        mainWindow.becomeFirstResponder()
+    func show(in frame: NSRect?) {
+        let frame = frame ?? .zero
+        window?.setFrame(frame, display: true)
+        window?.setIsVisible(true)
+        window?.becomeFirstResponder()
         NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+// MARK: - NSWindowDelegate
+
+extension PasteMainWindowController: NSWindowDelegate {
+    func windowDidResignKey(_ notification: Notification) {
+        #if !DEBUG
+            dismissWindow()
+        #endif
     }
 }

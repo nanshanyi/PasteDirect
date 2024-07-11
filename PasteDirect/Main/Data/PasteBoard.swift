@@ -43,7 +43,7 @@ class PasteBoard {
         changeCount = pasteboard.changeCount
     }
 
-    public func pasteData(_ data: PasteboardModel, _ isAttribute: Bool = true) {
+    func pasteData(_ data: PasteboardModel, _ isAttribute: Bool = true) {
         pasteModel = data
         NSPasteboard.general.clearContents()
         if data.type == .string, !isAttribute {

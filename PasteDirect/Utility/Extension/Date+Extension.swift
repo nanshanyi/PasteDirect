@@ -5,7 +5,7 @@
 //  Created by 南山忆 on 2024/7/1.
 //
 
-import Foundation
+import AppKit
 
 extension Date {
     var timeAgo: String {
@@ -23,3 +23,4 @@ extension Date {
         }
     }
 }
+

@@ -8,90 +8,66 @@
 import AppKit
 import Foundation
 
-struct PasteboardModel {
-    public enum ModelType {
-        case none
-        case image
-        case string
-    }
-
-    public enum PasteboardType: Int {
-        case none
-        case rtf
-        case rtfd
-        case string
-        case html
-        case png
-    }
+enum PasteModelType {
+    case none
+    case image
+    case string
     
-    public let pasteBoardType: PasteboardType
-    public let data: Data
-    public let hashValue: Int
-    public let date: Date
-    public let appPath: String
-    public let appName: String
-    public var dataString: String = ""
-    
-    public var pType: NSPasteboard.PasteboardType {
-        switch pasteBoardType {
-        case .rtf: return .rtf
-        case .rtfd: return .rtfd
-        case .string: return .string
-        case .html: return .html
-        case .png: return .png
-        default: return .string
-        }
-    }
-    
-    public var attributeString: NSAttributedString? {
-        switch pasteBoardType {
-        case .rtf:
-            return NSAttributedString(rtf: data, documentAttributes: nil)
-        case .rtfd:
-            return NSAttributedString(rtfd: data, documentAttributes: nil)
-        case .string:
-            return try? NSAttributedString(data: data, options: [:], documentAttributes: nil)
+    init(with type: PasteboardType) {
+        switch type {
+        case .rtf, .rtfd, .string:
+            self = .string
+        case .png:
+            self = .image
         default:
-            return nil
+            self = .none
         }
     }
+}
+
+struct PasteboardModel {
+    let pasteBoardType: PasteboardType
+    let data: Data
+    let hashValue: Int
+    let date: Date
+    let appPath: String
+    let appName: String
+    let attributeString: NSAttributedString?
+    let pType: NSPasteboard.PasteboardType
+    let dataString: String
+    let type: PasteModelType
     
-    public var type: ModelType {
-        let pTypes: [PasteboardType] = [.rtf, .rtfd, .string]
-        if pTypes.contains(pasteBoardType) {
-            return .string
-        } else if pasteBoardType == .png {
-            return .image
-        }
-        return .none
+    init(pasteBoardType: PasteboardType,
+         data: Data,
+         hashValue: Int,
+         date: Date,
+         appPath: String,
+         appName: String) {
+        self.pasteBoardType = pasteBoardType
+        self.data = data
+        self.hashValue = hashValue
+        self.date = date
+        self.appPath = appPath
+        self.appName = appName
+        self.attributeString = NSAttributedString(with: data, type: pasteBoardType)
+        self.pType = pasteBoardType.pType
+        self.dataString = attributeString?.string ?? ""
+        self.type = PasteModelType(with: pasteBoardType)
     }
     
-    static func model(with item: NSPasteboardItem) -> PasteboardModel? {
+    init?(with item: NSPasteboardItem) {
         let app = WindowInfo.appOwningFrontmostWindow()
-        var tData: Data?
-        var pType: PasteboardType = .none
-        
         for type in item.types {
-            if let data = item.data(forType: type) {
-                tData = data
-                switch type {
-                case .rtf:
-                    pType = .rtf
-                case .rtfd:
-                    pType = .rtfd
-                case .string:
-                    pType = .string
-                case .png:
-                    pType = .png
-                default:
-                    pType = .none
-                }
-            }
-            if pType != .none {
-                var model = PasteboardModel(pasteBoardType: pType, data: tData!, hashValue: tData!.hashValue, date: Date(), appPath: app?.url.path ?? "", appName: app?.name ?? "")
-                model.dataString = model.attributeString?.string ?? ""
-                return model
-            }
+            guard let data = item.data(forType: type) else { continue }
+            let pType = PasteboardType(for: type)
+            guard pType != .none else { continue }
+            self.init(pasteBoardType: pType,
+                      data: data,
+                      hashValue: data.hashValue,
+                      date: Date(),
+                      appPath: app?.url.path ?? "",
+                      appName: app?.name ?? "")
+            return
         }
         return nil
     }

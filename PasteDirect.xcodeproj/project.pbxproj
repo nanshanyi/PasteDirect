@@ -54,6 +54,8 @@
 		CBD5E3B32C3E68EF00F0F95F /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B22C3E68EF00F0F95F /* PasteCollectionViewItem.swift */; };
 		CBD5E3B52C3E88F500F0F95F /* PasteEffectImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */; };
 		CBD5E3B72C3E8BC200F0F95F /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B62C3E8BC200F0F95F /* Layout.swift */; };
+		CBD5E3B92C3FC01C00F0F95F /* PasteBoardType.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */; };
+		CBD5E3BB2C3FCE3600F0F95F /* NSAttributeString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3BA2C3FCE3600F0F95F /* NSAttributeString+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,6 +136,8 @@
 		CBD5E3B22C3E68EF00F0F95F /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
 		CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEffectImageView.swift; sourceTree = "<group>"; };
 		CBD5E3B62C3E8BC200F0F95F /* Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
+		CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteBoardType.swift; sourceTree = "<group>"; };
+		CBD5E3BA2C3FCE3600F0F95F /* NSAttributeString+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributeString+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -245,7 +249,6 @@
 				CBABF7842B344A2F00D3A095 /* Extension */,
 				CB2CDF592924ECAB00E81836 /* Helps.swift */,
 				CBD5E3B02C3E3EF100F0F95F /* PasteUserDefaults.swift */,
-				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CB2CDF5B2924ECAB00E81836 /* UIImageColors.swift */,
 				CB2CDF5D2924ECAB00E81836 /* PrefKey.swift */,
 				CB3A438B2B3AF29D00816B52 /* Log.swift */,
@@ -285,6 +288,7 @@
 				CB2CDF6C2924ECAC00E81836 /* PasteDataStore.swift */,
 				CB2CDF6D2924ECAC00E81836 /* PasteSQLManager.swift */,
 				CB2CDF6E2924ECAC00E81836 /* PasteBoard.swift */,
+				CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -310,10 +314,12 @@
 		CBABF7842B344A2F00D3A095 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CBABF7852B344A6600D3A095 /* Then.swift */,
 				CBC127172C32D17900E5DBEF /* Date+Extension.swift */,
 				CBD5E3992C3BD76C00F0F95F /* ListView+Extension.swift */,
 				CBD5E3AA2C3D0B6A00F0F95F /* NSTextField+Extension.swift */,
+				CBD5E3BA2C3FCE3600F0F95F /* NSAttributeString+Extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -531,6 +537,7 @@
 				CB2CDF752924ECAE00E81836 /* UIImageColors.swift in Sources */,
 				CB2CDF802924ECAE00E81836 /* PasteWindowInfo.swift in Sources */,
 				CB2CDF7A2924ECAE00E81836 /* PasteMainViewController.swift in Sources */,
+				CBD5E3BB2C3FCE3600F0F95F /* NSAttributeString+Extension.swift in Sources */,
 				CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */,
 				CB5320AC2B3596B5006C4B5D /* PasteSearchField.swift in Sources */,
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,
@@ -548,6 +555,7 @@
 				CB2CDF7D2924ECAE00E81836 /* PasteMainWindowController.swift in Sources */,
 				CBD5E3A32C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift in Sources */,
 				CB2CDF742924ECAE00E81836 /* KeyboardShortcuts+Extension.swift in Sources */,
+				CBD5E3B92C3FC01C00F0F95F /* PasteBoardType.swift in Sources */,
 				CBD5E39A2C3BD76C00F0F95F /* ListView+Extension.swift in Sources */,
 				CB2CDF7F2924ECAE00E81836 /* main.swift in Sources */,
 				CB2CDF762924ECAE00E81836 /* PrefKey.swift in Sources */,

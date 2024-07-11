@@ -14,41 +14,19 @@ import UIColorHexSwift
 
 class PasteDataStore {
     static let main = PasteDataStore()
+    var dataList: [PasteboardModel] = []
+    var totoalCount = BehaviorRelay<Int>(value: 0)
+    var dataChange = true
+    
     private var sqlManager = PasteSQLManager.manager
     private var colorDic = [String: String]()
     private var pageIndex = 1
     private let pageSize = 50
-    var dataList: [PasteboardModel] = []
-    var totoalCount = BehaviorRelay<Int>(value: 0)
-    var dataChange = true
 
     init() {
         dataList = getItems(limit: pageIndex * pageSize)
-        totoalCount.accept(sqlManager.totoalCount())
+        totoalCount.accept(sqlManager.totoalCount)
         colorDic = PasteUserDefaults.appColorData
-    }
-
-    /// 加载下一页
-    /// - Returns: 返回从0到当前页所有数据list
-    public func loadNextPage() async -> [PasteboardModel] {
-        withUnsafeCurrentTask { _ in
-            Log("loadNextPage\(Thread.current)")
-            if dataList.count < totoalCount.value {
-                dataList += getItems(limit: pageSize, offset: pageSize * pageIndex)
-                pageIndex += 1
-            }
-            return dataList
-        }
-    }
-
-    /// 数据搜索
-    /// - Parameter keyWord: 搜索关键词
-    /// - Returns: 搜索结果list
-    public func searchData(_ keyWord: String) async -> [PasteboardModel] {
-        withUnsafeCurrentTask { _ in
-            let rows = sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
-            return getItems(rows: rows)
-        }
     }
 }
 
@@ -56,7 +34,7 @@ class PasteDataStore {
 
 extension PasteDataStore {
     private func updateTotoalCount() {
-        totoalCount.accept(sqlManager.totoalCount())
+        totoalCount.accept(sqlManager.totoalCount)
     }
 
     private func getItems(limit: Int = 50, offset: Int? = nil) -> [PasteboardModel] {
@@ -75,9 +53,12 @@ extension PasteDataStore {
             {
                 let appName = try? row.get(appName)
                 let appPath = try? row.get(appPath)
-                let dataString = try? row.get(dataString)
-                item = PasteboardModel(pasteBoardType: PasteboardModel.PasteboardType(rawValue: type)!, data: data, hashValue: hashV, date: date, appPath: appPath ?? "", appName: appName ?? "")
-                item.dataString = dataString ?? ""
+                item = PasteboardModel(pasteBoardType: PasteboardType(rawValue: type)!, 
+                                       data: data,
+                                       hashValue: hashV,
+                                       date: date,
+                                       appPath: appPath ?? "",
+                                       appName: appName ?? "")
                 items.append(item)
             }
         }
@@ -85,13 +66,37 @@ extension PasteDataStore {
     }
 }
 
-// MARK: - dataManager
+// MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
+    
+    /// 加载下一页
+    /// - Returns: 返回从0到当前页所有数据list
+    func loadNextPage() async -> [PasteboardModel] {
+        withUnsafeCurrentTask { _ in
+            Log("loadNextPage\(Thread.current)")
+            if dataList.count < totoalCount.value {
+                dataList += getItems(limit: pageSize, offset: pageSize * pageIndex)
+                pageIndex += 1
+            }
+            return dataList
+        }
+    }
+
+    /// 数据搜索
+    /// - Parameter keyWord: 搜索关键词
+    /// - Returns: 搜索结果list
+    func searchData(_ keyWord: String) async -> [PasteboardModel] {
+        withUnsafeCurrentTask { _ in
+            let rows = sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
+            return getItems(rows: rows)
+        }
+    }
+    
     /// 增加新数据
     /// - Parameter item: 新的item
-    public func addNewItem(_ item: NSPasteboardItem) {
-        guard let model = PasteboardModel.model(with: item) else { return }
+    func addNewItem(_ item: NSPasteboardItem) {
+        guard let model = PasteboardModel(with: item) else { return }
         sqlManager.insert(item: model)
         updateTotoalCount()
         dataChange = true
@@ -104,7 +109,7 @@ extension PasteDataStore {
 
     /// 移动已有数据
     /// - Parameter model: PasteboardModel
-    public func addOldModel(_ model: PasteboardModel) {
+    func addOldModel(_ model: PasteboardModel) {
         sqlManager.insert(item: model)
         updateTotoalCount()
         dataChange = true
@@ -114,20 +119,20 @@ extension PasteDataStore {
 
     /// 删除单条数据
     /// - Parameter item: PasteboardModel
-    public func deleteItem(_ item: PasteboardModel) {
+    func deleteItem(_ item: PasteboardModel) {
         dataList.removeAll(where: { $0 == item })
         deleteItems(filter: hashKey == item.hashValue)
     }
 
     /// 按条件删除数据
     /// - Parameter filter: Expression<Bool>
-    public func deleteItems(filter: Expression<Bool>) {
+    func deleteItems(filter: Expression<Bool>) {
         sqlManager.delete(filter: filter)
         updateTotoalCount()
     }
 
     /// 删除过期数据
-    public func clearExpiredData() {
+    func clearExpiredData() {
         let lastDate = PasteUserDefaults.lastClearDate
         let dateStr = Date().formatted(date: .numeric, time: .omitted)
         if lastDate == dateStr { return }
@@ -139,7 +144,7 @@ extension PasteDataStore {
 
     /// 按时间类型删除数据
     /// - Parameter type: HistoryTime
-    public func clearData(for type: HistoryTime) {
+    func clearData(for type: HistoryTime) {
         var dateCom = DateComponents()
         switch type {
         case .now:
@@ -160,12 +165,14 @@ extension PasteDataStore {
     }
 
     /// 删除所有数据
-    public func clearAllData() {
+    func clearAllData() {
         dataList.removeAll()
         clearData(for: .now)
         updateTotoalCount()
     }
 }
+
+// MARK: - 颜色处理
 
 extension PasteDataStore {
     @discardableResult
