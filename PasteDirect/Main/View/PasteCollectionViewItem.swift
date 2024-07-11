@@ -22,11 +22,6 @@ class PasteCollectionViewItem: NSCollectionViewItem {
     private var pModel: PasteboardModel!
     private var keyMonitor: Any?
 
-    private lazy var gradenLayer = CAGradientLayer().then {
-        $0.startPoint = CGPoint(x: 0, y: 1)
-        $0.endPoint = CGPoint(x: 0, y: 0)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
@@ -43,7 +38,7 @@ class PasteCollectionViewItem: NSCollectionViewItem {
 
     override var isSelected: Bool {
         didSet {
-            view.layer?.borderWidth = isSelected ? 4 : 0
+            contentView.layer?.borderWidth = isSelected ? 4 : 0
         }
     }
 
@@ -57,6 +52,19 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         if event.type == .leftMouseDown, event.clickCount == 2 {
             pasteText(true)
         }
+    }
+    
+    private lazy var contentView = NSView().then {
+        $0.wantsLayer = true
+        $0.layer?.masksToBounds = true
+        $0.layer?.backgroundColor = .clear
+        $0.layer?.cornerRadius = 12
+        $0.layer?.borderColor = NSColor("#3970ff")?.cgColor
+    }
+    
+    private lazy var gradenLayer = CAGradientLayer().then {
+        $0.startPoint = CGPoint(x: 0, y: 1)
+        $0.endPoint = CGPoint(x: 0, y: 0)
     }
 
     private lazy var topView = NSView().then {
@@ -115,14 +123,14 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         $0.lineBreakMode = .byCharWrapping
         $0.maximumNumberOfLines = 15
     }
-
-    private lazy var contentImageView = NSImageView().then {
+    
+    private lazy var pasteImageView = NSImageView().then {
         $0.alignment = .center
     }
 
-    private lazy var contentView = PasteEffectImageView().then {
-        $0.addSubview(contentImageView)
-        contentImageView.snp.makeConstraints { make in
+    private lazy var imageContentView = PasteEffectImageView().then {
+        $0.addSubview(pasteImageView)
+        pasteImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.trailing.equalToSuperview().offset(-Layout.spacing)
             make.top.equalToSuperview().offset(Layout.spacing)
@@ -155,18 +163,26 @@ class PasteCollectionViewItem: NSCollectionViewItem {
 extension PasteCollectionViewItem {
     private func initSubviews() {
         view.wantsLayer = true
-        view.layer?.cornerRadius = 12
-        view.layer?.borderColor = NSColor("#3970ff")?.cgColor
-        view.addSubview(topView)
+        view.layer?.backgroundColor = .clear
+        view.shadow = NSShadow().then {
+            $0.shadowBlurRadius = 3
+        }
         view.addSubview(contentView)
-        view.addSubview(contentLabel)
-        view.addSubview(bottomView)
+        contentView.addSubview(topView)
+        contentView.addSubview(imageContentView)
+        contentView.addSubview(contentLabel)
+        contentView.addSubview(bottomView)
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
         topView.snp.makeConstraints { make in
             make.leading.trailing.top.equalToSuperview()
             make.height.equalTo(70)
         }
 
-        contentView.snp.makeConstraints { make in
+        imageContentView.snp.makeConstraints { make in
             make.leading.trailing.bottom.equalToSuperview()
             make.top.equalTo(topView.snp.bottom)
         }
@@ -212,7 +228,7 @@ extension PasteCollectionViewItem {
     }
 
     private func setStringItem() {
-        contentView.isHidden = true
+        imageContentView.isHidden = true
         contentLabel.isHidden = false
         if let att = pModel.attributeString {
             var showStr = att
@@ -226,13 +242,13 @@ extension PasteCollectionViewItem {
                let colorstr = color.usingColorSpace(.deviceRGB)?.hexString(false)
             {
                 contentLabel.attributedStringValue = showStr
-                view.layer?.backgroundColor = color.cgColor
+                contentView.layer?.backgroundColor = color.cgColor
                 let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
                 let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
                 gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
 
             } else {
-                view.layer?.backgroundColor = NSColor.white.cgColor
+                contentView.layer?.backgroundColor = NSColor.white.cgColor
                 contentLabel.stringValue = showStr.string
                 contentLabel.textColor = .black
                 gradenLayer.colors = [NSColor(white: 1, alpha: 0).cgColor, NSColor(white: 1, alpha: 0.8).cgColor]
@@ -244,13 +260,12 @@ extension PasteCollectionViewItem {
     }
 
     private func setImageItem() {
-        contentView.isHidden = false
+        imageContentView.isHidden = false
         contentLabel.isHidden = true
         let retImage = NSImage(data: pModel.data)
-        contentView.image = retImage
-        contentImageView.image = retImage
+        pasteImageView.image = retImage
+        imageContentView.image = retImage
         typeLabel.stringValue = "图片"
-        view.layer?.backgroundColor = NSColor.white.cgColor
         gradenLayer.colors = [NSColor.clear.cgColor, NSColor.clear.cgColor]
         if let size = retImage?.size {
             bottomLabel.stringValue = "\(Int(size.width)) ×\(Int(size.height)) 像素"
