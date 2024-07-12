@@ -17,6 +17,8 @@ extension NSAttributedString {
             self.init(rtfd: data, documentAttributes: nil)
         case .string:
             try? self.init(data: data, options: [:], documentAttributes: nil)
+        case .html:
+            self.init(html: data, documentAttributes: nil)
         default:
             return nil
         }

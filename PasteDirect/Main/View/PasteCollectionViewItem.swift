@@ -245,11 +245,10 @@ extension PasteCollectionViewItem {
                let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
                let colorstr = color.usingColorSpace(.deviceRGB)?.hexString(false) {
                 contentLabel.attributedStringValue = showStr
-                contentView.layer?.backgroundColor = color.cgColor
+                contentView.layer?.backgroundColor = (NSColor(colorstr) ?? .white).cgColor
                 let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
                 let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
                 gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
-
             } else {
                 contentView.layer?.backgroundColor = NSColor.white.cgColor
                 contentLabel.stringValue = showStr.string

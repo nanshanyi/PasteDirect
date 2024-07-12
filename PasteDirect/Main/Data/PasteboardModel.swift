@@ -15,7 +15,7 @@ enum PasteModelType {
     
     init(with type: PasteboardType) {
         switch type {
-        case .rtf, .rtfd, .string:
+        case .rtf, .rtfd, .string, .html:
             self = .string
         case .png:
             self = .image
