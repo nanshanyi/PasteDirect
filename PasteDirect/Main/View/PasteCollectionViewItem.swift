@@ -227,10 +227,9 @@ extension PasteCollectionViewItem {
         let showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
 
         if att.length > 0,
-           let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
-           let rgbColor = color.usingColorSpace(.deviceRGB) {
+           let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
             contentLabel.attributedStringValue = showAtt
-            contentView.layer?.backgroundColor = rgbColor.cgColor
+            contentView.layer?.backgroundColor = color.cgColor
         } else {
             contentLabel.stringValue = showAtt.string
             contentView.layer?.backgroundColor = NSColor.white.cgColor
