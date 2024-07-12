@@ -16,7 +16,7 @@ class PasteDataStore {
     static let main = PasteDataStore()
     var dataList: [PasteboardModel] = []
     var totoalCount = BehaviorRelay<Int>(value: 0)
-    var dataChange = true
+    var dataChange = false
     
     private var sqlManager = PasteSQLManager.manager
     private var colorDic = [String: String]()

@@ -15,7 +15,7 @@ import RxCocoa
 class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
     private var selectIndex = IndexPath(item: 0, section: 0)
-    private var dataList = [PasteboardModel]()
+    private var dataList = PasteDataStore.main.dataList
     private let disposeBag = DisposeBag()
 
     // MARK: - lazy property
@@ -28,7 +28,7 @@ class PasteMainViewController: NSViewController {
         flowLayout.scrollDirection = .horizontal
         flowLayout.headerReferenceSize = NSSize(width: 20, height: height)
         flowLayout.footerReferenceSize = NSSize(width: 20, height: height)
-        $0.frame = self.view.bounds
+        $0.frame = view.bounds
         $0.wantsLayer = true
         $0.delegate = self
         $0.dataSource = self
@@ -39,7 +39,7 @@ class PasteMainViewController: NSViewController {
     }
 
     private lazy var scrollView = PasteScrollView().then {
-        let clipView = NSClipView(frame: self.view.bounds)
+        let clipView = NSClipView(frame: view.bounds)
         clipView.documentView = collectionView
         $0.contentView = clipView
         $0.scrollerStyle = .overlay
@@ -50,7 +50,7 @@ class PasteMainViewController: NSViewController {
     }
 
     private lazy var effectView = NSVisualEffectView().then {
-        $0.frame = self.view.frame
+        $0.frame = view.frame
         $0.state = .active
         $0.blendingMode = .behindWindow
     }
@@ -129,7 +129,7 @@ extension PasteMainViewController {
         }
         scrollView.snp.remakeConstraints { make in
             make.leading.trailing.bottom.equalToSuperview()
-            make.top.equalTo(view).offset(50)
+            make.top.equalToSuperview().offset(50)
         }
         searchBar.snp.remakeConstraints { make in
             make.centerX.equalToSuperview()

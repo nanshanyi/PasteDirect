@@ -45,7 +45,7 @@
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
 		CBABF7862B344A6600D3A095 /* Then.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBABF7852B344A6600D3A095 /* Then.swift */; };
 		CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC127172C32D17900E5DBEF /* Date+Extension.swift */; };
-		CBD5E39A2C3BD76C00F0F95F /* ListView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3992C3BD76C00F0F95F /* ListView+Extension.swift */; };
+		CBD5E39A2C3BD76C00F0F95F /* NSCollectionView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3992C3BD76C00F0F95F /* NSCollectionView+Extension.swift */; };
 		CBD5E39D2C3BDB6500F0F95F /* PasteIgnoreListController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBD5E39C2C3BDB6500F0F95F /* PasteIgnoreListController.xib */; };
 		CBD5E39E2C3BDB6500F0F95F /* PasteIgnoreListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E39B2C3BDB6500F0F95F /* PasteIgnoreListController.swift */; };
 		CBD5E3A32C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3A22C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift */; };
@@ -127,7 +127,7 @@
 		CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSearchField.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
 		CBC127172C32D17900E5DBEF /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
-		CBD5E3992C3BD76C00F0F95F /* ListView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ListView+Extension.swift"; sourceTree = "<group>"; };
+		CBD5E3992C3BD76C00F0F95F /* NSCollectionView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSCollectionView+Extension.swift"; sourceTree = "<group>"; };
 		CBD5E39B2C3BDB6500F0F95F /* PasteIgnoreListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteIgnoreListController.swift; sourceTree = "<group>"; };
 		CBD5E39C2C3BDB6500F0F95F /* PasteIgnoreListController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PasteIgnoreListController.xib; sourceTree = "<group>"; };
 		CBD5E3A22C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteIgnoreListCellView.swift; sourceTree = "<group>"; };
@@ -317,7 +317,7 @@
 				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CBABF7852B344A6600D3A095 /* Then.swift */,
 				CBC127172C32D17900E5DBEF /* Date+Extension.swift */,
-				CBD5E3992C3BD76C00F0F95F /* ListView+Extension.swift */,
+				CBD5E3992C3BD76C00F0F95F /* NSCollectionView+Extension.swift */,
 				CBD5E3AA2C3D0B6A00F0F95F /* NSTextField+Extension.swift */,
 				CBD5E3BA2C3FCE3600F0F95F /* NSAttributeString+Extension.swift */,
 			);
@@ -556,7 +556,7 @@
 				CBD5E3A32C3BFF4D00F0F95F /* PasteIgnoreListCellView.swift in Sources */,
 				CB2CDF742924ECAE00E81836 /* KeyboardShortcuts+Extension.swift in Sources */,
 				CBD5E3B92C3FC01C00F0F95F /* PasteBoardType.swift in Sources */,
-				CBD5E39A2C3BD76C00F0F95F /* ListView+Extension.swift in Sources */,
+				CBD5E39A2C3BD76C00F0F95F /* NSCollectionView+Extension.swift in Sources */,
 				CB2CDF7F2924ECAE00E81836 /* main.swift in Sources */,
 				CB2CDF762924ECAE00E81836 /* PrefKey.swift in Sources */,
 				CBD5E3B32C3E68EF00F0F95F /* PasteCollectionViewItem.swift in Sources */,

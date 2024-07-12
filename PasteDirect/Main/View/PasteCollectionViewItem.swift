@@ -36,11 +36,6 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         $0.layer?.borderColor = NSColor("#3970ff")?.cgColor
     }
 
-    private lazy var gradenLayer = CAGradientLayer().then {
-        $0.startPoint = CGPoint(x: 0, y: 1)
-        $0.endPoint = CGPoint(x: 0, y: 0)
-    }
-
     private lazy var topView = NSView().then {
         $0.wantsLayer = true
     }
@@ -65,7 +60,7 @@ class PasteCollectionViewItem: NSCollectionViewItem {
     }
 
     private lazy var contentLabel = NSTextField.label().then {
-        $0.textColor = .white
+        $0.textColor = .black
         $0.backgroundColor = .clear
         $0.font = .systemFont(ofSize: 14)
         $0.lineBreakMode = .byCharWrapping
@@ -88,7 +83,6 @@ class PasteCollectionViewItem: NSCollectionViewItem {
 
     private lazy var bottomView = NSView().then {
         $0.wantsLayer = true
-        $0.layer?.addSublayer(gradenLayer)
         $0.addSubview(bottomLabel)
         bottomLabel.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
@@ -120,11 +114,6 @@ extension PasteCollectionViewItem {
         didSet {
             contentView.layer?.borderWidth = isSelected ? 4 : 0
         }
-    }
-
-    override func viewDidLayout() {
-        super.viewDidLayout()
-        gradenLayer.frame = bottomView.bounds
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -217,9 +206,7 @@ extension PasteCollectionViewItem {
             break
         }
         if !pModel.appPath.isEmpty {
-            iconImageView.imageScaling = .scaleAxesIndependently
-            let iconImage = NSWorkspace.shared.icon(forFile: pModel.appPath)
-            iconImageView.image = iconImage
+            iconImageView.image = NSWorkspace.shared.icon(forFile: pModel.appPath)
             Task {
                 let color = await PasteDataStore.main.colorWith(pModel).cgColor
                 topView.layer?.backgroundColor = color
@@ -229,36 +216,25 @@ extension PasteCollectionViewItem {
         }
         setViewMenu()
         timeLabel.stringValue = model.date.timeAgo
+        typeLabel.stringValue = model.type.string
+        bottomLabel.stringValue = model.sizeString(or: pasteImageView.image)
     }
 
     private func setStringItem() {
         imageContentView.isHidden = true
         contentLabel.isHidden = false
-        if let att = pModel.attributeString {
-            var showStr = att
+        guard let att = pModel.attributeString else { return }
+        let showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
 
-            if att.length > maxLength {
-                showStr = att.attributedSubstring(from: NSMakeRange(0, maxLength))
-            }
-
-            if att.length > 0,
-               let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
-               let colorstr = color.usingColorSpace(.deviceRGB)?.hexString(false) {
-                contentLabel.attributedStringValue = showStr
-                contentView.layer?.backgroundColor = (NSColor(colorstr) ?? .white).cgColor
-                let startColor = NSColor("\(colorstr)00") ?? NSColor(white: 0, alpha: 0)
-                let endColor = NSColor("\(colorstr)cc") ?? NSColor(white: 0, alpha: 1)
-                gradenLayer.colors = [startColor.cgColor, endColor.cgColor]
-            } else {
-                contentView.layer?.backgroundColor = NSColor.white.cgColor
-                contentLabel.stringValue = showStr.string
-                contentLabel.textColor = .black
-                gradenLayer.colors = [NSColor(white: 0, alpha: 0).cgColor, NSColor(white: 1, alpha: 0.8).cgColor]
-            }
-            bottomLabel.stringValue = "\(att.string.count)个字符"
+        if att.length > 0,
+           let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor,
+           let rgbColor = color.usingColorSpace(.deviceRGB) {
+            contentLabel.attributedStringValue = showAtt
+            contentView.layer?.backgroundColor = rgbColor.cgColor
+        } else {
+            contentLabel.stringValue = showAtt.string
+            contentView.layer?.backgroundColor = NSColor.white.cgColor
         }
-
-        typeLabel.stringValue = "文本"
     }
 
     private func setImageItem() {
@@ -267,11 +243,6 @@ extension PasteCollectionViewItem {
         let retImage = NSImage(data: pModel.data)
         pasteImageView.image = retImage
         imageContentView.image = retImage
-        typeLabel.stringValue = "图片"
-        gradenLayer.colors = [NSColor.clear.cgColor, NSColor.clear.cgColor]
-        if let size = retImage?.size {
-            bottomLabel.stringValue = "\(Int(size.width)) ×\(Int(size.height)) 像素"
-        }
     }
 
     private func setViewMenu() {

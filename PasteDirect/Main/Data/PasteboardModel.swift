@@ -23,6 +23,14 @@ enum PasteModelType {
             self = .none
         }
     }
+    
+    var string: String {
+        switch self {
+        case .image: return "图片"
+        case .string: return "文本"
+        default: return "未知"
+        }
+    }
 }
 
 struct PasteboardModel {
@@ -71,6 +79,19 @@ struct PasteboardModel {
         }
         return nil
     }
+    
+    func sizeString(or image: NSImage? = nil) -> String {
+        switch type {
+        case .none:
+            return ""
+        case .image:
+            guard let image else { return "" }
+            return "\(Int(image.size.width)) ×\(Int(image.size.height)) 像素"
+        case .string:
+            return "\(dataString.count)个字符"
+        }
+    }
+    
 }
 
 extension PasteboardModel: Equatable {
