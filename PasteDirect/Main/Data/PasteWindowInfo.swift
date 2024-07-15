@@ -15,7 +15,7 @@ struct WindowInfo {
         "com.apple.notificationcenterui",
         "com.apple.screencaptureui",
         "com.apple.PIPAgent",
-        "com.PasteDirect",
+        "com.nanshanyi.PasteDirect",
     ]
     
     static var customList: [String] {

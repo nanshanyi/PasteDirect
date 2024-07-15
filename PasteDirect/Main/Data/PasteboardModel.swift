@@ -80,6 +80,10 @@ struct PasteboardModel {
         return nil
     }
     
+    private let formatter = NumberFormatter().then {
+        $0.numberStyle = .decimal
+    }
+    
     func sizeString(or image: NSImage? = nil) -> String {
         switch type {
         case .none:
@@ -88,7 +92,9 @@ struct PasteboardModel {
             guard let image else { return "" }
             return "\(Int(image.size.width)) ×\(Int(image.size.height)) 像素"
         case .string:
-            return "\(dataString.count)个字符"
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            return "\(formatter.string(from: NSNumber(value: dataString.count)) ?? "")个字符"
         }
     }
     
