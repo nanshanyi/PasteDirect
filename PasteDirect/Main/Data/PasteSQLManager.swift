@@ -108,21 +108,24 @@ extension PasteSQLManager {
 //    }
 
     // 查
-    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) -> [Row] {
-        var query = table.select(select).order(order)
-        if let f = filter {
-            query = query.filter(f)
-        }
-        if let l = limit {
-            if let o = offset {
-                query = query.limit(l, offset: o)
-            } else {
-                query = query.limit(l)
+    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
+        withUnsafeCurrentTask { _ in
+            guard !Task.isCancelled else { return [] }
+            var query = table.select(select).order(order)
+            if let f = filter {
+                query = query.filter(f)
             }
+            if let l = limit {
+                if let o = offset {
+                    query = query.limit(l, offset: o)
+                } else {
+                    query = query.limit(l)
+                }
+            }
+            if let result = try? db.prepare(query) {
+                return Array(result)
+            }
+            return []
         }
-        if let result = try? db.prepare(query) {
-            return Array(result)
-        }
-        return []
     }
 }

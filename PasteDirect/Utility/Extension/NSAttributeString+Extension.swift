@@ -18,7 +18,7 @@ extension NSAttributedString {
         case .string:
             try? self.init(data: data, options: [:], documentAttributes: nil)
         case .html:
-            guard var html = NSMutableAttributedString(html: data, documentAttributes: nil) else {
+            guard let html = NSMutableAttributedString(html: data, documentAttributes: nil) else {
                 return nil
             }
             html.enumerateAttribute(.font, in: NSMakeRange(0, html.length)) { attribute, range, stoped in

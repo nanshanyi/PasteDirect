@@ -33,7 +33,7 @@ class PasteBoard {
 
         if let model = pasteModel {
             changeCount = pasteboard.changeCount
-            PasteDataStore.main.addOldModel(model)
+            PasteDataStore.main.insertModel(model)
             pasteModel = nil
             return
         }

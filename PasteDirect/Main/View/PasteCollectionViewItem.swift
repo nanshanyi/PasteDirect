@@ -195,8 +195,9 @@ extension PasteCollectionViewItem {
 // MARK: - 数据更新
 
 extension PasteCollectionViewItem {
-    func updateItem(model: PasteboardModel) {
+    func updateItem(model: PasteboardModel, selected: Bool) {
         pModel = model
+        isSelected = selected
         switch pModel.type {
         case .image:
             setImageItem()
