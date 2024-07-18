@@ -14,7 +14,7 @@ import UIColorHexSwift
 
 class PasteDataStore {
     static let main = PasteDataStore()
-    var dataChange = true
+    var dataChange = false
     private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
     private(set) var totoalCount = BehaviorRelay<Int>(value: 0)
     private(set) var pageIndex = 0
@@ -26,6 +26,7 @@ class PasteDataStore {
 
     init() {
         resetDefaultList()
+        dataChange = false
         totoalCount.accept(sqlManager.totoalCount)
         colorDic = PasteUserDefaults.appColorData
     }
@@ -44,9 +45,7 @@ extension PasteDataStore {
     }
 
     private func getItems(rows: [Row]) -> [PasteboardModel] {
-        var item: PasteboardModel
-        var items = [PasteboardModel]()
-        for row in rows {
+        return rows.compactMap { row in
             if let type = try? row.get(type),
                let data = try? row.get(data),
                let hashV = try? row.get(hashKey),
@@ -54,16 +53,26 @@ extension PasteDataStore {
             {
                 let appName = try? row.get(appName)
                 let appPath = try? row.get(appPath)
-                item = PasteboardModel(pasteBoardType: PasteboardType(rawValue: type)!,
-                                       data: data,
-                                       hashValue: hashV,
-                                       date: date,
-                                       appPath: appPath ?? "",
-                                       appName: appName ?? "")
-                items.append(item)
+                let showData = try? row.get(showData)
+                let dataString = try? row.get(dataString)
+                let length = try? row.get(length)
+                let pType = PasteboardType(rawValue: type) ?? .string
+                
+                return PasteboardModel(
+                    pasteBoardType: pType,
+                    data: data,
+                    showData: showData,
+                    hashValue: hashV,
+                    date: date,
+                    appPath: appPath ?? "",
+                    appName: appName ?? "",
+                    dataString: dataString ?? "",
+                    length: length ?? 0,
+                    attributeString: NSAttributedString(with: showData, type: pType)
+                )
             }
+            return nil
         }
-        return items
     }
 }
 
@@ -77,6 +86,7 @@ extension PasteDataStore {
         Task {
             guard dataList.value.count < totoalCount.value else { return }
             pageIndex += 1
+            Log("loadNextPage \(pageIndex)")
             var list = dataList.value
             list += await getItems(limit: pageSize, offset: pageSize * pageIndex)
             dataList.accept(list)
@@ -113,7 +123,6 @@ extension PasteDataStore {
             await updateColor(model)
         }
     }
-
     
     /// 插入数据
     /// - Parameter model: PasteboardModel
@@ -178,9 +187,13 @@ extension PasteDataStore {
 
     /// 删除所有数据
     func clearAllData() {
-        dataList.accept([])
-        clearData(for: .now)
-        updateTotoalCount()
+        let alert = NSAlert()
+        alert.messageText = "清除所有数据"
+        alert.informativeText = "清空数据后会退出应用，请重新打开"
+        alert.addButton(withTitle: "确定")
+        alert.runModal()
+        sqlManager.dropTable()
+        NSApplication.shared.terminate(self)
     }
 }
 

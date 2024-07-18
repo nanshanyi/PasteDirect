@@ -89,9 +89,7 @@ extension PasteMainViewController {
         if PasteDataStore.main.dataChange {
             PasteDataStore.main.dataChange.toggle()
             selectIndex = IndexPath(item: 0, section: 0)
-            if !dataList.value.isEmpty {
-                collectionView.selectItems(at: [selectIndex], scrollPosition: .left)
-            }
+            dataList.accept(dataList.value)
         }
     }
 
@@ -99,7 +97,9 @@ extension PasteMainViewController {
         super.viewDidDisappear()
         searchBar.objectValue = nil
         PasteDataStore.main.clearExpiredData()
-        PasteDataStore.main.resetDefaultList()
+        if PasteDataStore.main.dataChange {
+            PasteDataStore.main.resetDefaultList()
+        }
     }
 }
 
@@ -147,10 +147,13 @@ extension PasteMainViewController {
             .filter{ _ in !self.deleteItem }
             .subscribe(
             with: self,
-            onNext: { wrapper, _ in
+            onNext: { wrapper, value in
                 wrapper.deleteItem = false
                 wrapper.scrollView.isLoding = false
                 wrapper.collectionView.reloadData()
+                if value.count > wrapper.selectIndex.item {
+                    wrapper.collectionView.selectItems(at: [wrapper.selectIndex], scrollPosition: .nearestVerticalEdge)
+                }
             }
         ).disposed(by: disposeBag)
     }
@@ -173,12 +176,14 @@ extension PasteMainViewController {
             selectIndex = IndexPath(item: 0, section: 0)
             PasteDataStore.main.searchData(keyword)
             Log("search start: \(keyword)")
+            collectionView.scroll(.zero)
         }
     }
 
     private func resetToDefaultList() {
         scrollView.isSearching = false
         PasteDataStore.main.resetDefaultList()
+        collectionView.scroll(.zero)
     }
 
     private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
@@ -228,7 +233,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
         let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
-        cItem.updateItem(model: dataList.value[indexPath.item], selected: indexPath == selectIndex)
+        cItem.updateItem(model: dataList.value[indexPath.item])
         return cItem
     }
 }

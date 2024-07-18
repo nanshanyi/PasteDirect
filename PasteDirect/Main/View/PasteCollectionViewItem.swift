@@ -15,7 +15,7 @@ protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func deleteItem(_ item: PasteboardModel, indePath: IndexPath)
 }
 
-let maxLength = 500
+let maxLength = 300
 
 class PasteCollectionViewItem: NSCollectionViewItem {
     weak var delegate: PasteCollectionViewItemDelegate?
@@ -195,9 +195,8 @@ extension PasteCollectionViewItem {
 // MARK: - 数据更新
 
 extension PasteCollectionViewItem {
-    func updateItem(model: PasteboardModel, selected: Bool) {
+    func updateItem(model: PasteboardModel) {
         pModel = model
-        isSelected = selected
         switch pModel.type {
         case .image:
             setImageItem()
@@ -226,7 +225,6 @@ extension PasteCollectionViewItem {
         contentLabel.isHidden = false
         guard let att = pModel.attributeString else { return }
         let showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
-
         if att.length > 0,
            let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
             contentLabel.attributedStringValue = showAtt
@@ -247,7 +245,7 @@ extension PasteCollectionViewItem {
 
     private func setViewMenu() {
         let menu = NSMenu()
-        if let app = NSApplication.shared.delegate as? PasteAppDelegate, 
+        if let app = NSApplication.shared.delegate as? PasteAppDelegate,
             let name = app.frontApp?.localizedName {
             let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteAction), keyEquivalent: "")
             menu.addItem(item)
