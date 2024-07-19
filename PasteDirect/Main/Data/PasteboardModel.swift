@@ -112,7 +112,7 @@ class PasteboardModel {
         case .string:
             let formatter = NumberFormatter()
             formatter.numberStyle = .decimal
-            return "\(formatter.string(from: NSNumber(value: dataString.count)) ?? "")个字符"
+            return "\(formatter.string(from: NSNumber(value: length)) ?? "")个字符"
         }
     }
     

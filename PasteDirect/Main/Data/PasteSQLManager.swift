@@ -122,7 +122,7 @@ extension PasteSQLManager {
 //    }
 
     // 查
-    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString, showData], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
+    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString, showData, length], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
         withUnsafeCurrentTask { _ in
             guard !Task.isCancelled else { return [] }
             var query = table.select(select).order(order)

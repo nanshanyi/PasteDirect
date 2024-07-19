@@ -47,4 +47,10 @@ class PasteScrollView: NSScrollView {
             }
         }
     }
+    
+    func resetState() {
+        isSearching = false
+        isLoding = false
+        noMore = false
+    }
 }

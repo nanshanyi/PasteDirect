@@ -98,7 +98,7 @@ extension PasteMainViewController {
         searchBar.objectValue = nil
         PasteDataStore.main.clearExpiredData()
         if PasteDataStore.main.dataChange {
-            PasteDataStore.main.resetDefaultList()
+            resetToDefaultList()
         }
     }
 }
@@ -181,7 +181,7 @@ extension PasteMainViewController {
     }
 
     private func resetToDefaultList() {
-        scrollView.isSearching = false
+        scrollView.resetState()
         PasteDataStore.main.resetDefaultList()
         collectionView.scroll(.zero)
     }
