@@ -12,10 +12,12 @@ let id = Expression<Int>("id")
 let hashKey = Expression<Int>("hashKey")
 let type = Expression<Int>("type")
 let data = Expression<Data>("data")
+let showData = Expression<Data?>("showData")
 let date = Expression<Date>("date")
 let appPath = Expression<String>("appPath")
 let appName = Expression<String>("appName")
 let dataString = Expression<String>("dataString")
+let length = Expression<Int>("length")
 
 class PasteSQLManager: NSObject {
     static let manager = PasteSQLManager()
@@ -46,10 +48,12 @@ class PasteSQLManager: NSObject {
             t.column(hashKey)
             t.column(type)
             t.column(data)
+            t.column(showData)
             t.column(date)
             t.column(appPath)
             t.column(appName)
             t.column(dataString)
+            t.column(length)
         }))
         return tab
     }()
@@ -69,7 +73,17 @@ extension PasteSQLManager {
     func insert(item: PasteboardModel) {
         let query = table
         delete(filter: hashKey == item.hashValue)
-        let insert = query.insert(hashKey <- item.hashValue, type <- item.pasteBoardType.rawValue, data <- item.data, date <- item.date, appPath <- item.appPath, appName <- item.appName, dataString <- item.dataString)
+        let insert = query.insert(
+            hashKey <- item.hashValue,
+            type <- item.pasteBoardType.rawValue,
+            data <- item.data,
+            showData <- item.showData,
+            date <- item.date,
+            appPath <- item.appPath,
+            appName <- item.appName,
+            dataString <- item.dataString,
+            length <- item.length
+        )
         if let rowId = try? db.run(insert) {
             Log("插入成功：\(rowId)")
         } else {
@@ -108,21 +122,24 @@ extension PasteSQLManager {
 //    }
 
     // 查
-    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) -> [Row] {
-        var query = table.select(select).order(order)
-        if let f = filter {
-            query = query.filter(f)
-        }
-        if let l = limit {
-            if let o = offset {
-                query = query.limit(l, offset: o)
-            } else {
-                query = query.limit(l)
+    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString, showData, length], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
+        withUnsafeCurrentTask { _ in
+            guard !Task.isCancelled else { return [] }
+            var query = table.select(select).order(order)
+            if let f = filter {
+                query = query.filter(f)
             }
+            if let l = limit {
+                if let o = offset {
+                    query = query.limit(l, offset: o)
+                } else {
+                    query = query.limit(l)
+                }
+            }
+            if let result = try? db.prepare(query) {
+                return Array(result)
+            }
+            return []
         }
-        if let result = try? db.prepare(query) {
-            return Array(result)
-        }
-        return []
     }
 }

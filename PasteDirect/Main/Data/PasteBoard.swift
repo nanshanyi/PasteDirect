@@ -33,7 +33,7 @@ class PasteBoard {
 
         if let model = pasteModel {
             changeCount = pasteboard.changeCount
-            PasteDataStore.main.addOldModel(model)
+            PasteDataStore.main.insertModel(model)
             pasteModel = nil
             return
         }
@@ -47,7 +47,7 @@ class PasteBoard {
         pasteModel = data
         NSPasteboard.general.clearContents()
         if data.type == .string, !isAttribute {
-            NSPasteboard.general.setString(data.attributeString?.string ?? "", forType: .string)
+            NSPasteboard.general.setString(data.dataString, forType: .string)
         } else {
             NSPasteboard.general.setData(data.data, forType: data.pType)
         }

@@ -9,7 +9,8 @@ import AppKit
 
 extension NSAttributedString {
     
-    convenience init?(with data: Data, type: PasteboardType) {
+    convenience init?(with data: Data?, type: PasteboardType) {
+        guard let data else { return nil }
         switch type {
         case .rtf:
             self.init(rtf: data, documentAttributes: nil)
@@ -18,7 +19,7 @@ extension NSAttributedString {
         case .string:
             try? self.init(data: data, options: [:], documentAttributes: nil)
         case .html:
-            guard var html = NSMutableAttributedString(html: data, documentAttributes: nil) else {
+            guard let html = NSMutableAttributedString(html: data, documentAttributes: nil) else {
                 return nil
             }
             html.enumerateAttribute(.font, in: NSMakeRange(0, html.length)) { attribute, range, stoped in
@@ -30,6 +31,21 @@ extension NSAttributedString {
                 }
             }
             self.init(attributedString: html)
+        default:
+            return nil
+        }
+    }
+    
+    func toData(with type: PasteboardType) -> Data? {
+        switch type {
+        case .rtf:
+              return rtf(from: NSMakeRange(0, length))
+        case .rtfd:
+            return rtfd(from: NSMakeRange(0, length))
+        case .string:
+            return try? data(from: NSMakeRange(0, length))
+        case .html:
+            return try? data(from: NSMakeRange(0, length), documentAttributes: [.documentType : NSAttributedString.DocumentType.html])
         default:
             return nil
         }

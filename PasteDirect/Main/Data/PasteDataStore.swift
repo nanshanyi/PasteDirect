@@ -14,17 +14,19 @@ import UIColorHexSwift
 
 class PasteDataStore {
     static let main = PasteDataStore()
-    var dataList: [PasteboardModel] = []
-    var totoalCount = BehaviorRelay<Int>(value: 0)
     var dataChange = false
+    private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
+    private(set) var totoalCount = BehaviorRelay<Int>(value: 0)
+    private(set) var pageIndex = 0
     
     private var sqlManager = PasteSQLManager.manager
+    private var searchTask: Task<(), Never>?
     private var colorDic = [String: String]()
-    private var pageIndex = 1
     private let pageSize = 50
 
     init() {
-        dataList = getItems(limit: pageIndex * pageSize)
+        resetDefaultList()
+        dataChange = false
         totoalCount.accept(sqlManager.totoalCount)
         colorDic = PasteUserDefaults.appColorData
     }
@@ -37,15 +39,13 @@ extension PasteDataStore {
         totoalCount.accept(sqlManager.totoalCount)
     }
 
-    private func getItems(limit: Int = 50, offset: Int? = nil) -> [PasteboardModel] {
-        let rows = sqlManager.search(limit: limit, offset: offset)
+    private func getItems(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel]{
+        let rows = await sqlManager.search(limit: limit, offset: offset)
         return getItems(rows: rows)
     }
 
     private func getItems(rows: [Row]) -> [PasteboardModel] {
-        var item: PasteboardModel
-        var items = [PasteboardModel]()
-        for row in rows {
+        return rows.compactMap { row in
             if let type = try? row.get(type),
                let data = try? row.get(data),
                let hashV = try? row.get(hashKey),
@@ -53,16 +53,26 @@ extension PasteDataStore {
             {
                 let appName = try? row.get(appName)
                 let appPath = try? row.get(appPath)
-                item = PasteboardModel(pasteBoardType: PasteboardType(rawValue: type)!, 
-                                       data: data,
-                                       hashValue: hashV,
-                                       date: date,
-                                       appPath: appPath ?? "",
-                                       appName: appName ?? "")
-                items.append(item)
+                let showData = try? row.get(showData)
+                let dataString = try? row.get(dataString)
+                let length = try? row.get(length)
+                let pType = PasteboardType(rawValue: type) ?? .string
+                
+                return PasteboardModel(
+                    pasteBoardType: pType,
+                    data: data,
+                    showData: showData,
+                    hashValue: hashV,
+                    date: date,
+                    appPath: appPath ?? "",
+                    appName: appName ?? "",
+                    dataString: dataString ?? "",
+                    length: length ?? 0,
+                    attributeString: NSAttributedString(with: showData, type: pType)
+                )
             }
+            return nil
         }
-        return items
     }
 }
 
@@ -72,24 +82,34 @@ extension PasteDataStore {
     
     /// 加载下一页
     /// - Returns: 返回从0到当前页所有数据list
-    func loadNextPage() async -> [PasteboardModel] {
-        withUnsafeCurrentTask { _ in
-            Log("loadNextPage\(Thread.current)")
-            if dataList.count < totoalCount.value {
-                dataList += getItems(limit: pageSize, offset: pageSize * pageIndex)
-                pageIndex += 1
-            }
-            return dataList
+    func loadNextPage() {
+        Task {
+            guard dataList.value.count < totoalCount.value else { return }
+            pageIndex += 1
+            Log("loadNextPage \(pageIndex)")
+            var list = dataList.value
+            list += await getItems(limit: pageSize, offset: pageSize * pageIndex)
+            dataList.accept(list)
+        }
+    }
+    
+    func resetDefaultList() {
+        Task {
+            pageIndex = 0
+            let list = await getItems(limit: pageSize, offset: pageSize * pageIndex)
+            dataList.accept(list)
         }
     }
 
     /// 数据搜索
     /// - Parameter keyWord: 搜索关键词
     /// - Returns: 搜索结果list
-    func searchData(_ keyWord: String) async -> [PasteboardModel] {
-        withUnsafeCurrentTask { _ in
-            let rows = sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
-            return getItems(rows: rows)
+    func searchData(_ keyWord: String) {
+        searchTask?.cancel()
+        searchTask = Task {
+            let rows = await sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
+            let result = getItems(rows: rows)
+            Task.isCancelled ? () : dataList.accept(result)
         }
     }
     
@@ -97,31 +117,30 @@ extension PasteDataStore {
     /// - Parameter item: 新的item
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
-        sqlManager.insert(item: model)
-        updateTotoalCount()
         dataChange = true
-        dataList.removeAll(where: { $0 == model })
-        dataList.insert(model, at: 0)
+        insertModel(model)
         Task {
             await updateColor(model)
         }
     }
-
-    /// 移动已有数据
+    
+    /// 插入数据
     /// - Parameter model: PasteboardModel
-    func addOldModel(_ model: PasteboardModel) {
+    func insertModel(_ model: PasteboardModel) {
         sqlManager.insert(item: model)
         updateTotoalCount()
-        dataChange = true
-        dataList.removeAll(where: { $0 == model })
-        dataList.insert(model, at: 0)
+        var list = dataList.value
+        list.removeAll(where: { $0 == model })
+        list.insert(model, at: 0)
+        dataList.accept(list)
     }
-
     /// 删除单条数据
     /// - Parameter item: PasteboardModel
-    func deleteItem(_ item: PasteboardModel) {
-        dataList.removeAll(where: { $0 == item })
-        deleteItems(filter: hashKey == item.hashValue)
+    func deleteItems(_ items: PasteboardModel...) {
+        var list = dataList.value
+        list.removeAll(where: { items.contains($0) })
+        dataList.accept(list)
+        deleteItems(filter: items.map{ $0.hashValue}.contains(hashKey))
     }
 
     /// 按条件删除数据
@@ -159,16 +178,20 @@ extension PasteDataStore {
             return
         }
         if let deadDate = NSCalendar.current.date(byAdding: dateCom, to: Date()) {
-            dataList.removeAll(where: { $0.date < deadDate })
+            dataList.accept(dataList.value.filter{ $0.date > deadDate })
             deleteItems(filter: date < deadDate)
         }
     }
 
     /// 删除所有数据
     func clearAllData() {
-        dataList.removeAll()
-        clearData(for: .now)
-        updateTotoalCount()
+        let alert = NSAlert()
+        alert.messageText = "清除所有数据"
+        alert.informativeText = "清空数据后会退出应用，请重新打开"
+        alert.addButton(withTitle: "确定")
+        alert.runModal()
+        sqlManager.dropTable()
+        NSApplication.shared.terminate(self)
     }
 }
 
