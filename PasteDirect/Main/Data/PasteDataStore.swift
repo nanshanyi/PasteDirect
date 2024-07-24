@@ -95,7 +95,6 @@ extension PasteDataStore {
     
     func resetDefaultList() {
         Task {
-            dataChange = true
             pageIndex = 0
             let list = await getItems(limit: pageSize, offset: pageSize * pageIndex)
             dataList.accept(list)
@@ -118,6 +117,7 @@ extension PasteDataStore {
     /// - Parameter item: 新的item
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
+        dataChange = true
         insertModel(model)
         Task {
             await updateColor(model)
@@ -129,13 +129,11 @@ extension PasteDataStore {
     func insertModel(_ model: PasteboardModel) {
         sqlManager.insert(item: model)
         updateTotoalCount()
-        dataChange = true
         var list = dataList.value
         list.removeAll(where: { $0 == model })
         list.insert(model, at: 0)
         dataList.accept(list)
     }
-
     /// 删除单条数据
     /// - Parameter item: PasteboardModel
     func deleteItems(_ items: PasteboardModel...) {

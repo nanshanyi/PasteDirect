@@ -108,7 +108,7 @@ class PasteboardModel {
             return ""
         case .image:
             guard let image else { return "" }
-            return "\(Int(image.size.width)) ×\(Int(image.size.height)) 像素"
+            return "\(Int(image.size.width)) × \(Int(image.size.height)) 像素"
         case .string:
             let formatter = NumberFormatter()
             formatter.numberStyle = .decimal
