@@ -12,7 +12,7 @@ import SnapKit
 import UIColorHexSwift
 
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
-    func deleteItem(_ item: PasteboardModel, indePath: IndexPath)
+    func deleteItem(_ item: PasteboardModel, indexPath: IndexPath)
 }
 
 let maxLength = 300
@@ -305,7 +305,7 @@ extension PasteCollectionViewItem {
     @objc
     private func deleteItem() {
         if let indexPath = collectionView?.indexPath(for: self) {
-            delegate?.deleteItem(pModel, indePath: indexPath)
+            delegate?.deleteItem(pModel, indexPath: indexPath)
         }
     }
 }
