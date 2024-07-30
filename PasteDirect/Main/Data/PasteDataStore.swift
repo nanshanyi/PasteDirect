@@ -14,7 +14,8 @@ import UIColorHexSwift
 
 class PasteDataStore {
     static let main = PasteDataStore()
-    var dataChange = false
+    var needRefresh = false
+    let pageSize = 50
     private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
     private(set) var totoalCount = BehaviorRelay<Int>(value: 0)
     private(set) var pageIndex = 0
@@ -22,11 +23,10 @@ class PasteDataStore {
     private var sqlManager = PasteSQLManager.manager
     private var searchTask: Task<(), Never>?
     private var colorDic = [String: String]()
-    private let pageSize = 50
+    
 
     init() {
         resetDefaultList()
-        dataChange = false
         totoalCount.accept(sqlManager.totoalCount)
         colorDic = PasteUserDefaults.appColorData
     }
@@ -53,7 +53,7 @@ extension PasteDataStore {
             {
                 let appName = try? row.get(appName)
                 let appPath = try? row.get(appPath)
-                let showData = try? row.get(showData)
+                let showData = try? row.get(showData) ?? data
                 let dataString = try? row.get(dataString)
                 let length = try? row.get(length)
                 let pType = PasteboardType(rawValue: type) ?? .string
@@ -117,7 +117,6 @@ extension PasteDataStore {
     /// - Parameter item: 新的item
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
-        dataChange = true
         insertModel(model)
         Task {
             await updateColor(model)
@@ -127,11 +126,13 @@ extension PasteDataStore {
     /// 插入数据
     /// - Parameter model: PasteboardModel
     func insertModel(_ model: PasteboardModel) {
+        needRefresh = true
         sqlManager.insert(item: model)
         updateTotoalCount()
         var list = dataList.value
         list.removeAll(where: { $0 == model })
         list.insert(model, at: 0)
+        list = Array(list.prefix(pageSize))
         dataList.accept(list)
     }
     /// 删除单条数据
@@ -180,6 +181,7 @@ extension PasteDataStore {
         if let deadDate = NSCalendar.current.date(byAdding: dateCom, to: Date()) {
             dataList.accept(dataList.value.filter{ $0.date > deadDate })
             deleteItems(filter: date < deadDate)
+            needRefresh = true
         }
     }
 
@@ -205,8 +207,7 @@ extension PasteDataStore {
                 let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
                 let colors = iconImage.getColors(quality: .highest)
                 if let colorStr = colors?.primary.hexString(true),
-                   !colorStr.isEmpty
-                {
+                   !colorStr.isEmpty {
                     colorDic[model.appName] = colorStr
                     PasteUserDefaults.appColorData = colorDic
                 }

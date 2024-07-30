@@ -8,9 +8,9 @@
 import AppKit
 import Carbon
 import Cocoa
-import SnapKit
-import RxSwift
 import RxCocoa
+import RxSwift
+import SnapKit
 
 class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
@@ -71,7 +71,6 @@ class PasteMainViewController: NSViewController {
 // MARK: - 生命周期
 
 extension PasteMainViewController {
-
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
@@ -86,10 +85,14 @@ extension PasteMainViewController {
             context.duration = 0.25
             self.view.animator().setFrameOrigin(.zero)
         }
-        if PasteDataStore.main.dataChange {
-            PasteDataStore.main.dataChange.toggle()
-            selectIndex = IndexPath(item: 0, section: 0)
-            dataList.accept(dataList.value)
+        if PasteDataStore.main.needRefresh {
+            PasteDataStore.main.needRefresh.toggle()
+            if dataList.value.count < PasteDataStore.main.pageSize {
+                resetToDefaultList()
+            } else {
+                resetSelectIndex()
+                collectionView.reloadData()
+            }
         }
     }
 
@@ -97,9 +100,6 @@ extension PasteMainViewController {
         super.viewDidDisappear()
         searchBar.objectValue = nil
         PasteDataStore.main.clearExpiredData()
-        if PasteDataStore.main.dataChange {
-            resetToDefaultList()
-        }
     }
 }
 
@@ -133,6 +133,7 @@ extension PasteMainViewController {
 
     private func initRx() {
         searchBar.rx.text.orEmpty
+            .skip(1)
             .debounce(.milliseconds(200), scheduler: MainScheduler.instance)
             .subscribe(
                 with: self,
@@ -142,22 +143,19 @@ extension PasteMainViewController {
                 }
             )
             .disposed(by: disposeBag)
-        
+
         dataList.observe(on: MainScheduler.instance)
-            .filter{ _ in !self.deleteItem }
+            .filter { _ in !self.deleteItem }
             .subscribe(
-            with: self,
-            onNext: { wrapper, value in
-                wrapper.deleteItem = false
-                wrapper.scrollView.isLoding = false
-                wrapper.collectionView.reloadData()
-                if value.count > wrapper.selectIndex.item {
-                    wrapper.collectionView.selectItems(at: [wrapper.selectIndex], scrollPosition: .nearestVerticalEdge)
+                with: self,
+                onNext: { wrapper, _ in
+                    wrapper.deleteItem = false
+                    wrapper.scrollView.isLoding = false
+                    wrapper.collectionView.reloadData()
                 }
-            }
-        ).disposed(by: disposeBag)
+            ).disposed(by: disposeBag)
     }
-    
+
     func dismissVC(completionHandler: (() -> Void)? = nil) {
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.25
@@ -182,8 +180,8 @@ extension PasteMainViewController {
 
     private func resetToDefaultList() {
         scrollView.resetState()
+        resetSelectIndex()
         PasteDataStore.main.resetDefaultList()
-        collectionView.scroll(.zero)
     }
 
     private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
@@ -203,6 +201,13 @@ extension PasteMainViewController {
             }
         }
         return event
+    }
+
+    private func resetSelectIndex() {
+        selectIndex = IndexPath(item: 0, section: 0)
+        if !dataList.value.isEmpty {
+            collectionView.selectItems(at: [selectIndex], scrollPosition: .nearestVerticalEdge)
+        }
     }
 }
 
@@ -234,6 +239,12 @@ extension PasteMainViewController: NSCollectionViewDataSource {
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
         cItem.updateItem(model: dataList.value[indexPath.item])
+        if selectIndex == indexPath {
+            cItem.isSelected = true
+            collectionView.selectionIndexPaths = [indexPath]
+        } else {
+            cItem.isSelected = false
+        }
         return cItem
     }
 }
@@ -254,9 +265,13 @@ extension PasteMainViewController: PasteScrollViewDelegate {
 // MARK: - PasteCollectionViewItemDelegate
 
 extension PasteMainViewController: PasteCollectionViewItemDelegate {
-    func deleteItem(_ item: PasteboardModel, indePath: IndexPath) {
+    func deleteItem(_ item: PasteboardModel, indexPath: IndexPath) {
+        defer { deleteItem = false }
         deleteItem = true
         PasteDataStore.main.deleteItems(item)
-        collectionView.animator().deleteItems(at: [indePath])
+        collectionView.animator().deleteItems(at: [indexPath])
+        if indexPath == selectIndex {
+            resetSelectIndex()
+        }
     }
 }

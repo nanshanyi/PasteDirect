@@ -38,7 +38,7 @@ class PasteboardModel {
     let data: Data
     let showData: Data?
     let hashValue: Int
-    let date: Date
+    private(set) var date: Date
     let appPath: String
     let appName: String
     let dataString: String
@@ -77,12 +77,13 @@ class PasteboardModel {
             guard pType != .none else { continue }
             var showData: Data? = nil
             var showAtt: NSAttributedString? = nil
-            let att = NSAttributedString(with: data, type: pType)
-            if let att {
+            let att = NSAttributedString(with: data, type: pType) ?? NSAttributedString()
+            if pType != .png {
+                guard !att.string.allSatisfy({ $0.isWhitespace}) else { continue }
                 showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
                 showData = showAtt?.toData(with: pType)
             }
-            
+
             self.init(pasteBoardType: pType,
                       data: data,
                       showData: showData,
@@ -90,8 +91,8 @@ class PasteboardModel {
                       date: Date(),
                       appPath: app?.url.path ?? "",
                       appName: app?.name ?? "",
-                      dataString: att?.string ?? "",
-                      length: att?.length ?? 0,
+                      dataString: att.string,
+                      length: att.length,
                       attributeString: showAtt)
             return
         }
@@ -114,6 +115,10 @@ class PasteboardModel {
             formatter.numberStyle = .decimal
             return "\(formatter.string(from: NSNumber(value: length)) ?? "")个字符"
         }
+    }
+    
+    func updateDate() {
+        date = Date()
     }
     
 }
