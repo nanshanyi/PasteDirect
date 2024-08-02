@@ -37,6 +37,9 @@ class PasteMainViewController: NSViewController {
         $0.collectionViewLayout = flowLayout
         $0.isSelectable = true
         $0.register(PasteCollectionViewItem.self)
+        $0.registerForDraggedTypes(PasteboardType.allCases.map { $0.pType })
+        $0.setDraggingSourceOperationMask(.every, forLocal: true)
+        $0.setDraggingSourceOperationMask(.every, forLocal: false)
     }
 
     private lazy var scrollView = PasteScrollView().then {
@@ -185,7 +188,7 @@ extension PasteMainViewController {
     }
 
     private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
-        if KeyHelper.numberChacraer.contains(where: { $0 == event.keyCode }) {
+        if KeyHelper.numberCharacters.contains(where: { $0 == event.keyCode }) {
             if !searchBar.isFirstResponder {
                 view.window?.makeFirstResponder(searchBar)
             }
@@ -220,6 +223,16 @@ extension PasteMainViewController: NSCollectionViewDelegate {
         }
         Log("选中\(indexPaths.description)")
         return indexPaths
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, canDragItemsAt indexPaths: Set<IndexPath>, with event: NSEvent) -> Bool {
+        Log("Drag \(indexPaths.description)")
+        return true
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
+        let model = dataList.value[indexPath.item]
+        return model.writeItem
     }
 }
 

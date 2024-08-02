@@ -7,7 +7,7 @@
 
 import AppKit
 
-enum PasteboardType: Int {
+enum PasteboardType: Int, CaseIterable {
     case none
     case rtf
     case rtfd

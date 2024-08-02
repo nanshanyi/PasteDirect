@@ -36,6 +36,7 @@
 		CB2CDF8C2924EE5B00E81836 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF532924E9FC00E81836 /* main.swift */; };
 		CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438B2B3AF29D00816B52 /* Log.swift */; };
 		CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */; };
+		CB5044DE2C5CD4F700F9DE75 /* PasteboardWritingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */; };
 		CB5320AC2B3596B5006C4B5D /* PasteSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */; };
 		CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = CB9641792C2D752C0099F12F /* RxCocoa */; };
 		CB96417C2C2D752C0099F12F /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB96417B2C2D752C0099F12F /* RxSwift */; };
@@ -124,6 +125,7 @@
 		CB2CDF8F2924EFF700E81836 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CB3A438B2B3AF29D00816B52 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceItemIdentifier.swift; sourceTree = "<group>"; };
+		CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardWritingItem.swift; sourceTree = "<group>"; };
 		CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSearchField.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
 		CBC127172C32D17900E5DBEF /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 		CB2CDF642924ECAC00E81836 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				CB5044DF2C5CD51400F9DE75 /* Model */,
 				CB2CDF6F2924ECAD00E81836 /* View */,
 				CB2CDF5E2924ECAB00E81836 /* Controller */,
 				CB2CDF692924ECAC00E81836 /* Data */,
@@ -283,12 +286,9 @@
 		CB2CDF692924ECAC00E81836 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				CB2CDF6A2924ECAC00E81836 /* PasteWindowInfo.swift */,
-				CB2CDF6B2924ECAC00E81836 /* PasteboardModel.swift */,
 				CB2CDF6C2924ECAC00E81836 /* PasteDataStore.swift */,
 				CB2CDF6D2924ECAC00E81836 /* PasteSQLManager.swift */,
 				CB2CDF6E2924ECAC00E81836 /* PasteBoard.swift */,
-				CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -302,6 +302,17 @@
 				CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		CB5044DF2C5CD51400F9DE75 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */,
+				CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */,
+				CB2CDF6A2924ECAC00E81836 /* PasteWindowInfo.swift */,
+				CB2CDF6B2924ECAC00E81836 /* PasteboardModel.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		CB8FE2E22925E71A008FEB96 /* Frameworks */ = {
@@ -543,6 +554,7 @@
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,
 				CBD5E3AB2C3D0B6A00F0F95F /* NSTextField+Extension.swift in Sources */,
 				CBD5E39E2C3BDB6500F0F95F /* PasteIgnoreListController.swift in Sources */,
+				CB5044DE2C5CD4F700F9DE75 /* PasteboardWritingItem.swift in Sources */,
 				CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */,
 				CBD5E3B72C3E8BC200F0F95F /* Layout.swift in Sources */,
 				CBABF7862B344A6600D3A095 /* Then.swift in Sources */,

@@ -9,7 +9,7 @@ import Carbon
 import Foundation
 
 enum KeyHelper {
-    static let numberChacraer: [Int] = [
+    static let numberCharacters: [Int] = [
         kVK_ANSI_A,
         kVK_ANSI_S,
         kVK_ANSI_D,
