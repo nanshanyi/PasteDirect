@@ -21,7 +21,7 @@ class PasteDataStore {
     private(set) var pageIndex = 0
     
     private var sqlManager = PasteSQLManager.manager
-    private var searchTask: Task<(), Never>?
+    private var searchTask: Task<(), Error>?
     private var colorDic = [String: String]()
     
 
@@ -41,10 +41,10 @@ extension PasteDataStore {
 
     private func getItems(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel]{
         let rows = await sqlManager.search(limit: limit, offset: offset)
-        return getItems(rows: rows)
+        return await getItems(rows: rows)
     }
 
-    private func getItems(rows: [Row]) -> [PasteboardModel] {
+    private func getItems(rows: [Row]) async -> [PasteboardModel] {
         return rows.compactMap { row in
             if let type = try? row.get(type),
                let data = try? row.get(data),
@@ -107,9 +107,11 @@ extension PasteDataStore {
     func searchData(_ keyWord: String) {
         searchTask?.cancel()
         searchTask = Task {
-            let rows = await sqlManager.search(filter: appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
-            let result = getItems(rows: rows)
-            Task.isCancelled ? () : dataList.accept(result)
+            let filter = appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%")
+            let rows = await sqlManager.search(filter: filter)
+            let result = await getItems(rows: rows)
+            try Task.checkCancellation()
+            dataList.accept(result)
         }
     }
     
@@ -127,13 +129,15 @@ extension PasteDataStore {
     /// - Parameter model: PasteboardModel
     func insertModel(_ model: PasteboardModel) {
         needRefresh = true
-        sqlManager.insert(item: model)
-        updateTotoalCount()
-        var list = dataList.value
-        list.removeAll(where: { $0 == model })
-        list.insert(model, at: 0)
-        list = Array(list.prefix(pageSize))
-        dataList.accept(list)
+        Task {
+            await sqlManager.insert(item: model)
+            updateTotoalCount()
+            var list = dataList.value
+            list.removeAll(where: { $0 == model })
+            list.insert(model, at: 0)
+            list = Array(list.prefix(pageSize))
+            dataList.accept(list)
+        }
     }
     /// 删除单条数据
     /// - Parameter item: PasteboardModel
@@ -147,8 +151,10 @@ extension PasteDataStore {
     /// 按条件删除数据
     /// - Parameter filter: Expression<Bool>
     func deleteItems(filter: Expression<Bool>) {
-        sqlManager.delete(filter: filter)
-        updateTotoalCount()
+        Task {
+            await sqlManager.delete(filter: filter)
+            updateTotoalCount()
+        }
     }
 
     /// 删除过期数据
@@ -202,25 +208,24 @@ extension PasteDataStore {
 extension PasteDataStore {
     @discardableResult
     func updateColor(_ model: PasteboardModel) async -> NSColor {
-        withUnsafeCurrentTask { _ in
-            if !colorDic.contains(where: { $0.key == model.appName }) {
-                let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
-                let colors = iconImage.getColors(quality: .highest)
-                if let colorStr = colors?.primary.hexString(true),
-                   !colorStr.isEmpty {
-                    colorDic[model.appName] = colorStr
-                    PasteUserDefaults.appColorData = colorDic
-                }
-                return colors?.primary ?? .clear
+        if !colorDic.contains(where: { $0.key == model.appName }) {
+            let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
+            let colors = iconImage.getColors(quality: .highest)
+            if let colorStr = colors?.primary.hexString(true),
+               !colorStr.isEmpty {
+                colorDic[model.appName] = colorStr
+                PasteUserDefaults.appColorData = colorDic
             }
-            return .clear
+            return colors?.primary ?? .clear
         }
+        return .clear
     }
 
-    func colorWith(_ model: PasteboardModel) async -> NSColor {
-        if let colorStr = colorDic[model.appName], let color = NSColor(colorStr) {
+    func colorWith(_ model: PasteboardModel) -> NSColor {
+        if let colorStr = colorDic[model.appName], 
+            let color = NSColor(colorStr) {
             return color
         }
-        return await updateColor(model)
+        return .clear
     }
 }

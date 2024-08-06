@@ -33,7 +33,7 @@ enum PasteModelType {
     }
 }
 
-class PasteboardModel {
+final class PasteboardModel {
     let pasteBoardType: PasteboardType
     let data: Data
     let showData: Data?
@@ -45,7 +45,8 @@ class PasteboardModel {
     let length: Int
     let attributeString: NSAttributedString?
     lazy var pType = pasteBoardType.pType
-    lazy var type: PasteModelType = PasteModelType(with: pasteBoardType)
+    lazy var type: PasteModelType = .init(with: pasteBoardType)
+    lazy var writeItem = PasteboardWritingItem(data: data, type: pType)
     
     init(pasteBoardType: PasteboardType,
          data: Data,
@@ -56,7 +57,8 @@ class PasteboardModel {
          appName: String,
          dataString: String,
          length: Int,
-         attributeString: NSAttributedString? = nil) {
+         attributeString: NSAttributedString? = nil)
+    {
         self.pasteBoardType = pasteBoardType
         self.data = data
         self.showData = showData
@@ -75,11 +77,11 @@ class PasteboardModel {
             guard let data = item.data(forType: type) else { continue }
             let pType = PasteboardType(for: type)
             guard pType != .none else { continue }
-            var showData: Data? = nil
-            var showAtt: NSAttributedString? = nil
+            var showData: Data?
+            var showAtt: NSAttributedString?
             let att = NSAttributedString(with: data, type: pType) ?? NSAttributedString()
             if pType != .png {
-                guard !att.string.allSatisfy({ $0.isWhitespace}) else { continue }
+                guard !att.string.allSatisfy({ $0.isWhitespace }) else { continue }
                 showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
                 showData = showAtt?.toData(with: pType)
             }
@@ -120,7 +122,6 @@ class PasteboardModel {
     func updateDate() {
         date = Date()
     }
-    
 }
 
 extension PasteboardModel: Equatable {
