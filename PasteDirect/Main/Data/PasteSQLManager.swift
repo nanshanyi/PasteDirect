@@ -70,9 +70,9 @@ extension PasteSQLManager {
     }
 
     // 增
-    func insert(item: PasteboardModel) {
+    func insert(item: PasteboardModel) async {
         let query = table
-        delete(filter: hashKey == item.hashValue)
+        await delete(filter: hashKey == item.hashValue)
         let insert = query.insert(
             hashKey <- item.hashValue,
             type <- item.pasteBoardType.rawValue,
@@ -92,7 +92,7 @@ extension PasteSQLManager {
     }
 
     // 根据条件删除
-    func delete(filter: Expression<Bool>) {
+    func delete(filter: Expression<Bool>) async {
         let query = table.filter(filter)
         if let count = try? db.run(query.delete()) {
             Log("删除的条数为：\(count)")
@@ -123,23 +123,24 @@ extension PasteSQLManager {
 
     // 查
     func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString, showData, length], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
-        withUnsafeCurrentTask { _ in
-            guard !Task.isCancelled else { return [] }
-            var query = table.select(select).order(order)
-            if let f = filter {
-                query = query.filter(f)
-            }
-            if let l = limit {
-                if let o = offset {
-                    query = query.limit(l, offset: o)
-                } else {
-                    query = query.limit(l)
-                }
-            }
-            if let result = try? db.prepare(query) {
-                return Array(result)
-            }
+        guard !Task.isCancelled else {
+            Log("Task is cancelled")
             return []
         }
+        var query = table.select(select).order(order)
+        if let f = filter {
+            query = query.filter(f)
+        }
+        if let l = limit {
+            if let o = offset {
+                query = query.limit(l, offset: o)
+            } else {
+                query = query.limit(l)
+            }
+        }
+        if let result = try? db.prepare(query) {
+            return Array(result)
+        }
+        return []
     }
 }

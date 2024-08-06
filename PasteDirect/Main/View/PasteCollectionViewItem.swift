@@ -207,10 +207,7 @@ extension PasteCollectionViewItem {
         }
         if !pModel.appPath.isEmpty {
             iconImageView.image = NSWorkspace.shared.icon(forFile: pModel.appPath)
-            Task {
-                let color = await PasteDataStore.main.colorWith(pModel).cgColor
-                topView.layer?.backgroundColor = color
-            }
+            topView.layer?.backgroundColor = PasteDataStore.main.colorWith(pModel).cgColor
         } else {
             topView.layer?.backgroundColor = NSColor.default.cgColor
         }

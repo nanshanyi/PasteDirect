@@ -47,6 +47,7 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     
     private func initRx() {
         PasteDataStore.main.totoalCount
+            .observe(on: MainScheduler.instance)
             .subscribe(
                 with: self,
                 onNext: { wrapper, value in
