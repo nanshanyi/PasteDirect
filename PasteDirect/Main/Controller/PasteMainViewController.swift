@@ -207,6 +207,7 @@ extension PasteMainViewController {
     }
 
     private func resetSelectIndex() {
+        collectionView.item(at: selectIndex)?.isSelected = false
         selectIndex = IndexPath(item: 0, section: 0)
         if !dataList.value.isEmpty {
             collectionView.selectItems(at: [selectIndex], scrollPosition: .nearestVerticalEdge)
