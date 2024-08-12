@@ -7,13 +7,13 @@
 
 import Cocoa
 import KeyboardShortcuts
-import Preferences
+import Settings
 
-final class PasteShortcutsSettingViewController: NSViewController, SettingsPane {
+final class PasteShortcutsSettingViewController: NSViewController, SettingsPane {    
     @IBOutlet weak var pasteCell: NSGridCell!
 
-    let preferencePaneIdentifier = Settings.PaneIdentifier.shortcuts
-    let preferencePaneTitle = "快捷键"
+    let paneIdentifier = Settings.PaneIdentifier.shortcuts
+    let paneTitle = "快捷键"
     override var nibName: NSNib.Name? { "PasteShortcutsSettingViewController" }
 
     var toolbarItemIcon: NSImage {

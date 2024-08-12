@@ -6,7 +6,7 @@
 //
 
 import Cocoa
-import Preferences
+import Settings
 import RxCocoa
 import RxSwift
 import ServiceManagement
@@ -17,18 +17,18 @@ enum PasteIgnoreType {
 }
 
 final class PasteIgnoreListController: NSViewController, SettingsPane {
+    
     @IBOutlet weak var tableView: NSTableView!
     @IBOutlet weak var addButton: NSButton!
     @IBOutlet weak var addTextField: NSTextField!
     
-    let preferencePaneIdentifier = Settings.PaneIdentifier.ignore
-    let preferencePaneTitle = "忽略列表"
+    let paneIdentifier = Settings.PaneIdentifier.ignore
+    let paneTitle = "忽略列表"
     override var nibName: NSNib.Name? { "PasteIgnoreListController" }
     var toolbarItemIcon: NSImage {
         NSImage(systemSymbolName: "square.and.pencil", accessibilityDescription: nil)!
     }
     private let disposeBag = DisposeBag()
-    
     private var customList = BehaviorRelay<[String]>(value: [])
     private lazy var defatulDataList = WindowInfo.defaultList.map { PasteIgnoreListItem(id: $0, type: .default) }
     private var dataList = [PasteIgnoreListItem]()

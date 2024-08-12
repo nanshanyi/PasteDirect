@@ -8,7 +8,7 @@
 import Carbon
 import Cocoa
 import KeyboardShortcuts
-import Preferences
+import Settings
 import ApplicationServices
 
 class PasteAppDelegate: NSObject {

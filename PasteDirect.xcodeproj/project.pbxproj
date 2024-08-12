@@ -38,10 +38,10 @@
 		CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */; };
 		CB5044DE2C5CD4F700F9DE75 /* PasteboardWritingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */; };
 		CB5320AC2B3596B5006C4B5D /* PasteSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */; };
+		CB58CF022C69BB20008BE1A4 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = CB58CF012C69BB20008BE1A4 /* Settings */; };
 		CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = CB9641792C2D752C0099F12F /* RxCocoa */; };
 		CB96417C2C2D752C0099F12F /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB96417B2C2D752C0099F12F /* RxSwift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
-		CB9986FC2925FFFD007E585C /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FB2925FFFD007E585C /* Preferences */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
 		CBABF7862B344A6600D3A095 /* Then.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBABF7852B344A6600D3A095 /* Then.swift */; };
@@ -147,9 +147,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB58CF022C69BB20008BE1A4 /* Settings in Frameworks */,
 				CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */,
 				CB9986FF29260015007E585C /* SQLite in Frameworks */,
-				CB9986FC2925FFFD007E585C /* Preferences in Frameworks */,
 				CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */,
 				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
 				CB99870229260372007E585C /* SnapKit in Frameworks */,
@@ -385,11 +385,11 @@
 			packageProductDependencies = (
 				CB2CDF892924ED1D00E81836 /* UIColorHexSwift */,
 				CB9986F52925FF46007E585C /* KeyboardShortcuts */,
-				CB9986FB2925FFFD007E585C /* Preferences */,
 				CB9986FE29260015007E585C /* SQLite */,
 				CB99870129260372007E585C /* SnapKit */,
 				CB9641792C2D752C0099F12F /* RxCocoa */,
 				CB96417B2C2D752C0099F12F /* RxSwift */,
+				CB58CF012C69BB20008BE1A4 /* Settings */,
 			);
 			productName = PasteDirect;
 			productReference = CB2CDEEA2924E8D500E81836 /* PasteDirect.app */;
@@ -486,10 +486,10 @@
 			packageReferences = (
 				CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */,
 				CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
-				CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */,
 				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
 				CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */,
+				CB58CF002C69BB20008BE1A4 /* XCRemoteSwiftPackageReference "Settings" */,
 			);
 			productRefGroup = CB2CDEEB2924E8D500E81836 /* Products */;
 			projectDirPath = "";
@@ -995,6 +995,14 @@
 				minimumVersion = 5.1.9;
 			};
 		};
+		CB58CF002C69BB20008BE1A4 /* XCRemoteSwiftPackageReference "Settings" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Settings";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.1;
+			};
+		};
 		CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
@@ -1008,15 +1016,7 @@
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.9.0;
-			};
-		};
-		CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/Preferences";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.6.0;
+				minimumVersion = 2.0.1;
 			};
 		};
 		CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
@@ -1024,15 +1024,14 @@
 			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.14.1;
+				minimumVersion = 0.15.3;
 			};
 		};
 		CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
 			requirement = {
-				kind = versionRange;
-				maximumVersion = 6.0.0;
+				kind = upToNextMajorVersion;
 				minimumVersion = 5.0.0;
 			};
 		};
@@ -1043,6 +1042,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */;
 			productName = UIColorHexSwift;
+		};
+		CB58CF012C69BB20008BE1A4 /* Settings */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB58CF002C69BB20008BE1A4 /* XCRemoteSwiftPackageReference "Settings" */;
+			productName = Settings;
 		};
 		CB9641792C2D752C0099F12F /* RxCocoa */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1058,11 +1062,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
-		};
-		CB9986FB2925FFFD007E585C /* Preferences */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB9986FA2925FFFD007E585C /* XCRemoteSwiftPackageReference "Preferences" */;
-			productName = Preferences;
 		};
 		CB9986FE29260015007E585C /* SQLite */ = {
 			isa = XCSwiftPackageProductDependency;
