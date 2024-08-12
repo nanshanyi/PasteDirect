@@ -5,11 +5,11 @@
 //  Created by 南山忆 on 2022/10/20.
 //
 
+import ApplicationServices
 import Carbon
 import Cocoa
 import KeyboardShortcuts
 import Settings
-import ApplicationServices
 
 class PasteAppDelegate: NSObject {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -26,13 +26,12 @@ class PasteAppDelegate: NSObject {
     var frontApp: NSRunningApplication?
 
     private lazy var settingsWindowController = SettingsWindowController(
-        preferencePanes: [PasteGeneralSettingsViewController(),
-                          PasteShortcutsSettingViewController(),
-                         PasteIgnoreListController()],
+        panes: [PasteGeneralSettingsViewController(),
+                PasteShortcutsSettingViewController(),
+                PasteIgnoreListController()],
         style: .toolbarItems,
         animated: true
     )
-
 }
 
 // MARK: - NSApplicationDelegate
@@ -61,24 +60,23 @@ extension PasteAppDelegate {
             PasteUserDefaults.appAlreadyLaunched = true
         }
         /// 初始化DataStore
-        let _ = PasteDataStore.main
+        _ = PasteDataStore.main
         /// 注册快捷键
         KeyboardShortcuts.onKeyDown(for: .pasteKey) { [self] in
             let curFrame = NSScreen.main?.frame
             showOrDismissWindow(curFrame)
         }
-        
+
 #if !DEBUG
         /// 检查辅助功能权限
         showPromptAccessibility()
 #endif
-
     }
-    
+
     private func showPromptAccessibility() {
         let checkOptPrompt = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as NSString
         let accessEnabled = AXIsProcessTrustedWithOptions([checkOptPrompt: false] as CFDictionary?)
-        if (!accessEnabled) {
+        if !accessEnabled {
             let alert = NSAlert()
             alert.messageText = "PasteDirect 需要获取辅助功能权限"
             alert.informativeText = "点击确定跳转到系统设置页，如果列表中已存在PasteDirect，请删除后重新添加，并打开权限开关"
@@ -87,7 +85,7 @@ extension PasteAppDelegate {
             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
         }
     }
-    
+
     private func setStatusItem() {
         menuBarItem.isVisible = true
         menuBarItem.button?.image = NSImage(named: "paste_icon_Normal")
