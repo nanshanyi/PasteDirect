@@ -191,13 +191,9 @@
 		CB2CDEEC2924E8D500E81836 /* PasteDirect */ = {
 			isa = PBXGroup;
 			children = (
-				CBD5E39F2C3BFECD00F0F95F /* Setting */,
-				CB2CDF642924ECAC00E81836 /* Main */,
-				CB2CDF582924ECAB00E81836 /* Utility */,
-				CB2CDF682924ECAC00E81836 /* main.swift */,
-				CB2CDF8F2924EFF700E81836 /* Info.plist */,
-				CB2CDEF12924E8D800E81836 /* Assets.xcassets */,
-				CB2CDEF62924E8D800E81836 /* PasteDirect.entitlements */,
+				CB5999F82C6F275C00472E62 /* Source */,
+				CB5999FA2C6F279D00472E62 /* Resource */,
+				CB5999F92C6F276900472E62 /* Supporting Files */,
 			);
 			path = PasteDirect;
 			sourceTree = "<group>";
@@ -287,6 +283,34 @@
 				CB2CDF6B2924ECAC00E81836 /* PasteboardModel.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		CB5999F82C6F275C00472E62 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				CBD5E39F2C3BFECD00F0F95F /* Setting */,
+				CB2CDF642924ECAC00E81836 /* Main */,
+				CB2CDF582924ECAB00E81836 /* Utility */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		CB5999F92C6F276900472E62 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CB2CDF682924ECAC00E81836 /* main.swift */,
+				CB2CDF8F2924EFF700E81836 /* Info.plist */,
+				CB2CDEF62924E8D800E81836 /* PasteDirect.entitlements */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CB5999FA2C6F279D00472E62 /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				CB2CDEF12924E8D800E81836 /* Assets.xcassets */,
+			);
+			path = Resource;
 			sourceTree = "<group>";
 		};
 		CB8FE2E22925E71A008FEB96 /* Frameworks */ = {
