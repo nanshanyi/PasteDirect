@@ -12,7 +12,6 @@
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
 		CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */; };
 		CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */; };
-		CB2CDF572924EB7300E81836 /* LaunchAtLogin.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = CB2CDF442924E9D300E81836 /* LaunchAtLogin.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CB2CDF732924ECAD00E81836 /* Helps.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF592924ECAB00E81836 /* Helps.swift */; };
 		CB2CDF742924ECAE00E81836 /* KeyboardShortcuts+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */; };
 		CB2CDF752924ECAE00E81836 /* UIImageColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF5B2924ECAB00E81836 /* UIImageColors.swift */; };
@@ -33,7 +32,6 @@
 		CB2CDF842924ECAE00E81836 /* PasteBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF6E2924ECAC00E81836 /* PasteBoard.swift */; };
 		CB2CDF852924ECAE00E81836 /* PasteScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF702924ECAD00E81836 /* PasteScrollView.swift */; };
 		CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF892924ED1D00E81836 /* UIColorHexSwift */; };
-		CB2CDF8C2924EE5B00E81836 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF532924E9FC00E81836 /* main.swift */; };
 		CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438B2B3AF29D00816B52 /* Log.swift */; };
 		CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */; };
 		CB5044DE2C5CD4F700F9DE75 /* PasteboardWritingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */; };
@@ -83,7 +81,6 @@
 			dstPath = Contents/Library/LoginItems;
 			dstSubfolderSpec = 1;
 			files = (
-				CB2CDF572924EB7300E81836 /* LaunchAtLogin.app in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,10 +96,6 @@
 		CB2CDF052924E8D900E81836 /* PasteDirectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PasteDirectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectUITests.swift; sourceTree = "<group>"; };
 		CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		CB2CDF442924E9D300E81836 /* LaunchAtLogin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaunchAtLogin.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB2CDF4F2924E9D600E81836 /* LaunchAtLogin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LaunchAtLogin.entitlements; sourceTree = "<group>"; };
-		CB2CDF532924E9FC00E81836 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		CB2CDF542924E9FC00E81836 /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = info.plist; sourceTree = "<group>"; };
 		CB2CDF592924ECAB00E81836 /* Helps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helps.swift; sourceTree = "<group>"; };
 		CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "KeyboardShortcuts+Extension.swift"; sourceTree = "<group>"; };
 		CB2CDF5B2924ECAB00E81836 /* UIImageColors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageColors.swift; sourceTree = "<group>"; };
@@ -171,13 +164,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CB2CDF412924E9D300E81836 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -187,7 +173,6 @@
 				CB2CDEEC2924E8D500E81836 /* PasteDirect */,
 				CB2CDEFE2924E8D900E81836 /* PasteDirectTests */,
 				CB2CDF082924E8D900E81836 /* PasteDirectUITests */,
-				CB2CDF452924E9D400E81836 /* LaunchAtLogin */,
 				CB2CDEEB2924E8D500E81836 /* Products */,
 				CB8FE2E22925E71A008FEB96 /* Frameworks */,
 			);
@@ -199,7 +184,6 @@
 				CB2CDEEA2924E8D500E81836 /* PasteDirect.app */,
 				CB2CDEFB2924E8D900E81836 /* PasteDirectTests.xctest */,
 				CB2CDF052924E8D900E81836 /* PasteDirectUITests.xctest */,
-				CB2CDF442924E9D300E81836 /* LaunchAtLogin.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -233,16 +217,6 @@
 				CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */,
 			);
 			path = PasteDirectUITests;
-			sourceTree = "<group>";
-		};
-		CB2CDF452924E9D400E81836 /* LaunchAtLogin */ = {
-			isa = PBXGroup;
-			children = (
-				CB2CDF542924E9FC00E81836 /* info.plist */,
-				CB2CDF532924E9FC00E81836 /* main.swift */,
-				CB2CDF4F2924E9D600E81836 /* LaunchAtLogin.entitlements */,
-			);
-			path = LaunchAtLogin;
 			sourceTree = "<group>";
 		};
 		CB2CDF582924ECAB00E81836 /* Utility */ = {
@@ -431,23 +405,6 @@
 			productReference = CB2CDF052924E8D900E81836 /* PasteDirectUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		CB2CDF432924E9D300E81836 /* LaunchAtLogin */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CB2CDF502924E9D600E81836 /* Build configuration list for PBXNativeTarget "LaunchAtLogin" */;
-			buildPhases = (
-				CB2CDF402924E9D300E81836 /* Sources */,
-				CB2CDF412924E9D300E81836 /* Frameworks */,
-				CB2CDF422924E9D300E81836 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = LaunchAtLogin;
-			productName = LaunchAtLogin;
-			productReference = CB2CDF442924E9D300E81836 /* LaunchAtLogin.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -468,9 +425,6 @@
 					CB2CDF042924E8D900E81836 = {
 						CreatedOnToolsVersion = 14.1;
 						TestTargetID = CB2CDEE92924E8D500E81836;
-					};
-					CB2CDF432924E9D300E81836 = {
-						CreatedOnToolsVersion = 14.1;
 					};
 				};
 			};
@@ -498,7 +452,6 @@
 				CB2CDEE92924E8D500E81836 /* PasteDirect */,
 				CB2CDEFA2924E8D900E81836 /* PasteDirectTests */,
 				CB2CDF042924E8D900E81836 /* PasteDirectUITests */,
-				CB2CDF432924E9D300E81836 /* LaunchAtLogin */,
 			);
 		};
 /* End PBXProject section */
@@ -523,13 +476,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		CB2CDF032924E8D900E81836 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CB2CDF422924E9D300E81836 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -594,14 +540,6 @@
 			files = (
 				CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */,
 				CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CB2CDF402924E9D300E81836 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CB2CDF8C2924EE5B00E81836 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -674,7 +612,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -731,7 +669,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -743,7 +681,6 @@
 		CB2CDF102924E8D900E81836 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
@@ -762,7 +699,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -775,7 +712,6 @@
 		CB2CDF112924E8D900E81836 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
@@ -794,7 +730,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -876,66 +812,6 @@
 			};
 			name = Release;
 		};
-		CB2CDF512924E9D600E81836 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = LaunchAtLogin/LaunchAtLogin.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LaunchAtLogin/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect.LaunchAtLogin;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		CB2CDF522924E9D600E81836 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = LaunchAtLogin/LaunchAtLogin.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = LaunchAtLogin/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = Main;
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect.LaunchAtLogin;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -971,15 +847,6 @@
 			buildConfigurations = (
 				CB2CDF162924E8D900E81836 /* Debug */,
 				CB2CDF172924E8D900E81836 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		CB2CDF502924E9D600E81836 /* Build configuration list for PBXNativeTarget "LaunchAtLogin" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CB2CDF512924E9D600E81836 /* Debug */,
-				CB2CDF522924E9D600E81836 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

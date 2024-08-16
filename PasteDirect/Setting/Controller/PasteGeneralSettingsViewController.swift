@@ -94,9 +94,4 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
             PasteUserDefaults.historyTime = sender.integerValue
         }
     }
-    
-    func setStartAtLogin(enabled: Bool) {
-      let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-      SMLoginItemSetEnabled(identifier, enabled)
-    }
 }

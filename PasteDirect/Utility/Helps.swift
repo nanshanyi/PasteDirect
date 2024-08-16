@@ -14,25 +14,24 @@ struct LaunchAtLogin {
 
     static var isEnabled: Bool {
         get {
-            guard let jobs = (LaunchAtLogin.self as DeprecationWarningWorkaround.Type).jobsDict else {
-                return false
-            }
-            let job = jobs.first { $0["Label"] as! String == id }
-            return job?["OnDemand"] as? Bool ?? false
+            SMAppService.mainApp.isEnabled
         }
         set {
-            SMLoginItemSetEnabled(id as CFString, newValue)
+            do {
+                try SMAppService.mainApp.update(newValue)
+            } catch {
+                Log("Failed to update launch at login: \(error)")
+            }
         }
     }
 }
 
-private protocol DeprecationWarningWorkaround {
-    static var jobsDict: [[String: AnyObject]]? { get }
-}
-
-extension LaunchAtLogin: DeprecationWarningWorkaround {
-    @available(*, deprecated)
-    static var jobsDict: [[String: AnyObject]]? {
-        SMCopyAllJobDictionaries(kSMDomainUserLaunchd)?.takeRetainedValue() as? [[String: AnyObject]]
+private extension SMAppService {
+    var isEnabled: Bool {
+        status == .enabled
+    }
+    
+    func update(_ enable: Bool) throws {
+        isEnabled ? try unregister() : try register()
     }
 }
