@@ -174,7 +174,7 @@ extension PasteMainViewController {
         if keyword.isEmpty {
             resetToDefaultList()
         } else {
-            selectIndex = IndexPath(item: 0, section: 0)
+            resetSelectIndex()
             PasteDataStore.main.searchData(keyword)
             Log("search start: \(keyword)")
             collectionView.scroll(.zero)

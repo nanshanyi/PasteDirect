@@ -6,13 +6,13 @@
 //
 
 import Cocoa
-import Preferences
+import Settings
 import ServiceManagement
 import RxSwift
 
 final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
-    let preferencePaneIdentifier = Settings.PaneIdentifier.general
-    let preferencePaneTitle = "通用"
+    let paneIdentifier = Settings.PaneIdentifier.general
+    let paneTitle = "通用"
     override var nibName: NSNib.Name? { "PasteGeneralSettingsViewController" }
     let disposeBag = DisposeBag()
     @IBOutlet weak var onStartButton: NSButton!
@@ -93,10 +93,5 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
         } else {
             PasteUserDefaults.historyTime = sender.integerValue
         }
-    }
-    
-    func setStartAtLogin(enabled: Bool) {
-      let identifier = "\(Bundle.main.bundleIdentifier!)Helper" as CFString
-      SMLoginItemSetEnabled(identifier, enabled)
     }
 }
