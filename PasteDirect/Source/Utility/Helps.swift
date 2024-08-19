@@ -10,8 +10,6 @@ import Foundation
 import ServiceManagement
 
 struct LaunchAtLogin {
-    private static let id = "\(Bundle.main.bundleIdentifier!).LaunchAtLogin"
-
     static var isEnabled: Bool {
         get {
             SMAppService.mainApp.isEnabled
