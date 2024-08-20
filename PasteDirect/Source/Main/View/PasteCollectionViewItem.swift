@@ -244,11 +244,11 @@ extension PasteCollectionViewItem {
         let menu = NSMenu()
         if let app = NSApplication.shared.delegate as? PasteAppDelegate,
             let name = app.frontApp?.localizedName {
-            let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteAction), keyEquivalent: "")
+            let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteAttributeTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
         if pModel.type == .string {
-            let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteOnlyText), keyEquivalent: "")
+            let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteOnlyTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
         let item2 = NSMenuItem(title: "复制", action: #selector(copyItemData), keyEquivalent: "")
@@ -274,12 +274,16 @@ extension PasteCollectionViewItem {
     }
 
     @objc
-    private func pasteOnlyText() {
+    private func pasteOnlyTextClick() {
+        pasteAction(false)
+    }
+    
+    @objc
+    private func pasteAttributeTextClick() {
         pasteAction(true)
     }
 
-    @objc
-    private func pasteAction(_ isAttribute: Bool = false) {
+    private func pasteAction(_ isAttribute: Bool = true) {
         PasteBoard.main.pasteData(pModel, isAttribute)
         guard PasteUserDefaults.pasteDirect else { return }
         guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
