@@ -12,6 +12,9 @@ import RxSwift
 import SQLite
 import UIColorHexSwift
 
+
+typealias Expression = SQLite.Expression
+
 class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false

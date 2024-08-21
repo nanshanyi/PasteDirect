@@ -63,9 +63,9 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         $0.textColor = .black
         $0.backgroundColor = .clear
         $0.font = .systemFont(ofSize: 14)
-        $0.lineBreakMode = .byCharWrapping
-        $0.maximumNumberOfLines = 15
+        $0.lineBreakMode = .byWordWrapping
     }
+    
 
     private lazy var pasteImageView = NSImageView().then {
         $0.alignment = .center
