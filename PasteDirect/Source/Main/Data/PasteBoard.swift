@@ -8,7 +8,7 @@
 import AppKit
 import Foundation
 
-class PasteBoard {
+final class PasteBoard {
     static let main = PasteBoard()
 
     private let pasteboard = NSPasteboard.general

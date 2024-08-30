@@ -8,11 +8,11 @@
 import Cocoa
 import Foundation
 
-@objc protocol PasteScrollViewDelegate {
+protocol PasteScrollViewDelegate: NSObjectProtocol {
     func loadMoreData()
 }
 
-class PasteScrollView: NSScrollView {
+final class PasteScrollView: NSScrollView {
     weak var delegate: PasteScrollViewDelegate?
     var isSearching = false
     var isLoding = false

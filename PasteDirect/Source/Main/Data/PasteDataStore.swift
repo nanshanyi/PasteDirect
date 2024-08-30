@@ -15,7 +15,7 @@ import UIColorHexSwift
 
 typealias Expression = SQLite.Expression
 
-class PasteDataStore {
+final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
     let pageSize = 50
@@ -213,7 +213,7 @@ extension PasteDataStore {
     func updateColor(_ model: PasteboardModel) async -> NSColor {
         if !colorDic.contains(where: { $0.key == model.appName }) {
             let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
-            let colors = iconImage.getColors(quality: .highest)
+            let colors = await iconImage.getColors(quality: .highest)
             if let colorStr = colors?.primary.hexString(true),
                !colorStr.isEmpty {
                 colorDic[model.appName] = colorStr

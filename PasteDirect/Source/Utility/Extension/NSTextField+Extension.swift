@@ -9,14 +9,6 @@ import Cocoa
 
 extension NSTextField {
     
-    static func label() -> NSTextField {
-        NSTextField().then{
-            $0.isEditable = false
-            $0.isSelectable = false
-            $0.isBordered = false
-        }
-    }
-    
     open override func performKeyEquivalent(with event: NSEvent) -> Bool {
         let commandKey = NSEvent.ModifierFlags.command.rawValue
         let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue

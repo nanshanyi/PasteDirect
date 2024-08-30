@@ -11,7 +11,7 @@ protocol PasteIgnoreListCellViewDelegate: AnyObject {
     func deleteItem(_ item: PasteIgnoreListItem)
 }
 
-class PasteIgnoreListCellView: NSTableCellView {
+final class PasteIgnoreListCellView: NSTableCellView {
     weak var delegate: PasteIgnoreListCellViewDelegate?
     private var item: PasteIgnoreListItem?
     

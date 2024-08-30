@@ -11,7 +11,7 @@ import Cocoa
 import KeyboardShortcuts
 import Settings
 
-class PasteAppDelegate: NSObject {
+final class PasteAppDelegate: NSObject {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private lazy var rMenu = NSMenu(title: "设置").then {
         let item1 = NSMenuItem(title: "偏好设置", action: #selector(settingsAction), keyEquivalent: ",")
@@ -56,7 +56,9 @@ extension PasteAppDelegate {
         PasteBoard.main.startListening()
         /// 记录是否第一次启动 设置开机自启
         if !PasteUserDefaults.appAlreadyLaunched {
+#if !DEBUG
             LaunchAtLogin.isEnabled = true
+#endif
             PasteUserDefaults.appAlreadyLaunched = true
         }
         /// 初始化DataStore
