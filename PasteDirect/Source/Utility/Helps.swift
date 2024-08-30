@@ -1,9 +1,8 @@
 //
-//  HotKey.swift
-//  HotKey
+//  LaunchAtLogin.swift
+//  PasteDirect
 //
-//  Created by Henry on 2018/09/15.
-//  Copyright © 2018 Eonil. All rights reserved.
+//  Created by 南山忆 on 2024/6/10.
 //
 
 import Foundation
@@ -30,6 +29,9 @@ private extension SMAppService {
     }
     
     func update(_ enable: Bool) throws {
-        isEnabled ? try unregister() : try register()
+        enable ? try register() : try unregister()
     }
 }
+
+
+

@@ -12,7 +12,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
-class PasteMainViewController: NSViewController {
+final class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
     private var selectIndex = IndexPath(item: 0, section: 0)
     private var dataList = PasteDataStore.main.dataList

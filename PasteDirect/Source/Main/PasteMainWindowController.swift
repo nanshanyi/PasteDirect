@@ -8,7 +8,7 @@
 import Carbon
 import Cocoa
 
-class PasteMainWindowController: NSWindowController {
+final class PasteMainWindowController: NSWindowController {
     var isVisable: Bool { window?.isVisible ?? false }
 
     init() {

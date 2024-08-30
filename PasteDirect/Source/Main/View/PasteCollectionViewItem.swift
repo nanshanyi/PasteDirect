@@ -10,6 +10,7 @@ import Carbon
 import KeyboardShortcuts
 import SnapKit
 import UIColorHexSwift
+import Foundation
 
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func deleteItem(_ item: PasteboardModel, indexPath: IndexPath)
@@ -17,15 +18,18 @@ protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
 
 let maxLength = 300
 
-class PasteCollectionViewItem: NSCollectionViewItem {
+final class PasteCollectionViewItem: NSCollectionViewItem {
     weak var delegate: PasteCollectionViewItemDelegate?
     private var pModel: PasteboardModel!
     private var keyMonitor: Any?
+    private var isAttribute: Bool = true
+    private var observation: NSKeyValueObservation?
 
     deinit {
         if let monitor = keyMonitor {
             NSEvent.removeMonitor(monitor)
         }
+        observation?.invalidate()
     }
 
     private lazy var contentView = NSView().then {
@@ -45,27 +49,26 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         $0.imageScaling = .scaleAxesIndependently
     }
 
-    private lazy var typeLabel = NSTextField.label().then {
+    private lazy var typeLabel = NSlabel().then {
         $0.textColor = .white
         $0.maximumNumberOfLines = 1
         $0.backgroundColor = .clear
         $0.font = .systemFont(ofSize: 18, weight: .medium)
     }
 
-    private lazy var timeLabel = NSTextField.label().then {
+    private lazy var timeLabel = NSlabel().then {
         $0.textColor = .white
         $0.backgroundColor = .clear
         $0.maximumNumberOfLines = 1
         $0.font = .systemFont(ofSize: 12)
     }
 
-    private lazy var contentLabel = NSTextField.label().then {
-        $0.textColor = .black
+    private lazy var contentLabel = NSlabel().then {
+        $0.textColor = .textColor
         $0.backgroundColor = .clear
         $0.font = .systemFont(ofSize: 14)
-        $0.lineBreakMode = .byWordWrapping
+        $0.lineBreakMode = .byCharWrapping
     }
-    
 
     private lazy var pasteImageView = NSImageView().then {
         $0.alignment = .center
@@ -90,7 +93,7 @@ class PasteCollectionViewItem: NSCollectionViewItem {
         }
     }
 
-    private lazy var bottomLabel = NSTextField.label().then {
+    private lazy var bottomLabel = NSlabel().then {
         $0.alignment = .center
         $0.textColor = .systemGray
         $0.backgroundColor = .clear
@@ -105,9 +108,7 @@ extension PasteCollectionViewItem {
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.enterKeyDown(with: event)
-        }
+        initObserver()
     }
 
     override var isSelected: Bool {
@@ -209,7 +210,7 @@ extension PasteCollectionViewItem {
             iconImageView.image = NSWorkspace.shared.icon(forFile: pModel.appPath)
             topView.layer?.backgroundColor = PasteDataStore.main.colorWith(pModel).cgColor
         } else {
-            topView.layer?.backgroundColor = NSColor.default.cgColor
+            topView.layer?.backgroundColor = NSColor.bgColor.cgColor
         }
         setViewMenu()
         timeLabel.stringValue = model.date.timeAgo
@@ -226,9 +227,11 @@ extension PasteCollectionViewItem {
            let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
             contentLabel.attributedStringValue = showAtt
             contentView.layer?.backgroundColor = color.cgColor
+            isAttribute = true
         } else {
+            isAttribute = false
             contentLabel.stringValue = showAtt.string
-            contentView.layer?.backgroundColor = NSColor.white.cgColor
+            contentView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
         }
     }
 
@@ -263,6 +266,20 @@ extension PasteCollectionViewItem {
 // MARK: - 事件处理
 
 extension PasteCollectionViewItem {
+    
+    private func initObserver() {
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            self?.enterKeyDown(with: event)
+        }
+        observation = NSApp.observe(\.effectiveAppearance) { [weak self] app, _ in
+            app.effectiveAppearance.performAsCurrentDrawingAppearance {
+                if self?.isAttribute != true {
+                    self?.contentView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
+                }
+            }
+        }
+    }
+    
     private func enterKeyDown(with event: NSEvent) -> NSEvent? {
         if isSelected,
            event.type == .keyDown,
@@ -312,8 +329,4 @@ extension PasteCollectionViewItem {
 }
 
 extension PasteCollectionViewItem: UserInterfaceItemIdentifier {}
-
-private extension NSColor {
-    static let `default` = NSColor(red: 41.0 / 255.0, green: 42.0 / 255.0, blue: 48.0 / 255.0, alpha: 1)
-}
 

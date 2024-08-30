@@ -8,19 +8,17 @@
 import AppKit
 
 enum PasteboardType: Int, CaseIterable {
-    case none
-    case rtf
-    case rtfd
-    case string
-    case html
-    case png
+    case none = 0
+    case rtf = 1
+    case rtfd = 2
+    case string = 3
+    case png = 5
     
     var pType: NSPasteboard.PasteboardType {
         switch self {
         case .rtf: return .rtf
         case .rtfd: return .rtfd
         case .string: return .string
-        case .html: return .html
         case .png: return .png
         default: return .string
         }
@@ -31,7 +29,6 @@ enum PasteboardType: Int, CaseIterable {
         case .rtf: self = .rtf
         case .rtfd: self = .rtfd
         case .string: self = .string
-        case .html: self = .html
         case .png: self = .png
         default: self = .none
         }

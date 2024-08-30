@@ -19,10 +19,10 @@ let appName = Expression<String>("appName")
 let dataString = Expression<String>("dataString")
 let length = Expression<Int>("length")
 
-class PasteSQLManager: NSObject {
+final class PasteSQLManager: NSObject {
     static let manager = PasteSQLManager()
 
-    private lazy var db: Connection = {
+    private lazy var db: Connection? = {
         let path = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
         ).first!.appending("/paste")
@@ -35,15 +35,19 @@ class PasteSQLManager: NSObject {
                 Log(error.localizedDescription)
             }
         }
-
-        let db = try! Connection("\(path)/paste.sqlite3")
-        db.busyTimeout = 5.0
-        return db
+        do {
+            let db = try Connection("\(path)/paste.sqlite3")
+            db.busyTimeout = 5.0
+            return db
+        } catch {
+            Log("Connection Error\(error)")
+        }
+        return nil
     }()
 
     private lazy var table: Table = {
         let tab = Table("pasteContent")
-        try! db.run(tab.create(ifNotExists: true, withoutRowid: false, block: { t in
+        let stateMent = tab.create(ifNotExists: true, withoutRowid: false) { t in
             t.column(id, primaryKey: true)
             t.column(hashKey)
             t.column(type)
@@ -54,7 +58,12 @@ class PasteSQLManager: NSObject {
             t.column(appName)
             t.column(dataString)
             t.column(length)
-        }))
+        }
+        do {
+            try db?.run(stateMent)
+        } catch {
+            Log("Create Table Error: \(error)")
+        }
         return tab
     }()
 }
@@ -63,10 +72,12 @@ class PasteSQLManager: NSObject {
 
 extension PasteSQLManager {
     var totoalCount: Int {
-        if let count = try? db.scalar(table.count) {
-            return count
+        do {
+            return try db?.scalar(table.count) ?? 0
+        } catch {
+            Log("获取总数失败：\(error)")
+            return 0
         }
-        return 0
     }
 
     // 增
@@ -84,28 +95,31 @@ extension PasteSQLManager {
             dataString <- item.dataString,
             length <- item.length
         )
-        if let rowId = try? db.run(insert) {
-            Log("插入成功：\(rowId)")
-        } else {
-            Log("插入失败")
+        do {
+            let rowId = try db?.run(insert)
+            Log("插入成功：\(String(describing: rowId))")
+        } catch {
+            Log("插入失败：\(error)")
         }
     }
 
     // 根据条件删除
     func delete(filter: Expression<Bool>) async {
         let query = table.filter(filter)
-        if let count = try? db.run(query.delete()) {
-            Log("删除的条数为：\(count)")
-        } else {
-            Log("删除失败")
+        do {
+            let count = try db?.run(query.delete())
+            Log("删除的条数为：\(String(describing: count))")
+        } catch {
+            Log("删除失败：\(error)")
         }
     }
 
     func dropTable() {
-        if let d = try? db.run(table.drop()) {
-            Log("删除所有\(d.columnCount)")
-        } else {
-            Log("删除失败")
+        do {
+           let d = try db?.run(table.drop())
+            Log("删除所有\(String(describing: d?.columnCount))")
+        } catch {
+            Log("删除失败：\(error)")
         }
     }
 
@@ -138,9 +152,15 @@ extension PasteSQLManager {
                 query = query.limit(l)
             }
         }
-        if let result = try? db.prepare(query) {
-            return Array(result)
+        
+        do {
+            if let result = try db?.prepare(query) {
+                return Array(result)
+            }
+            return []
+        } catch {
+            Log("查询失败：\(error)")
+            return []
         }
-        return []
     }
 }

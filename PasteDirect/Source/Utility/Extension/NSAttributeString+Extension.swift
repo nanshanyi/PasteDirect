@@ -18,19 +18,6 @@ extension NSAttributedString {
             self.init(rtfd: data, documentAttributes: nil)
         case .string:
             try? self.init(data: data, options: [:], documentAttributes: nil)
-        case .html:
-            guard let html = NSMutableAttributedString(html: data, documentAttributes: nil) else {
-                return nil
-            }
-            html.enumerateAttribute(.font, in: NSMakeRange(0, html.length)) { attribute, range, stoped in
-                if range.location > maxLength {
-                    stoped.pointee = true
-                }
-                if let font = attribute as? NSFont {
-                    html.addAttribute(.font, value: NSFont.systemFont(ofSize: font.pointSize), range: range)
-                }
-            }
-            self.init(attributedString: html)
         default:
             return nil
         }
@@ -44,8 +31,6 @@ extension NSAttributedString {
             return rtfd(from: NSMakeRange(0, length))
         case .string:
             return try? data(from: NSMakeRange(0, length))
-        case .html:
-            return try? data(from: NSMakeRange(0, length), documentAttributes: [.documentType : NSAttributedString.DocumentType.html])
         default:
             return nil
         }
