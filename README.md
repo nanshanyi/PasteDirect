@@ -2,6 +2,7 @@
 # PasteTool
 <img src="./PasteDirect/Resource/Assets.xcassets/AppIcon.appiconset/PasteDirect256@1x.png" width="96">
 mac剪切板工具
+
 数据安全，纯本地应用，本地数据库数据存储，不需要任何网络链接
 
 ![截屏](https://github.com/nanshanyi/PasteDirect/assets/16298146/16cffa3f-42a8-4f7d-84ed-39b9aa9868fe)
