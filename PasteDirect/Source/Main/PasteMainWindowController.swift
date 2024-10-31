@@ -29,16 +29,21 @@ final class PasteMainWindowController: NSWindowController {
         window?.hasShadow = false
         window?.backgroundColor = .clear
     }
+}
 
-    func dismissWindow(completionHandler: (() -> Void)? = nil) {
-        let mainViewController = window?.contentViewController as? PasteMainViewController
-        mainViewController?.dismissVC { [weak self] in
-            self?.window?.resignFirstResponder()
-            self?.window?.setIsVisible(false)
+extension PasteMainWindowController {
+    func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
+        let view = window?.contentViewController?.view
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.25
+            view?.animator().setFrameOrigin(NSPoint(x: 0, y: -(view?.bounds.height ?? 300)))
+        }) {
+            self.window?.resignFirstResponder()
+            self.window?.setIsVisible(false)
             completionHandler?()
         }
     }
-
+    
     func show(in frame: NSRect?) {
         let frame = frame ?? .zero
         window?.setFrame(frame, display: true)

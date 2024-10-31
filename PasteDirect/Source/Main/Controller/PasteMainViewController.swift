@@ -14,7 +14,7 @@ import SnapKit
 
 final class PasteMainViewController: NSViewController {
     private let viewHeight: CGFloat = 360
-    private var selectIndex = IndexPath(item: 0, section: 0)
+    private var selectIndexPath = IndexPath(item: 0, section: 0)
     private var dataList = PasteDataStore.main.dataList
     private let disposeBag = DisposeBag()
     private var deleteItem = false
@@ -33,6 +33,7 @@ final class PasteMainViewController: NSViewController {
         $0.wantsLayer = true
         $0.delegate = self
         $0.dataSource = self
+        $0.allowsEmptySelection = false
         $0.backgroundColors = [.clear]
         $0.collectionViewLayout = flowLayout
         $0.isSelectable = true
@@ -158,13 +159,6 @@ extension PasteMainViewController {
                 }
             ).disposed(by: disposeBag)
     }
-
-    func dismissVC(completionHandler: (() -> Void)? = nil) {
-        NSAnimationContext.runAnimationGroup({ context in
-            context.duration = 0.25
-            self.view.animator().setFrameOrigin(NSPoint(x: 0, y: -view.bounds.height))
-        }, completionHandler: completionHandler)
-    }
 }
 
 // MARK: - 私有方法
@@ -193,24 +187,45 @@ extension PasteMainViewController {
                 view.window?.makeFirstResponder(searchBar)
             }
         } else if event.keyCode == kVK_Escape {
-            if searchBar.isFirstResponder {
-                searchBar.objectValue = nil
-                view.window?.makeFirstResponder(collectionView)
-                resetToDefaultList()
-                return nil
-            } else {
-                let app = NSApplication.shared.delegate as? PasteAppDelegate
-                app?.dismissWindow()
-            }
+            escapeKeyDown()
+        } else if event.keyCode == kVK_Delete {
+            deleteKeyDown()
+        } else if event.keyCode == kVK_Return {
+            returnKeyDown()
         }
         return event
     }
+    
+    private func escapeKeyDown() {
+        if searchBar.isFirstResponder {
+            searchBar.objectValue = nil
+            view.window?.makeFirstResponder(collectionView)
+            resetToDefaultList()
+        } else {
+            let app = NSApplication.shared.delegate as? PasteAppDelegate
+            app?.dismissWindow()
+        }
+    }
+    
+    private func deleteKeyDown() {
+        guard !searchBar.isFirstResponder else { return }
+        if selectIndexPath.item < dataList.value.count {
+            let item = dataList.value[selectIndexPath.item]
+            deleteItem(item, indexPath: selectIndexPath)
+        }
+    }
+    
+    private func returnKeyDown() {
+        guard !searchBar.isFirstResponder else { return }
+        guard let item = collectionView.item(at: selectIndexPath) as? PasteCollectionViewItem else { return }
+        item.pasteItem()
+    }
 
-    private func resetSelectIndex() {
-        collectionView.item(at: selectIndex)?.isSelected = false
-        selectIndex = IndexPath(item: 0, section: 0)
+    private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
+        collectionView.item(at: selectIndexPath)?.isSelected = false
+        selectIndexPath = indexPath
         if !dataList.value.isEmpty {
-            collectionView.selectItems(at: [selectIndex], scrollPosition: .nearestVerticalEdge)
+            collectionView.selectItems(at: [selectIndexPath], scrollPosition: .nearestVerticalEdge)
         }
     }
 }
@@ -220,7 +235,7 @@ extension PasteMainViewController {
 extension PasteMainViewController: NSCollectionViewDelegate {
     func collectionView(_ collectionView: NSCollectionView, shouldSelectItemsAt indexPaths: Set<IndexPath>) -> Set<IndexPath> {
         if let indexPath = indexPaths.first {
-            selectIndex = indexPath
+            selectIndexPath = indexPath
         }
         Log("选中\(indexPaths.description)")
         return indexPaths
@@ -253,7 +268,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
         cItem.updateItem(model: dataList.value[indexPath.item])
-        if selectIndex == indexPath {
+        if selectIndexPath == indexPath {
             cItem.isSelected = true
             collectionView.selectionIndexPaths = [indexPath]
         } else {
@@ -284,8 +299,6 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
         deleteItem = true
         PasteDataStore.main.deleteItems(item)
         collectionView.animator().deleteItems(at: [indexPath])
-        if indexPath == selectIndex {
-            resetSelectIndex()
-        }
+        resetSelectIndex(indexPath)
     }
 }

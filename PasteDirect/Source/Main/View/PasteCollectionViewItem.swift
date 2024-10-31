@@ -25,13 +25,6 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
     private var isAttribute: Bool = true
     private var observation: NSKeyValueObservation?
 
-    deinit {
-        if let monitor = keyMonitor {
-            NSEvent.removeMonitor(monitor)
-        }
-        observation?.invalidate()
-    }
-
     private lazy var contentView = NSView().then {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
@@ -196,6 +189,10 @@ extension PasteCollectionViewItem {
 // MARK: - 数据更新
 
 extension PasteCollectionViewItem {
+    func pasteItem() {
+        pasteAction()
+    }
+    
     func updateItem(model: PasteboardModel) {
         pModel = model
         switch pModel.type {
@@ -266,11 +263,7 @@ extension PasteCollectionViewItem {
 // MARK: - 事件处理
 
 extension PasteCollectionViewItem {
-    
     private func initObserver() {
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            self?.enterKeyDown(with: event)
-        }
         observation = NSApp.observe(\.effectiveAppearance) { [weak self] app, _ in
             app.effectiveAppearance.performAsCurrentDrawingAppearance {
                 if self?.isAttribute != true {
@@ -278,16 +271,6 @@ extension PasteCollectionViewItem {
                 }
             }
         }
-    }
-    
-    private func enterKeyDown(with event: NSEvent) -> NSEvent? {
-        if isSelected,
-           event.type == .keyDown,
-           event.keyCode == kVK_Return {
-            pasteAction()
-            return nil
-        }
-        return event
     }
 
     @objc
@@ -301,6 +284,7 @@ extension PasteCollectionViewItem {
     }
 
     private func pasteAction(_ isAttribute: Bool = true) {
+        Log("isAttribute: \(isAttribute) data: \(pModel.dataString)")
         PasteBoard.main.pasteData(pModel, isAttribute)
         guard PasteUserDefaults.pasteDirect else { return }
         guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
