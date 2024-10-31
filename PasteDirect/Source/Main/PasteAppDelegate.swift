@@ -54,31 +54,37 @@ extension PasteAppDelegate {
         setStatusItem()
         /// 开启剪贴板监听
         PasteBoard.main.startListening()
+        /// 初始化DataStore
+        PasteDataStore.main.setup()
         /// 记录是否第一次启动 设置开机自启
         if !PasteUserDefaults.appAlreadyLaunched {
 #if !DEBUG
             LaunchAtLogin.isEnabled = true
 #endif
             PasteUserDefaults.appAlreadyLaunched = true
+            settingsAction()
         }
-        /// 初始化DataStore
-        _ = PasteDataStore.main
+        
+#if !DEBUG
+        /// 检查辅助功能权限
+        showPromptAccessibility()
+#endif
+        
         /// 注册快捷键
         KeyboardShortcuts.onKeyDown(for: .pasteKey) { [self] in
             let curFrame = NSScreen.main?.frame
             showOrDismissWindow(curFrame)
         }
-
-#if !DEBUG
-        /// 检查辅助功能权限
-        showPromptAccessibility()
-#endif
     }
 
     private func showPromptAccessibility() {
-        let checkOptPrompt = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as NSString
-        let accessEnabled = AXIsProcessTrustedWithOptions([checkOptPrompt: false] as CFDictionary?)
-        if !accessEnabled {
+        if !readPrivileges(prompt: false) {
+            acquirePrivileges()
+        }
+    }
+    
+    private func acquirePrivileges(firstAsk: Bool = false) {
+        if !self.readPrivileges(prompt: true), !firstAsk {
             let alert = NSAlert()
             alert.messageText = "PasteDirect 需要获取辅助功能权限"
             alert.informativeText = "点击确定跳转到系统设置页，如果列表中已存在PasteDirect，请删除后重新添加，并打开权限开关"
@@ -86,6 +92,13 @@ extension PasteAppDelegate {
             alert.runModal()
             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
         }
+    }
+    
+    private func readPrivileges(prompt: Bool) -> Bool {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: prompt]
+        let status = AXIsProcessTrustedWithOptions(options)
+        Log(String(format: "Reading Accessibility privileges - Current access status %{public}@", String(status)))
+        return status
     }
 
     private func setStatusItem() {
@@ -118,7 +131,7 @@ extension PasteAppDelegate {
 
 extension PasteAppDelegate {
     func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
-        mainWindowController.dismissWindow(completionHandler: completionHandler)
+        mainWindowController.dismissWindow(completionHandler)
     }
 
     func showOrDismissWindow(_ frame: NSRect? = nil) {

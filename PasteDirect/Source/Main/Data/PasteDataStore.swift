@@ -27,8 +27,7 @@ final class PasteDataStore {
     private var searchTask: Task<(), Error>?
     private var colorDic = [String: String]()
     
-
-    init() {
+    func setup() {
         resetDefaultList()
         totoalCount.accept(sqlManager.totoalCount)
         colorDic = PasteUserDefaults.appColorData

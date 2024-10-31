@@ -44,9 +44,9 @@ final class PasteboardModel {
     let dataString: String
     let length: Int
     let attributeString: NSAttributedString?
-    lazy var pType = pasteBoardType.pType
-    lazy var type: PasteModelType = .init(with: pasteBoardType)
-    lazy var writeItem = PasteboardWritingItem(data: data, type: pType)
+    private(set) lazy var pType = pasteBoardType.pType
+    private(set) lazy var type: PasteModelType = .init(with: pasteBoardType)
+    private(set) lazy var writeItem = PasteboardWritingItem(data: data, type: pType)
     
     init(pasteBoardType: PasteboardType,
          data: Data,
