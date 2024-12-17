@@ -69,6 +69,7 @@ final class PasteMainViewController: NSViewController {
         $0.focusRingType = .none
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
+        $0.delegate = self
     }
 }
 
@@ -107,7 +108,7 @@ extension PasteMainViewController {
     }
 }
 
-// MARK: - UI & 对外方法
+// MARK: - UI & Rx
 
 extension PasteMainViewController {
     private func initSubviews() {
@@ -300,5 +301,12 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
         PasteDataStore.main.deleteItems(item)
         collectionView.animator().deleteItems(at: [indexPath])
         resetSelectIndex(indexPath)
+    }
+}
+
+
+extension PasteMainViewController: NSSearchFieldDelegate {
+    func controlTextDidEndEditing(_ obj: Notification) {
+        view.window?.makeFirstResponder(collectionView)
     }
 }

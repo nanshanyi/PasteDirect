@@ -19,15 +19,11 @@ final class PasteScrollView: NSScrollView {
     var noMore = false
 
     override func scrollWheel(with event: NSEvent) {
-        if event.subtype == .mouseEvent {
-            if let cgEvent = event.cgEvent?.copy() {
-                cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis2, value: Double(event.scrollingDeltaY))
-                cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis1, value: 0.0)
-                if let nEvent = NSEvent(cgEvent: cgEvent) {
-                    super.scrollWheel(with: nEvent)
-                } else {
-                    super.scrollWheel(with: event)
-                }
+        if let cgEvent = event.cgEvent?.copy(), event.scrollingDeltaY != 0 {
+            cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis2, value: Double(event.scrollingDeltaY))
+            cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis1, value: 0.0)
+            if let nEvent = NSEvent(cgEvent: cgEvent) {
+                super.scrollWheel(with: nEvent)
             } else {
                 super.scrollWheel(with: event)
             }
