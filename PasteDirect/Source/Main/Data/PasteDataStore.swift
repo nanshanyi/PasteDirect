@@ -58,10 +58,10 @@ extension PasteDataStore {
                 let showData = try? row.get(showData) ?? data
                 let dataString = try? row.get(dataString)
                 let length = try? row.get(length)
-                let pType = PasteboardType(rawValue: type) ?? .string
+                let pType = PasteboardType(type)
                 
                 return PasteboardModel(
-                    pasteBoardType: pType,
+                    pasteboardType: pType,
                     data: data,
                     showData: showData,
                     hashValue: hashV,

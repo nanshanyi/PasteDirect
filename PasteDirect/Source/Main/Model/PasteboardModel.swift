@@ -17,7 +17,7 @@ enum PasteModelType {
         switch type {
         case .rtf, .rtfd, .string:
             self = .string
-        case .png:
+        case .png, .tiff:
             self = .image
         default:
             self = .none
@@ -34,7 +34,7 @@ enum PasteModelType {
 }
 
 final class PasteboardModel {
-    let pasteBoardType: PasteboardType
+    let pasteboardType: PasteboardType
     let data: Data
     let showData: Data?
     let hashValue: Int
@@ -44,11 +44,10 @@ final class PasteboardModel {
     let dataString: String
     let length: Int
     let attributeString: NSAttributedString?
-    private(set) lazy var pType = pasteBoardType.pType
-    private(set) lazy var type: PasteModelType = .init(with: pasteBoardType)
-    private(set) lazy var writeItem = PasteboardWritingItem(data: data, type: pType)
+    private(set) lazy var writeItem = PasteboardWritingItem(data: data, type: pasteboardType)
+    private(set) lazy var type = PasteModelType(with: pasteboardType)
     
-    init(pasteBoardType: PasteboardType,
+    init(pasteboardType: PasteboardType,
          data: Data,
          showData: Data?,
          hashValue: Int,
@@ -59,7 +58,7 @@ final class PasteboardModel {
          length: Int,
          attributeString: NSAttributedString? = nil)
     {
-        self.pasteBoardType = pasteBoardType
+        self.pasteboardType = pasteboardType
         self.data = data
         self.showData = showData
         self.hashValue = hashValue
@@ -73,32 +72,27 @@ final class PasteboardModel {
     
     convenience init?(with item: NSPasteboardItem) {
         let app = WindowInfo.appOwningFrontmostWindow()
-        for type in item.types {
-            guard let data = item.data(forType: type) else { continue }
-            let pType = PasteboardType(for: type)
-            guard pType != .none else { continue }
-            var showData: Data?
-            var showAtt: NSAttributedString?
-            let att = NSAttributedString(with: data, type: pType) ?? NSAttributedString()
-            if pType != .png {
-                guard !att.string.allSatisfy({ $0.isWhitespace }) else { continue }
-                showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
-                showData = showAtt?.toData(with: pType)
-            }
-
-            self.init(pasteBoardType: pType,
-                      data: data,
-                      showData: showData,
-                      hashValue: data.hashValue,
-                      date: Date(),
-                      appPath: app?.url.path ?? "",
-                      appName: app?.name ?? "",
-                      dataString: att.string,
-                      length: att.length,
-                      attributeString: showAtt)
-            return
+        guard let type = item.availableType(from: PasteboardType.supportTypes) else { return nil }
+        guard let data = item.data(forType: type) else { return nil }
+        var showData: Data?
+        var showAtt: NSAttributedString?
+        var att = NSAttributedString()
+        if type.isText() {
+            att = NSAttributedString(with: data, type: type) ?? NSAttributedString()
+            guard !att.string.allSatisfy({ $0.isWhitespace }) else { return nil }
+            showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
+            showData = showAtt?.toData(with: type)
         }
-        return nil
+        self.init(pasteboardType: type,
+                  data: data,
+                  showData: showData,
+                  hashValue: data.hashValue,
+                  date: Date(),
+                  appPath: app?.url.path ?? "",
+                  appName: app?.name ?? "",
+                  dataString: att.string,
+                  length: att.length,
+                  attributeString: showAtt)
     }
     
     private let formatter = NumberFormatter().then {
@@ -113,8 +107,6 @@ final class PasteboardModel {
             guard let image else { return "" }
             return "\(Int(image.size.width)) × \(Int(image.size.height)) 像素"
         case .string:
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .decimal
             return "\(formatter.string(from: NSNumber(value: length)) ?? "")个字符"
         }
     }

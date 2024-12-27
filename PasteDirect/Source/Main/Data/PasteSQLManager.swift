@@ -10,7 +10,7 @@ import SQLite
 
 let id = Expression<Int>("id")
 let hashKey = Expression<Int>("hashKey")
-let type = Expression<Int>("type")
+let type = Expression<String>("type")
 let data = Expression<Data>("data")
 let showData = Expression<Data?>("showData")
 let date = Expression<Date>("date")
@@ -86,7 +86,7 @@ extension PasteSQLManager {
         await delete(filter: hashKey == item.hashValue)
         let insert = query.insert(
             hashKey <- item.hashValue,
-            type <- item.pasteBoardType.rawValue,
+            type <- item.pasteboardType.rawValue,
             data <- item.data,
             showData <- item.showData,
             date <- item.date,
