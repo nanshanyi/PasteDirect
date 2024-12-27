@@ -5,13 +5,13 @@ mac剪切板工具
 
 数据安全，纯本地应用，本地数据库数据存储，不需要任何网络链接
 
-![截屏](https://github.com/nanshanyi/PasteDirect/assets/16298146/16cffa3f-42a8-4f7d-84ed-39b9aa9868fe)
-<img width="520" alt="image" src="https://github.com/user-attachments/assets/da36e288-a071-4bbd-854b-a50342c50bd8">
+<img width="2048" alt="截屏2024-12-27 18 16 56" src="https://github.com/user-attachments/assets/f7163799-b431-4679-97cf-007d099c0071" />
 
 ## 支持数据类型
 图片，文字，html，code，各种富文本
 
 ## 支持快捷操作
+适配系统深色模式
 
 支持搜索，可快速查找历史剪切板
 
