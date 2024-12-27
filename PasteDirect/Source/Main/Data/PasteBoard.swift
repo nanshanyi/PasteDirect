@@ -50,7 +50,7 @@ final class PasteBoard {
         if data.type == .string, !isAttribute {
             NSPasteboard.general.setString(data.dataString, forType: .string)
         } else {
-            NSPasteboard.general.setData(data.data, forType: data.pType)
+            NSPasteboard.general.setData(data.data, forType: data.pasteboardType)
         }
     }
 }

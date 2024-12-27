@@ -38,7 +38,7 @@ final class PasteMainViewController: NSViewController {
         $0.collectionViewLayout = flowLayout
         $0.isSelectable = true
         $0.register(PasteCollectionViewItem.self)
-        $0.registerForDraggedTypes(PasteboardType.allCases.map { $0.pType })
+        $0.registerForDraggedTypes(PasteboardType.supportTypes)
         $0.setDraggingSourceOperationMask(.every, forLocal: true)
         $0.setDraggingSourceOperationMask(.every, forLocal: false)
     }

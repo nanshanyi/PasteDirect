@@ -7,30 +7,13 @@
 
 import AppKit
 
-enum PasteboardType: Int, CaseIterable {
-    case none = 0
-    case rtf = 1
-    case rtfd = 2
-    case string = 3
-    case png = 5
-    
-    var pType: NSPasteboard.PasteboardType {
-        switch self {
-        case .rtf: return .rtf
-        case .rtfd: return .rtfd
-        case .string: return .string
-        case .png: return .png
-        default: return .string
-        }
+typealias PasteboardType = NSPasteboard.PasteboardType
+
+extension PasteboardType {
+    static var supportTypes: [PasteboardType] = [.rtf, .rtfd, .string, .png, .tiff]
+    func isImage() -> Bool {
+        self == .png || self == .tiff
     }
     
-    init(for type: NSPasteboard.PasteboardType) {
-        switch type {
-        case .rtf: self = .rtf
-        case .rtfd: self = .rtfd
-        case .string: self = .string
-        case .png: self = .png
-        default: self = .none
-        }
-    }
+    func isText() -> Bool { !isImage() }
 }
