@@ -36,6 +36,11 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
     private lazy var topView = NSView().then {
         $0.wantsLayer = true
     }
+    
+    private lazy var topMask = NSView().then {
+        $0.wantsLayer = true
+        $0.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.25).cgColor
+    }
 
     private lazy var iconImageView = NSImageView().then {
         $0.alignment = .center
@@ -132,9 +137,15 @@ extension PasteCollectionViewItem {
     }
 
     private func initTopView() {
+        topView.addSubview(topMask)
         topView.addSubview(typeLabel)
         topView.addSubview(timeLabel)
         topView.addSubview(iconImageView)
+        
+        topMask.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
         typeLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.bottom.equalTo(timeLabel.snp.top).offset(-4)

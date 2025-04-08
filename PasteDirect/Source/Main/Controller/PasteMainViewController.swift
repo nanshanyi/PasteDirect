@@ -13,7 +13,6 @@ import RxSwift
 import SnapKit
 
 final class PasteMainViewController: NSViewController {
-    private let viewHeight: CGFloat = 360
     private var selectIndexPath = IndexPath(item: 0, section: 0)
     private var dataList = PasteDataStore.main.dataList
     private let disposeBag = DisposeBag()
@@ -23,12 +22,12 @@ final class PasteMainViewController: NSViewController {
 
     private lazy var collectionView = NSCollectionView().then {
         let flowLayout = NSCollectionViewFlowLayout()
-        let height = 280
-        flowLayout.itemSize = NSSize(width: height, height: height)
-        flowLayout.minimumLineSpacing = 20
+        flowLayout.itemSize = Layout.itemSize
+        flowLayout.minimumLineSpacing = Layout.lineSpacing
         flowLayout.scrollDirection = .horizontal
-        flowLayout.headerReferenceSize = NSSize(width: 20, height: height)
-        flowLayout.footerReferenceSize = NSSize(width: 20, height: height)
+        flowLayout.headerReferenceSize = Layout.headerFooterSize
+        flowLayout.footerReferenceSize = Layout.headerFooterSize
+        flowLayout.sectionInset = NSEdgeInsets(top: 0, left: Layout.lineSpacing, bottom: 0, right: Layout.lineSpacing)
         $0.frame = view.bounds
         $0.wantsLayer = true
         $0.delegate = self
@@ -50,7 +49,7 @@ final class PasteMainViewController: NSViewController {
         $0.scrollerStyle = .overlay
         $0.horizontalScrollElasticity = .automatic
         $0.autoresizingMask = [.width, .height]
-        $0.scrollerInsets = NSEdgeInsets(top: 0, left: 0, bottom: -100, right: 0)
+        $0.scrollerInsets = Layout.edgeInsets
         $0.delegate = self
     }
 
@@ -65,7 +64,7 @@ final class PasteMainViewController: NSViewController {
         $0.layer?.masksToBounds = true
         $0.layer?.borderWidth = 1
         $0.layer?.borderColor = NSColor.lightGray.cgColor
-        $0.layer?.cornerRadius = 15
+        $0.layer?.cornerRadius = Layout.searchBarHeight / 2.0
         $0.focusRingType = .none
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
@@ -85,7 +84,7 @@ extension PasteMainViewController {
 
     override func viewDidAppear() {
         view.window?.makeFirstResponder(collectionView)
-        view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: view.frame.width, height: viewHeight)
+        view.frame = NSRect(x: view.frame.origin.x, y: -Layout.viewHeight, width: view.frame.width, height: Layout.viewHeight)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
             self.view.animator().setFrameOrigin(.zero)
@@ -131,8 +130,8 @@ extension PasteMainViewController {
             make.centerX.equalToSuperview()
             make.top.greaterThanOrEqualTo(view).offset(5)
             make.bottom.greaterThanOrEqualTo(scrollView.snp.top).offset(-5)
-            make.height.equalTo(30)
-            make.width.equalTo(200)
+            make.height.equalTo(Layout.searchBarHeight)
+            make.width.equalTo(Layout.searchBarWidth)
         }
     }
 
@@ -150,7 +149,7 @@ extension PasteMainViewController {
             .disposed(by: disposeBag)
 
         dataList.observe(on: MainScheduler.instance)
-            .filter { _ in !self.deleteItem }
+            .filter { [weak self] _ in self?.deleteItem == false }
             .subscribe(
                 with: self,
                 onNext: { wrapper, _ in
@@ -248,8 +247,7 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
-        let model = dataList.value[indexPath.item]
-        return model.writeItem
+        return dataList.value[indexPath.item].writeItem
     }
 }
 
@@ -283,7 +281,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.value.count >= PasteDataStore.main.totoalCount.value {
+        if dataList.value.count >= PasteDataStore.main.totalCount.value {
             scrollView.noMore = true
             scrollView.isLoding = false
             return

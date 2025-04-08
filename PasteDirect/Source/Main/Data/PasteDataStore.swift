@@ -20,7 +20,7 @@ final class PasteDataStore {
     var needRefresh = false
     let pageSize = 50
     private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
-    private(set) var totoalCount = BehaviorRelay<Int>(value: 0)
+    private(set) var totalCount = BehaviorRelay<Int>(value: 0)
     private(set) var pageIndex = 0
     
     private var sqlManager = PasteSQLManager.manager
@@ -29,7 +29,7 @@ final class PasteDataStore {
     
     func setup() {
         resetDefaultList()
-        totoalCount.accept(sqlManager.totoalCount)
+        totalCount.accept(sqlManager.totoalCount)
         colorDic = PasteUserDefaults.appColorData
     }
 }
@@ -38,7 +38,7 @@ final class PasteDataStore {
 
 extension PasteDataStore {
     private func updateTotoalCount() {
-        totoalCount.accept(sqlManager.totoalCount)
+        totalCount.accept(sqlManager.totoalCount)
     }
 
     private func getItems(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel]{
@@ -51,8 +51,7 @@ extension PasteDataStore {
             if let type = try? row.get(type),
                let data = try? row.get(data),
                let hashV = try? row.get(hashKey),
-               let date = try? row.get(date)
-            {
+               let date = try? row.get(date) {
                 let appName = try? row.get(appName)
                 let appPath = try? row.get(appPath)
                 let showData = try? row.get(showData) ?? data
@@ -86,12 +85,11 @@ extension PasteDataStore {
     /// - Returns: 返回从0到当前页所有数据list
     func loadNextPage() {
         Task {
-            guard dataList.value.count < totoalCount.value else { return }
+            guard dataList.value.count < totalCount.value else { return }
             pageIndex += 1
             Log("loadNextPage \(pageIndex)")
-            var list = dataList.value
-            list += await getItems(limit: pageSize, offset: pageSize * pageIndex)
-            dataList.accept(list)
+            let nextPage = await getItems(limit: pageSize, offset: pageSize * pageIndex)
+            dataList.accept(dataList.value + nextPage)
         }
     }
     
