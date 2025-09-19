@@ -53,11 +53,21 @@ final class PasteMainViewController: NSViewController {
         $0.delegate = self
     }
 
-    private lazy var effectView = NSVisualEffectView().then {
-        $0.frame = view.frame
-        $0.state = .active
-        $0.blendingMode = .behindWindow
-    }
+    private lazy var effectView: NSView = {
+        if #available(macOS 26.0, *) {
+           let effectView = NSGlassEffectView()
+            effectView.frame = view.frame
+            effectView.cornerRadius = 0
+            return effectView
+        } else {
+           let effectView = NSVisualEffectView()
+            effectView.frame = view.frame
+            effectView.state = .active
+            effectView.blendingMode = .behindWindow
+            effectView.layer?.maskedCorners = CACornerMask([.layerMaxXMaxYCorner, .layerMinXMaxYCorner])
+            return effectView
+        }
+    }()
 
     private lazy var searchBar = PasteSearchField().then {
         $0.wantsLayer = true
