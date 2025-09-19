@@ -64,17 +64,12 @@ final class PasteMainViewController: NSViewController {
             effectView.frame = view.frame
             effectView.state = .active
             effectView.blendingMode = .behindWindow
-            effectView.layer?.maskedCorners = CACornerMask([.layerMaxXMaxYCorner, .layerMinXMaxYCorner])
             return effectView
         }
     }()
 
     private lazy var searchBar = PasteSearchField().then {
-        $0.wantsLayer = true
-        $0.layer?.masksToBounds = true
-        $0.layer?.borderWidth = 1
-        $0.layer?.borderColor = NSColor.lightGray.cgColor
-        $0.layer?.cornerRadius = Layout.searchBarHeight / 2.0
+        $0.cell?.controlSize = .large
         $0.focusRingType = .none
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
@@ -123,20 +118,23 @@ extension PasteMainViewController {
     private func initSubviews() {
         view.wantsLayer = true
         view.layer?.backgroundColor = NSColor.clear.cgColor
+        view.layer?.maskedCorners = CACornerMask([.layerMaxXMaxYCorner, .layerMinXMaxYCorner])
+        view.layer?.masksToBounds = true
+        view.layer?.cornerRadius = 34
         view.addSubview(effectView)
         view.addSubview(scrollView)
         view.addSubview(searchBar)
-        effectView.snp.remakeConstraints { make in
+        effectView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        scrollView.contentView.snp.remakeConstraints { make in
+        scrollView.contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        scrollView.snp.remakeConstraints { make in
+        scrollView.snp.makeConstraints { make in
             make.leading.trailing.bottom.equalToSuperview()
             make.top.equalToSuperview().offset(50)
         }
-        searchBar.snp.remakeConstraints { make in
+        searchBar.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.greaterThanOrEqualTo(view).offset(5)
             make.bottom.greaterThanOrEqualTo(scrollView.snp.top).offset(-5)

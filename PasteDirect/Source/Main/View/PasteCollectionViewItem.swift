@@ -29,7 +29,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
         $0.layer?.backgroundColor = .clear
-        $0.layer?.cornerRadius = 12
+        $0.layer?.cornerRadius = 16
         $0.layer?.borderColor = NSColor("#3970ff")?.cgColor
     }
 
