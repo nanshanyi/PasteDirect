@@ -15,11 +15,11 @@ protocol PasteScrollViewDelegate: NSObjectProtocol {
 final class PasteScrollView: NSScrollView {
     weak var delegate: PasteScrollViewDelegate?
     var isSearching = false
-    var isLoding = false
+    var isLoading = false
     var noMore = false
 
     override func scrollWheel(with event: NSEvent) {
-        if let cgEvent = event.cgEvent?.copy(), event.scrollingDeltaY != 0 {
+        if let cgEvent = event.cgEvent?.copy(), event.scrollingDeltaX == 0 {
             cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis2, value: Double(event.scrollingDeltaY))
             cgEvent.setDoubleValueField(.scrollWheelEventDeltaAxis1, value: 0.0)
             if let nEvent = NSEvent(cgEvent: cgEvent) {
@@ -37,8 +37,8 @@ final class PasteScrollView: NSScrollView {
         if noMore || isSearching { return }
         let width = NSScreen.main?.frame.width ?? 2000
         if point.x + width + 500 > clipView.documentRect.width {
-            if !isLoding {
-                isLoding = true
+            if !isLoading {
+                isLoading = true
                 delegate?.loadMoreData()
             }
         }
@@ -46,7 +46,7 @@ final class PasteScrollView: NSScrollView {
     
     func resetState() {
         isSearching = false
-        isLoding = false
+        isLoading = false
         noMore = false
     }
 }

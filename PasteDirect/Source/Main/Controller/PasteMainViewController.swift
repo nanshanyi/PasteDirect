@@ -162,7 +162,7 @@ extension PasteMainViewController {
                 with: self,
                 onNext: { wrapper, _ in
                     wrapper.deleteItem = false
-                    wrapper.scrollView.isLoding = false
+                    wrapper.scrollView.isLoading = false
                     wrapper.collectionView.reloadData()
                 }
             ).disposed(by: disposeBag)
@@ -291,7 +291,7 @@ extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
         if dataList.value.count >= PasteDataStore.main.totalCount.value {
             scrollView.noMore = true
-            scrollView.isLoding = false
+            scrollView.isLoading = false
             return
         }
         PasteDataStore.main.loadNextPage()
