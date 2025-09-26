@@ -10,9 +10,7 @@ import Settings
 import ServiceManagement
 import RxSwift
 
-final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
-    let paneIdentifier = Settings.PaneIdentifier.general
-    let paneTitle = "通用"
+final class PasteGeneralSettingsViewController: NSViewController {
     override var nibName: NSNib.Name? { "PasteGeneralSettingsViewController" }
     let disposeBag = DisposeBag()
     @IBOutlet weak var onStartButton: NSButton!
@@ -26,17 +24,13 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     @IBOutlet weak var totalLabel: NSTextField!
     @IBOutlet weak var clearInfoLabel: NSTextField!
     
-    var toolbarItemIcon: NSImage {
-        NSImage(systemSymbolName: "switch.2", accessibilityDescription: nil)!
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         initRx()
         onStartButton.state = LaunchAtLogin.isEnabled ? .on : .off
         pasteOnlyTextButton.state = PasteUserDefaults.pasteOnlyText ? .on : .off
         pasteDirectButton.state = PasteUserDefaults.pasteDirect ? .on : .off
-        historySlider.integerValue = PasteUserDefaults.historyTime
+//        historySlider.integerValue = PasteUserDefaults.historyTime
         clearInfoLabel.isHidden = true
     }
     
@@ -75,23 +69,23 @@ final class PasteGeneralSettingsViewController: NSViewController, SettingsPane {
     }
     
     @IBAction func sliderChange(_ sender: NSSlider) {
-        let current = PasteUserDefaults.historyTime
-        if sender.integerValue < current {
-            let alert = NSAlert()
-            alert.messageText = "剪贴板的内容数量已经超过预设，要删除旧的条目来减少容量吗？"
-            alert.informativeText = "该动作将无法被撤销"
-            alert.addButton(withTitle: "确定")
-            alert.addButton(withTitle: "取消")
-            alert.beginSheetModal(for: self.view.window!) { res in
-                if res == .alertFirstButtonReturn, let type = HistoryTime(rawValue: sender.integerValue) {
-                    PasteDataStore.main.clearData(for: type)
-                    PasteUserDefaults.historyTime = sender.integerValue
-                } else if res == .alertSecondButtonReturn {
-                    sender.integerValue = current
-                }
-            }
-        } else {
-            PasteUserDefaults.historyTime = sender.integerValue
-        }
+//        let current = PasteUserDefaults.historyTime
+//        if sender.integerValue < current {
+//            let alert = NSAlert()
+//            alert.messageText = "剪贴板的内容数量已经超过预设，要删除旧的记录来减少容量吗？"
+//            alert.informativeText = "该动作将无法被撤销"
+//            alert.addButton(withTitle: "确定")
+//            alert.addButton(withTitle: "取消")
+//            alert.beginSheetModal(for: self.view.window!) { res in
+//                if res == .alertFirstButtonReturn, let type = HistoryTime(rawValue: sender.integerValue) {
+//                    PasteDataStore.main.clearData(for: type)
+//                    PasteUserDefaults.historyTime = sender.integerValue
+//                } else if res == .alertSecondButtonReturn {
+//                    sender.integerValue = current
+//                }
+//            }
+//        } else {
+//            PasteUserDefaults.historyTime = sender.integerValue
+//        }
     }
 }

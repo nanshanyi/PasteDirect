@@ -158,7 +158,7 @@ extension PasteCollectionViewItem {
 
         iconImageView.snp.makeConstraints { make in
             make.top.bottom.trailing.equalToSuperview()
-            make.width.equalTo(70)
+            make.width.equalTo(topView.snp.height)
         }
     }
 
@@ -175,7 +175,7 @@ extension PasteCollectionViewItem {
 
         topView.snp.makeConstraints { make in
             make.leading.trailing.top.equalToSuperview()
-            make.height.equalTo(70)
+            make.height.equalTo(60)
         }
 
         imageContentView.snp.makeConstraints { make in

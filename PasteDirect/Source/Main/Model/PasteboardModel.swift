@@ -71,7 +71,7 @@ final class PasteboardModel {
     }
     
     convenience init?(with item: NSPasteboardItem) {
-        let app = WindowInfo.appOwningFrontmostWindow()
+        guard let app = IgnoredAppsManager.shared.frontmostApplication() else { return nil }
         guard let type = item.availableType(from: PasteboardType.supportTypes) else { return nil }
         guard let data = item.data(forType: type) else { return nil }
         var showData: Data?
@@ -88,8 +88,8 @@ final class PasteboardModel {
                   showData: showData,
                   hashValue: data.hashValue,
                   date: Date(),
-                  appPath: app?.url.path ?? "",
-                  appName: app?.name ?? "",
+                  appPath: app.path,
+                  appName: app.name,
                   dataString: att.string,
                   length: att.length,
                   attributeString: showAtt)

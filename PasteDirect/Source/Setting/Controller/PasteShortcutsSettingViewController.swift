@@ -7,23 +7,18 @@
 
 import Cocoa
 import KeyboardShortcuts
-import Settings
+import SnapKit
 
-final class PasteShortcutsSettingViewController: NSViewController, SettingsPane {    
+final class PasteShortcutsSettingViewController: NSViewController {
     @IBOutlet weak var pasteCell: NSGridCell!
-
-    let paneIdentifier = Settings.PaneIdentifier.shortcuts
-    let paneTitle = "快捷键"
     override var nibName: NSNib.Name? { "PasteShortcutsSettingViewController" }
-
-    var toolbarItemIcon: NSImage {
-        NSImage(systemSymbolName: "command", accessibilityDescription: nil)!
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         let recorder = KeyboardShortcuts.RecorderCocoa(for: .pasteKey)
-        recorder.frame = NSRect(x: 0, y: 0, width: 100, height: 30)
         pasteCell.contentView?.addSubview(recorder)
+        recorder.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
     }
 }

@@ -23,12 +23,10 @@ final class PasteMainViewController: NSViewController {
     private lazy var collectionView = NSCollectionView().then {
         let flowLayout = NSCollectionViewFlowLayout()
         flowLayout.itemSize = Layout.itemSize
+        flowLayout.minimumInteritemSpacing = Layout.lineSpacing
         flowLayout.minimumLineSpacing = Layout.lineSpacing
         flowLayout.scrollDirection = .horizontal
-        flowLayout.headerReferenceSize = Layout.headerFooterSize
-        flowLayout.footerReferenceSize = Layout.headerFooterSize
         flowLayout.sectionInset = NSEdgeInsets(top: 0, left: Layout.lineSpacing, bottom: 0, right: Layout.lineSpacing)
-        $0.frame = view.bounds
         $0.wantsLayer = true
         $0.delegate = self
         $0.dataSource = self
@@ -43,27 +41,27 @@ final class PasteMainViewController: NSViewController {
     }
 
     private lazy var scrollView = PasteScrollView().then {
-        let clipView = NSClipView(frame: view.bounds)
-        clipView.documentView = collectionView
-        $0.contentView = clipView
+        $0.documentView = collectionView
         $0.scrollerStyle = .overlay
+        $0.autohidesScrollers = true
         $0.horizontalScrollElasticity = .automatic
-        $0.autoresizingMask = [.width, .height]
-        $0.scrollerInsets = Layout.edgeInsets
         $0.delegate = self
     }
 
     private lazy var effectView: NSView = {
         if #available(macOS 26.0, *) {
-           let effectView = NSGlassEffectView()
-            effectView.frame = view.frame
-            effectView.cornerRadius = 0
-            return effectView
+           let glassView = NSGlassEffectView()
+            glassView.frame = view.frame
+            glassView.cornerRadius = 34
+            glassView.contentView = contentView
+            return glassView
         } else {
            let effectView = NSVisualEffectView()
+            effectView.wantsLayer = true
             effectView.frame = view.frame
             effectView.state = .active
             effectView.blendingMode = .behindWindow
+            effectView.layer?.cornerRadius = 34
             return effectView
         }
     }()
@@ -74,6 +72,13 @@ final class PasteMainViewController: NSViewController {
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
         $0.delegate = self
+    }
+    
+    private lazy var contentView = NSView().then {
+        $0.wantsLayer = true
+        $0.layer?.backgroundColor = .clear
+        $0.layer?.cornerRadius = 34
+        $0.layer?.masksToBounds = true
     }
 }
 
@@ -117,27 +122,31 @@ extension PasteMainViewController {
 extension PasteMainViewController {
     private func initSubviews() {
         view.wantsLayer = true
-        view.layer?.backgroundColor = NSColor.clear.cgColor
-        view.layer?.maskedCorners = CACornerMask([.layerMaxXMaxYCorner, .layerMinXMaxYCorner])
-        view.layer?.masksToBounds = true
-        view.layer?.cornerRadius = 34
         view.addSubview(effectView)
-        view.addSubview(scrollView)
-        view.addSubview(searchBar)
+        if effectView is NSVisualEffectView {
+            effectView.addSubview(contentView)
+            contentView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+        }
+        contentView.addSubview(scrollView)
+        contentView.addSubview(searchBar)
         effectView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.leading.equalTo(8)
+            make.trailing.equalTo(-8)
+            make.top.equalToSuperview()
+            make.bottom.equalTo(-8)
         }
-        scrollView.contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        
         scrollView.snp.makeConstraints { make in
-            make.leading.trailing.bottom.equalToSuperview()
-            make.top.equalToSuperview().offset(50)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalToSuperview().offset(-20)
+            make.top.equalTo(searchBar.snp.bottom).offset(20)
         }
+        
         searchBar.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.top.greaterThanOrEqualTo(view).offset(5)
-            make.bottom.greaterThanOrEqualTo(scrollView.snp.top).offset(-5)
+            make.top.equalToSuperview().offset(20)
             make.height.equalTo(Layout.searchBarHeight)
             make.width.equalTo(Layout.searchBarWidth)
         }

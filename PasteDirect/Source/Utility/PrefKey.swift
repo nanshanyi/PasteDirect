@@ -7,9 +7,11 @@
 
 import Foundation
 
-enum PrefKey: String {
+enum PrefKey: String, CaseIterable {
     /// 开机自启
     case onStart
+    /// 状态栏显示
+    case statusDisplay
     /// 直接粘贴
     case pasteDirect
     /// 粘贴为纯文本
@@ -26,7 +28,7 @@ enum PrefKey: String {
     case ignoreList
 }
 
-enum HistoryTime: Int {
+enum HistoryTime: Double {
     case now = -1
     case day = 0
     case week = 33

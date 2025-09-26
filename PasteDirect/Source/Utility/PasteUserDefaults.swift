@@ -6,11 +6,15 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum PasteUserDefaults {
     /// 开机自启
     @UserDefaultsWrapper(.onStart, defaultValue: true)
     static var onStart
+    /// 状态栏显示
+    @UserDefaultsWrapper(.statusDisplay, defaultValue: true)
+    static var statusDisplay
     /// 直接粘贴
     @UserDefaultsWrapper(.pasteDirect, defaultValue: true)
     static var pasteDirect
@@ -32,6 +36,10 @@ enum PasteUserDefaults {
     /// 忽略的APP
     @UserDefaultsWrapper(.ignoreList, defaultValue: [String]())
     static var ignoreList
+    
+    static func setValue<T>(for key: PrefKey, value: T) {
+        UserDefaults.standard.set(value, forKey: key.rawValue)
+    }
 }
 
 @propertyWrapper

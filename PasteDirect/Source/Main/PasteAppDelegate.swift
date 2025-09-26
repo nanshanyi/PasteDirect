@@ -24,14 +24,8 @@ final class PasteAppDelegate: NSObject {
     private lazy var mainWindowController = PasteMainWindowController()
 
     var frontApp: NSRunningApplication?
-
-    private lazy var settingsWindowController = SettingsWindowController(
-        panes: [PasteGeneralSettingsViewController(),
-                PasteShortcutsSettingViewController(),
-                PasteIgnoreListController()],
-        style: .toolbarItems,
-        animated: true
-    )
+    
+    private lazy var settingsWindowController = PasteSettingWindowController()
 }
 
 // MARK: - NSApplicationDelegate
@@ -141,6 +135,10 @@ extension PasteAppDelegate {
             frontApp = NSWorkspace.shared.frontmostApplication
             mainWindowController.show(in: frame)
         }
+    }
+    
+    func statusItemVisible(_ isVisible: Bool) {
+        menuBarItem.isVisible = isVisible
     }
 }
 

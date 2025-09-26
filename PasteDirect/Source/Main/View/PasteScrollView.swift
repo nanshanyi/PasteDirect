@@ -17,6 +17,15 @@ final class PasteScrollView: NSScrollView {
     var isSearching = false
     var isLoading = false
     var noMore = false
+    
+    override var hasVerticalScroller: Bool {
+        get { false }
+        set { /* ignore */ }
+    }
+    override var hasHorizontalScroller: Bool {
+        get { false }
+        set { /* ignore */ }
+    }
 
     override func scrollWheel(with event: NSEvent) {
         if let cgEvent = event.cgEvent?.copy(), event.scrollingDeltaX == 0 {
