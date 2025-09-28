@@ -4,16 +4,6 @@
     "" : {
 
     },
-    "Add application..." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "添加应用程序"
-          }
-        }
-      }
-    },
     "Always paste as plain text" : {
       "localizations" : {
         "zh-Hans" : {
@@ -34,6 +24,16 @@
         }
       }
     },
+    "Clear" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
+          }
+        }
+      }
+    },
     "Clear all clipboard history" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41,6 +41,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "清除所有剪切历史"
+          }
+        }
+      }
+    },
+    "Click OK to jump to the system settings page. If PasteDirect already exists in the list, please delete it and add it again, and turn on the permission switch." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击确定跳转到系统设置页，如果列表中已存在PasteDirect，请删除后重新添加，并打开权限开关"
           }
         }
       }
@@ -143,6 +153,16 @@
         }
       }
     },
+    "OK" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定"
+          }
+        }
+      }
+    },
     "Paste history" : {
       "localizations" : {
         "zh-Hans" : {
@@ -170,6 +190,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "粘贴到当前活跃应用"
+          }
+        }
+      }
+    },
+    "PasteDirect requires accessibility permissions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PasteDirect 需要辅助功能权限"
+          }
+        }
+      }
+    },
+    "Quit PasteDirect" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
           }
         }
       }
@@ -204,6 +244,16 @@
         }
       }
     },
+    "Settings..." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "偏好设置"
+          }
+        }
+      }
+    },
     "Shortcuts" : {
       "localizations" : {
         "zh-Hans" : {
@@ -220,6 +270,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "确定"
+          }
+        }
+      }
+    },
+    "This action cannot be undone. All clipboard data will be permanently deleted." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作无法撤消，所有剪贴板数据将被永久删除。\n"
           }
         }
       }

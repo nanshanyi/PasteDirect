@@ -11,7 +11,7 @@ import RxRelay
 import RxSwift
 import SQLite
 import UIColorHexSwift
-
+import SwiftUI
 
 typealias Expression = SQLite.Expression
 
@@ -20,16 +20,16 @@ final class PasteDataStore {
     var needRefresh = false
     let pageSize = 50
     private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
-    private(set) var totalCount = BehaviorRelay<Int>(value: 0)
+    private(set) var totalCount = 0
     private(set) var pageIndex = 0
     
-    private var sqlManager = PasteSQLManager.manager
+    private var sqlManager = PasteSQLManager()
     private var searchTask: Task<(), Error>?
     private var colorDic = [String: String]()
     
     func setup() {
         resetDefaultList()
-        totalCount.accept(sqlManager.totoalCount)
+        updateTotalCount()
         colorDic = PasteUserDefaults.appColorData
     }
 }
@@ -37,8 +37,11 @@ final class PasteDataStore {
 // MARK: - private 辅助方法
 
 extension PasteDataStore {
-    private func updateTotoalCount() {
-        totalCount.accept(sqlManager.totoalCount)
+    private func updateTotalCount() {
+        totalCount = sqlManager.totoalCount
+        Task { @MainActor in
+            SettingsStore.shared.totalCountString = totalCount.description
+        }
     }
 
     private func getItems(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel]{
@@ -85,7 +88,7 @@ extension PasteDataStore {
     /// - Returns: 返回从0到当前页所有数据list
     func loadNextPage() {
         Task {
-            guard dataList.value.count < totalCount.value else { return }
+            guard dataList.value.count < totalCount else { return }
             pageIndex += 1
             Log("loadNextPage \(pageIndex)")
             let nextPage = await getItems(limit: pageSize, offset: pageSize * pageIndex)
@@ -131,7 +134,7 @@ extension PasteDataStore {
         needRefresh = true
         Task {
             await sqlManager.insert(item: model)
-            updateTotoalCount()
+            updateTotalCount()
             var list = dataList.value
             list.removeAll(where: { $0 == model })
             list.insert(model, at: 0)
@@ -153,7 +156,8 @@ extension PasteDataStore {
     func deleteItems(filter: Expression<Bool>) {
         Task {
             await sqlManager.delete(filter: filter)
-            updateTotoalCount()
+            updateTotalCount()
+            resetDefaultList()
         }
     }
 
@@ -194,12 +198,17 @@ extension PasteDataStore {
     /// 删除所有数据
     func clearAllData() {
         let alert = NSAlert()
-        alert.messageText = "清除所有数据"
-        alert.informativeText = "清空数据后会退出应用，请重新打开"
-        alert.addButton(withTitle: "确定")
-        alert.runModal()
-        sqlManager.dropTable()
-        NSApplication.shared.terminate(self)
+        alert.messageText = String(localized: "Clear all clipboard history")
+        alert.informativeText = String(localized: "This action cannot be undone. All clipboard data will be permanently deleted.")
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        alert.addButton(withTitle: String(localized: "Clear"))
+        alert.alertStyle = .warning
+        let response = alert.runModal()
+        if response == .alertSecondButtonReturn {
+            sqlManager.clearAllData()
+            updateTotalCount()
+            resetDefaultList()
+        }
     }
 }
 

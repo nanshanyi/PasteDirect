@@ -20,8 +20,6 @@ let dataString = Expression<String>("dataString")
 let length = Expression<Int>("length")
 
 final class PasteSQLManager: NSObject {
-    static let manager = PasteSQLManager()
-
     private lazy var db: Connection? = {
         let path = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
@@ -46,25 +44,7 @@ final class PasteSQLManager: NSObject {
     }()
 
     private lazy var table: Table = {
-        let tab = Table("pasteContent")
-        let stateMent = tab.create(ifNotExists: true, withoutRowid: false) { t in
-            t.column(id, primaryKey: true)
-            t.column(hashKey)
-            t.column(type)
-            t.column(data)
-            t.column(showData)
-            t.column(date)
-            t.column(appPath)
-            t.column(appName)
-            t.column(dataString)
-            t.column(length)
-        }
-        do {
-            try db?.run(stateMent)
-        } catch {
-            Log("Create Table Error: \(error)")
-        }
-        return tab
+        return createTable()
     }()
 }
 
@@ -114,13 +94,36 @@ extension PasteSQLManager {
         }
     }
 
-    func dropTable() {
+    func clearAllData() {
         do {
            let d = try db?.run(table.drop())
             Log("删除所有\(String(describing: d?.columnCount))")
+            table = createTable()
         } catch {
             Log("删除失败：\(error)")
         }
+    }
+        
+    func createTable() -> Table {
+        let tab = Table("pasteContent")
+        let stateMent = tab.create(ifNotExists: true, withoutRowid: false) { t in
+            t.column(id, primaryKey: true)
+            t.column(hashKey)
+            t.column(type)
+            t.column(data)
+            t.column(showData)
+            t.column(date)
+            t.column(appPath)
+            t.column(appName)
+            t.column(dataString)
+            t.column(length)
+        }
+        do {
+            try db?.run(stateMent)
+        } catch {
+            Log("Create Table Error: \(error)")
+        }
+        return tab
     }
 
 //    //改

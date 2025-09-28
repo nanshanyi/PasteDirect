@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Sidebar View
 struct SidebarView: View {
     @Binding var selectedCategory: SettingCategory?
 
@@ -29,12 +28,5 @@ struct SidebarView: View {
             }
         })
         .toolbar { Text("") }
-    }
-}
-
-extension View {
-    @ViewBuilder
-    func apply<V: View>(@ViewBuilder transform: (Self) -> V) -> some View {
-        transform(self)
     }
 }

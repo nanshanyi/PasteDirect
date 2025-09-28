@@ -9,16 +9,17 @@ import ApplicationServices
 import Carbon
 import Cocoa
 import KeyboardShortcuts
-import Settings
 
 final class PasteAppDelegate: NSObject {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    private lazy var rMenu = NSMenu(title: "设置").then {
-        let item1 = NSMenuItem(title: "偏好设置", action: #selector(settingsAction), keyEquivalent: ",")
+    private lazy var rMenu = NSMenu(title: "").then {
+        let item1 = NSMenuItem(title: String(localized: "Settings..."), action: #selector(settingsAction), keyEquivalent: ",")
+        item1.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         $0.addItem(item1)
         $0.addItem(NSMenuItem.separator())
-        let item3 = NSMenuItem(title: "退出", action: #selector(NSApplication.shared.terminate), keyEquivalent: "q")
-        $0.addItem(item3)
+        let item2 = NSMenuItem(title: String(localized: "Quit PasteDirect"), action: #selector(NSApplication.shared.terminate), keyEquivalent: "q")
+        item2.image = NSImage(systemSymbolName: "x.circle", accessibilityDescription: nil)
+        $0.addItem(item2)
     }
 
     private lazy var mainWindowController = PasteMainWindowController()
@@ -80,9 +81,9 @@ extension PasteAppDelegate {
     private func acquirePrivileges(firstAsk: Bool = false) {
         if !self.readPrivileges(prompt: true), !firstAsk {
             let alert = NSAlert()
-            alert.messageText = "PasteDirect 需要获取辅助功能权限"
-            alert.informativeText = "点击确定跳转到系统设置页，如果列表中已存在PasteDirect，请删除后重新添加，并打开权限开关"
-            alert.addButton(withTitle: "确定")
+            alert.messageText = String(localized: "PasteDirect requires accessibility permissions")
+            alert.informativeText = String(localized: "Click OK to jump to the system settings page. If PasteDirect already exists in the list, please delete it and add it again, and turn on the permission switch.")
+            alert.addButton(withTitle: String(localized: "OK"))
             alert.runModal()
             NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
         }
@@ -140,10 +141,4 @@ extension PasteAppDelegate {
     func statusItemVisible(_ isVisible: Bool) {
         menuBarItem.isVisible = isVisible
     }
-}
-
-extension Settings.PaneIdentifier {
-    static let general = Self("general")
-    static let shortcuts = Self("shortcuts")
-    static let ignore = Self("ignore")
 }

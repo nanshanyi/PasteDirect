@@ -1,7 +1,8 @@
-import SwiftUI
 import KeyboardShortcuts
+import SwiftUI
 
 // MARK: - Detail View
+
 struct DetailView: View {
     let category: SettingCategory?
 
@@ -28,6 +29,7 @@ struct DetailView: View {
 }
 
 // MARK: - Setting Section View
+
 struct SettingSectionView: View {
     let section: SettingSection
 
@@ -42,7 +44,6 @@ struct SettingSectionView: View {
                     VStack(spacing: 0) {
                         SettingItemView(item: item)
                             .background(Color(NSColor.controlBackgroundColor))
-                        // 添加分割线（除了最后一项）
                         if index < section.items.count - 1 {
                             Divider()
                                 .padding(.horizontal, 12)
@@ -61,12 +62,13 @@ struct SettingSectionView: View {
 }
 
 // MARK: - Setting Item View
+
 struct SettingItemView: View {
     let item: SettingItem
     @EnvironmentObject private var settingsStore: SettingsStore
     @State var showAlert = false
     @State private var pendingAlertValue: (key: PrefKey, value: Double, origin: Double)? = nil
-
+    
     var body: some View {
         HStack {
             switch item {
@@ -87,20 +89,19 @@ struct SettingItemView: View {
                 ))
                 .toggleStyle(.switch)
                 .controlSize(.small)
-                
-            case let .text(title, value):
+            case let .text(title, _):
                 Text(title)
                     .font(.system(size: 13))
                     .foregroundColor(.primary)
-                Text(value)
+                Text(settingsStore.totalCountString)
                     .font(.system(size: 13))
                     .foregroundColor(.primary)
                 Spacer()
-            case .slider(_, let key, let range, let step):
+            case let .slider(_, key, range, step):
                 VStack {
                     Slider(
                         value: Binding(
-                            get: { settingsStore.getDouble(key)},
+                            get: { settingsStore.getDouble(key) },
                             set: { newValue in
                                 // 记录原始值并显示警告
                                 let originalValue = settingsStore.getDouble(key)
@@ -117,17 +118,19 @@ struct SettingItemView: View {
                     )
                     .padding(10)
                     .controlSize(.small)
-                    HStack {
+
+                    HStack(spacing: 0) {
                         Text("Day")
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Spacer()
                         Text("Week")
-                            .frame(maxWidth: .infinity, alignment: .center)
+                        Spacer()
                         Text("Month")
-                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.leading, 5)
+                        Spacer()
                         Text("Forever")
-                            .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    
+                    .padding(.leading, 10)
+                    .padding(.trailing, -2)
                 }
             case let .button(title, action):
                 Spacer()
@@ -165,18 +168,15 @@ struct SettingItemView: View {
         } message: {
             Text("You have items that are older than the new history limit. Do you want to delete these older items and apply the new limit?")
         }
-
     }
 }
 
-// MARK: - Helper View Extension
-extension View {
-    @ViewBuilder
-    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
-        if condition {
-            transform(self)
-        } else {
-            self
-        }
+// preview
+struct DetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        DetailView(category: SettingCategory.general)
+            .environmentObject(SettingsStore())
+            .frame(width: 400, height: 600)
     }
 }
+

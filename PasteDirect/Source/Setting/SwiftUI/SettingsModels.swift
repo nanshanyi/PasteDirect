@@ -1,11 +1,11 @@
-import SwiftUI
 import KeyboardShortcuts
+import SwiftUI
 
 // MARK: - Data Models
 
 enum SettingContentType {
-case common
-case custom
+    case common
+    case custom
 }
 
 struct SettingCategory: Identifiable, Hashable {
@@ -29,16 +29,16 @@ struct SettingCategory: Identifiable, Hashable {
                 .toggle("Always paste as plain text", key: .pasteOnlyText),
             ]),
             SettingSection(title: "Paste history", items: [
-                .slider("", key: .historyTime, range: 0...100, step: 33),
-                .text("Total number of items", value: PasteDataStore.main.totalCount.value.description),
+                .slider("", key: .historyTime, range: 0 ... 100, step: 33),
+                .text("Total number of items", value: PasteDataStore.main.totalCount.description),
                 .button("Clear all clipboard history", action: {
                     PasteDataStore.main.clearAllData()
                     PasteUserDefaults.appColorData = [:]
                 }),
-            ])
+            ]),
         ]
     )
-    
+
     static let shortcuts = SettingCategory(
         type: .common,
         title: "Shortcuts",
@@ -46,22 +46,22 @@ struct SettingCategory: Identifiable, Hashable {
         sections: [
             SettingSection(title: "", items: [
                 .shortCut("Launch PasteDirect", key: .pasteKey),
-            ])
-        ])
+            ]),
+        ]
+    )
     static let ignore = SettingCategory(
         type: .custom,
         title: "Rules",
         icon: "list.bullet",
         sections: []
-        )
-            
+    )
 
     static let allCategories = [general, shortcuts, ignore]
-    
+
     static func == (lhs: SettingCategory, rhs: SettingCategory) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -100,7 +100,7 @@ enum SettingItem: Identifiable {
             return title
         }
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

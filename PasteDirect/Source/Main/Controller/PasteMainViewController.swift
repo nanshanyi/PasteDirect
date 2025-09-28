@@ -298,7 +298,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.value.count >= PasteDataStore.main.totalCount.value {
+        if dataList.value.count >= PasteDataStore.main.totalCount {
             scrollView.noMore = true
             scrollView.isLoading = false
             return

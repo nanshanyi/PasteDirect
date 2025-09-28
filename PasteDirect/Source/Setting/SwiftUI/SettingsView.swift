@@ -2,10 +2,12 @@ import SwiftUI
 internal import Combine
 
 // MARK: - Settings Store
+
 @MainActor
-class SettingsStore: ObservableObject {
+final class SettingsStore: ObservableObject {
+    static let shared = SettingsStore()
     @Published var settings: [PrefKey: Any] = [:]
-    
+    @Published var totalCountString: String = ""
     init() {
         loadDefaultSettings()
     }
@@ -44,8 +46,9 @@ class SettingsStore: ObservableObject {
 }
 
 // MARK: - Main Settings View
+
 struct SettingsView: View {
-    @StateObject private var settingsStore = SettingsStore()
+    @StateObject private var settingsStore = SettingsStore.shared
     @State private var selectedCategory: SettingCategory? = SettingCategory.general
 
     var body: some View {

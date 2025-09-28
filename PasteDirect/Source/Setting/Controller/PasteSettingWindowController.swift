@@ -9,7 +9,6 @@ import Cocoa
 import SwiftUI
 
 class PasteSettingWindowController: NSWindowController {
-    private let splitViewController = SettingSplitViewController()
     private let hostingController = NSHostingController(rootView: SettingsView())
     init() {
         let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: true)
@@ -20,11 +19,12 @@ class PasteSettingWindowController: NSWindowController {
         window.contentViewController = hostingController
         window.center()
     }
-    
+
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     public func show() {
         if #available(macOS 14, *) {
             NSApp.activate()
@@ -34,5 +34,6 @@ class PasteSettingWindowController: NSWindowController {
         hostingController.view.layoutSubtreeIfNeeded()
         showWindow(self)
         window?.center()
+        window?.orderFront(nil)
     }
 }
