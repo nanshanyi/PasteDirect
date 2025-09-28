@@ -1,6 +1,6 @@
 
 # PasteTool
-<img src="./PasteDirect/Resource/Assets.xcassets/AppIcon.appiconset/PasteDirect256@1x.png" width="96">
+<img src="./PasteDirect/Resource/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" width="96">
 mac剪切板工具
 
 数据安全，纯本地应用，本地数据库数据存储，不需要任何网络链接
