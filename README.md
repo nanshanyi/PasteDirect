@@ -5,7 +5,10 @@ mac剪切板工具
 
 数据安全，纯本地应用，本地数据库数据存储，不需要任何网络链接
 
-<img width="2048" alt="截屏2024-12-27 18 16 56" src="https://github.com/user-attachments/assets/f7163799-b431-4679-97cf-007d099c0071" />
+<img width="2048" height="441" alt="截屏2025-09-28 16 44 02" src="https://github.com/user-attachments/assets/4d0537b6-6a1b-4ca4-941f-ca69c6fd12fd" />
+<img width="2048" height="508" alt="截屏2025-09-28 16 48 05" src="https://github.com/user-attachments/assets/ba789e7e-502a-4ed1-83ef-208447130406" />
+<img width="629" height="565" alt="截屏2025-09-28 20 03 46" src="https://github.com/user-attachments/assets/a315da78-25d5-4382-8d93-4d827ec14a62" />
+
 
 ## 支持数据类型
 图片，文字，html，code，各种富文本
