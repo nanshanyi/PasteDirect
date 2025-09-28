@@ -119,7 +119,7 @@ extension WindowInfo {
     }
 
     static func allWindows(
-        options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements],
+        options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements, .optionIncludingWindow],
         filter: Filter = defaultFilter
     ) -> [Self] {
         let info = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] ?? []
@@ -131,9 +131,21 @@ extension WindowInfo {
     struct UserApp: Hashable, Identifiable {
         let name: String
         let url: URL
-        let bundleIdentifier: String
+        let bundleIdentifier: String?
 
         var id: URL { url }
+    }
+    
+    static func frontmostApplication() -> UserApp? {
+        let app = NSWorkspace.shared.frontmostApplication
+        let appIgnoreList = defaultList + PasteUserDefaults.ignoreList
+        if appIgnoreList.contains(app?.bundleIdentifier ?? "") {
+            return nil
+        }
+        guard let url = app?.bundleURL else {
+            return nil
+        }
+        return UserApp(name:app?.localizedName ?? "", url: url, bundleIdentifier: app?.bundleIdentifier)
     }
 
     /**

@@ -29,12 +29,17 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
         $0.layer?.backgroundColor = .clear
-        $0.layer?.cornerRadius = 12
+        $0.layer?.cornerRadius = 16
         $0.layer?.borderColor = NSColor("#3970ff")?.cgColor
     }
 
     private lazy var topView = NSView().then {
         $0.wantsLayer = true
+    }
+    
+    private lazy var topMask = NSView().then {
+        $0.wantsLayer = true
+        $0.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.25).cgColor
     }
 
     private lazy var iconImageView = NSImageView().then {
@@ -132,9 +137,15 @@ extension PasteCollectionViewItem {
     }
 
     private func initTopView() {
+        topView.addSubview(topMask)
         topView.addSubview(typeLabel)
         topView.addSubview(timeLabel)
         topView.addSubview(iconImageView)
+        
+        topMask.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
         typeLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.bottom.equalTo(timeLabel.snp.top).offset(-4)
@@ -147,7 +158,7 @@ extension PasteCollectionViewItem {
 
         iconImageView.snp.makeConstraints { make in
             make.top.bottom.trailing.equalToSuperview()
-            make.width.equalTo(70)
+            make.width.equalTo(topView.snp.height)
         }
     }
 
@@ -164,7 +175,7 @@ extension PasteCollectionViewItem {
 
         topView.snp.makeConstraints { make in
             make.leading.trailing.top.equalToSuperview()
-            make.height.equalTo(70)
+            make.height.equalTo(60)
         }
 
         imageContentView.snp.makeConstraints { make in

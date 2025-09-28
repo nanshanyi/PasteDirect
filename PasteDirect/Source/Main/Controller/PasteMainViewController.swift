@@ -13,7 +13,6 @@ import RxSwift
 import SnapKit
 
 final class PasteMainViewController: NSViewController {
-    private let viewHeight: CGFloat = 360
     private var selectIndexPath = IndexPath(item: 0, section: 0)
     private var dataList = PasteDataStore.main.dataList
     private let disposeBag = DisposeBag()
@@ -23,13 +22,11 @@ final class PasteMainViewController: NSViewController {
 
     private lazy var collectionView = NSCollectionView().then {
         let flowLayout = NSCollectionViewFlowLayout()
-        let height = 280
-        flowLayout.itemSize = NSSize(width: height, height: height)
-        flowLayout.minimumLineSpacing = 20
+        flowLayout.itemSize = Layout.itemSize
+        flowLayout.minimumInteritemSpacing = Layout.lineSpacing
+        flowLayout.minimumLineSpacing = Layout.lineSpacing
         flowLayout.scrollDirection = .horizontal
-        flowLayout.headerReferenceSize = NSSize(width: 20, height: height)
-        flowLayout.footerReferenceSize = NSSize(width: 20, height: height)
-        $0.frame = view.bounds
+        flowLayout.sectionInset = NSEdgeInsets(top: 0, left: Layout.lineSpacing, bottom: 0, right: Layout.lineSpacing)
         $0.wantsLayer = true
         $0.delegate = self
         $0.dataSource = self
@@ -44,32 +41,44 @@ final class PasteMainViewController: NSViewController {
     }
 
     private lazy var scrollView = PasteScrollView().then {
-        let clipView = NSClipView(frame: view.bounds)
-        clipView.documentView = collectionView
-        $0.contentView = clipView
+        $0.documentView = collectionView
         $0.scrollerStyle = .overlay
+        $0.autohidesScrollers = true
         $0.horizontalScrollElasticity = .automatic
-        $0.autoresizingMask = [.width, .height]
-        $0.scrollerInsets = NSEdgeInsets(top: 0, left: 0, bottom: -100, right: 0)
         $0.delegate = self
     }
 
-    private lazy var effectView = NSVisualEffectView().then {
-        $0.frame = view.frame
-        $0.state = .active
-        $0.blendingMode = .behindWindow
-    }
+    private lazy var effectView: NSView = {
+        if #available(macOS 26.0, *) {
+           let glassView = NSGlassEffectView()
+            glassView.frame = view.frame
+            glassView.cornerRadius = 34
+            glassView.contentView = contentView
+            return glassView
+        } else {
+           let effectView = NSVisualEffectView()
+            effectView.wantsLayer = true
+            effectView.frame = view.frame
+            effectView.state = .active
+            effectView.blendingMode = .behindWindow
+            effectView.layer?.cornerRadius = 34
+            return effectView
+        }
+    }()
 
     private lazy var searchBar = PasteSearchField().then {
-        $0.wantsLayer = true
-        $0.layer?.masksToBounds = true
-        $0.layer?.borderWidth = 1
-        $0.layer?.borderColor = NSColor.lightGray.cgColor
-        $0.layer?.cornerRadius = 15
+        $0.cell?.controlSize = .large
         $0.focusRingType = .none
         $0.refusesFirstResponder = true
         $0.placeholderString = "搜索"
         $0.delegate = self
+    }
+    
+    private lazy var contentView = NSView().then {
+        $0.wantsLayer = true
+        $0.layer?.backgroundColor = .clear
+        $0.layer?.cornerRadius = 34
+        $0.layer?.masksToBounds = true
     }
 }
 
@@ -85,7 +94,7 @@ extension PasteMainViewController {
 
     override func viewDidAppear() {
         view.window?.makeFirstResponder(collectionView)
-        view.frame = NSRect(x: view.frame.origin.x, y: -viewHeight, width: view.frame.width, height: viewHeight)
+        view.frame = NSRect(x: view.frame.origin.x, y: -Layout.viewHeight, width: view.frame.width, height: Layout.viewHeight)
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
             self.view.animator().setFrameOrigin(.zero)
@@ -113,26 +122,33 @@ extension PasteMainViewController {
 extension PasteMainViewController {
     private func initSubviews() {
         view.wantsLayer = true
-        view.layer?.backgroundColor = NSColor.clear.cgColor
         view.addSubview(effectView)
-        view.addSubview(scrollView)
-        view.addSubview(searchBar)
-        effectView.snp.remakeConstraints { make in
-            make.edges.equalToSuperview()
+        if effectView is NSVisualEffectView {
+            effectView.addSubview(contentView)
+            contentView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
         }
-        scrollView.contentView.snp.remakeConstraints { make in
-            make.edges.equalToSuperview()
+        contentView.addSubview(scrollView)
+        contentView.addSubview(searchBar)
+        effectView.snp.makeConstraints { make in
+            make.leading.equalTo(8)
+            make.trailing.equalTo(-8)
+            make.top.equalToSuperview()
+            make.bottom.equalTo(-8)
         }
-        scrollView.snp.remakeConstraints { make in
-            make.leading.trailing.bottom.equalToSuperview()
-            make.top.equalToSuperview().offset(50)
+        
+        scrollView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalToSuperview().offset(-20)
+            make.top.equalTo(searchBar.snp.bottom).offset(20)
         }
-        searchBar.snp.remakeConstraints { make in
+        
+        searchBar.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.top.greaterThanOrEqualTo(view).offset(5)
-            make.bottom.greaterThanOrEqualTo(scrollView.snp.top).offset(-5)
-            make.height.equalTo(30)
-            make.width.equalTo(200)
+            make.top.equalToSuperview().offset(20)
+            make.height.equalTo(Layout.searchBarHeight)
+            make.width.equalTo(Layout.searchBarWidth)
         }
     }
 
@@ -150,12 +166,12 @@ extension PasteMainViewController {
             .disposed(by: disposeBag)
 
         dataList.observe(on: MainScheduler.instance)
-            .filter { _ in !self.deleteItem }
+            .filter { [weak self] _ in self?.deleteItem == false }
             .subscribe(
                 with: self,
                 onNext: { wrapper, _ in
                     wrapper.deleteItem = false
-                    wrapper.scrollView.isLoding = false
+                    wrapper.scrollView.isLoading = false
                     wrapper.collectionView.reloadData()
                 }
             ).disposed(by: disposeBag)
@@ -248,8 +264,7 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
-        let model = dataList.value[indexPath.item]
-        return model.writeItem
+        return dataList.value[indexPath.item].writeItem
     }
 }
 
@@ -283,9 +298,9 @@ extension PasteMainViewController: NSCollectionViewDataSource {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.value.count >= PasteDataStore.main.totoalCount.value {
+        if dataList.value.count >= PasteDataStore.main.totalCount {
             scrollView.noMore = true
-            scrollView.isLoding = false
+            scrollView.isLoading = false
             return
         }
         PasteDataStore.main.loadNextPage()
