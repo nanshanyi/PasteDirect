@@ -1,6 +1,6 @@
-
 # PasteTool
 mac剪切板工具
+
 <img width="128" height="128" alt="PasteDirect" src="https://github.com/user-attachments/assets/9873c83e-8839-4a49-86a4-aaf9c8439f07" />
 
 数据安全，纯本地应用，本地数据库数据存储，不需要任何网络链接
