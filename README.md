@@ -1,6 +1,6 @@
 
 # PasteTool
-<img src="./PasteDirect/Resource/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" width="96">
+<img width="128" height="128" alt="PasteDirect" src="https://github.com/user-attachments/assets/9873c83e-8839-4a49-86a4-aaf9c8439f07" />
 mac剪切板工具
 
 数据安全，纯本地应用，本地数据库数据存储，不需要任何网络链接
@@ -14,7 +14,7 @@ mac剪切板工具
 图片，文字，html，code，各种富文本
 
 ## 支持快捷操作
-适配系统深色模式
+全面适配 macos 26 液态玻璃，深色图标
 
 支持搜索，可快速查找历史剪切板
 
