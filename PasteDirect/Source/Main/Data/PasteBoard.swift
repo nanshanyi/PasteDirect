@@ -42,7 +42,8 @@ final class PasteBoard {
         changeCount = pasteboard.changeCount
     }
 
-    func pasteData(_ data: PasteboardModel, _ isAttribute: Bool = true) {
+    func pasteData(_ data: PasteboardModel?, _ isAttribute: Bool = true) {
+        guard let data else { return }
         data.updateDate()
         pasteModel = data
         PasteDataStore.main.insertModel(data)

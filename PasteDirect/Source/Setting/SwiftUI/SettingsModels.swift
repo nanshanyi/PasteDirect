@@ -33,7 +33,6 @@ struct SettingCategory: Identifiable, Hashable {
                 .text("Total number of items", value: PasteDataStore.main.totalCount.description),
                 .button("Clear all clipboard history", action: {
                     PasteDataStore.main.clearAllData()
-                    PasteUserDefaults.appColorData = [:]
                 }),
             ]),
         ]

@@ -20,7 +20,6 @@ final class SettingsStore: ObservableObject {
             .pasteOnlyText: PasteUserDefaults.pasteOnlyText,
             .historyTime: PasteUserDefaults.historyTime,
             .appAlreadyLaunched: PasteUserDefaults.appAlreadyLaunched,
-            .appColorData: PasteUserDefaults.appColorData,
             .lastClearDate: PasteUserDefaults.lastClearDate,
             .ignoreList: PasteUserDefaults.ignoreList,
         ]

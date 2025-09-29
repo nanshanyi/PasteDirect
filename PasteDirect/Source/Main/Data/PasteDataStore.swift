@@ -18,37 +18,48 @@ typealias Expression = SQLite.Expression
 final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
-    let pageSize = 50
+    let pageSize = 20
     private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
     private(set) var totalCount = 0
     private(set) var pageIndex = 0
     
     private var sqlManager = PasteSQLManager()
     private var searchTask: Task<(), Error>?
-    private var colorDic = [String: String]()
+    private var colorDic = [String: NSColor?]()
     
     func setup() {
-        resetDefaultList()
-        updateTotalCount()
-        colorDic = PasteUserDefaults.appColorData
+        setupData()
     }
 }
 
 // MARK: - private 辅助方法
 
 extension PasteDataStore {
+    
+    private func setupData() {
+        Task {
+            pageIndex = 0
+            let list = await getItems(limit: pageSize, offset: pageSize * pageIndex)
+            dataList.accept(list)
+            for item in list {
+                await extractColor(from: item)
+            }
+        }
+        updateTotalCount()
+    }
+    
     private func updateTotalCount() {
         totalCount = sqlManager.totoalCount
         Task { @MainActor in
             SettingsStore.shared.totalCountString = totalCount.description
         }
     }
-
+    
     private func getItems(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel]{
         let rows = await sqlManager.search(limit: limit, offset: offset)
         return await getItems(rows: rows)
     }
-
+    
     private func getItems(rows: [Row]) async -> [PasteboardModel] {
         return rows.compactMap { row in
             if let type = try? row.get(type),
@@ -103,7 +114,7 @@ extension PasteDataStore {
             dataList.accept(list)
         }
     }
-
+    
     /// 数据搜索
     /// - Parameter keyWord: 搜索关键词
     /// - Returns: 搜索结果list
@@ -124,7 +135,7 @@ extension PasteDataStore {
         guard let model = PasteboardModel(with: item) else { return }
         insertModel(model)
         Task {
-            await updateColor(model)
+            await extractColor(from: model)
         }
     }
     
@@ -150,7 +161,7 @@ extension PasteDataStore {
         dataList.accept(list)
         deleteItems(filter: items.map{ $0.hashValue}.contains(hashKey))
     }
-
+    
     /// 按条件删除数据
     /// - Parameter filter: Expression<Bool>
     func deleteItems(filter: Expression<Bool>) {
@@ -160,7 +171,7 @@ extension PasteDataStore {
             resetDefaultList()
         }
     }
-
+    
     /// 删除过期数据
     func clearExpiredData() {
         let lastDate = PasteUserDefaults.lastClearDate
@@ -171,7 +182,7 @@ extension PasteDataStore {
         guard let type = HistoryTime(rawValue: current) else { return }
         clearData(for: type)
     }
-
+    
     /// 按时间类型删除数据
     /// - Parameter type: HistoryTime
     func clearData(for type: HistoryTime) {
@@ -194,7 +205,7 @@ extension PasteDataStore {
             needRefresh = true
         }
     }
-
+    
     /// 删除所有数据
     func clearAllData() {
         let alert = NSAlert()
@@ -215,26 +226,13 @@ extension PasteDataStore {
 // MARK: - 颜色处理
 
 extension PasteDataStore {
-    @discardableResult
-    func updateColor(_ model: PasteboardModel) async -> NSColor {
-        if !colorDic.contains(where: { $0.key == model.appName }) {
-            let iconImage = NSWorkspace.shared.icon(forFile: model.appPath)
-            let colors = await iconImage.getColors(quality: .highest)
-            if let colorStr = colors?.primary.hexString(true),
-               !colorStr.isEmpty {
-                colorDic[model.appName] = colorStr
-                PasteUserDefaults.appColorData = colorDic
-            }
-            return colors?.primary ?? .clear
-        }
-        return .clear
-    }
-
-    func colorWith(_ model: PasteboardModel) -> NSColor {
-        if let colorStr = colorDic[model.appName], 
-            let color = NSColor(colorStr) {
+    func extractColor(from model: PasteboardModel) async -> NSColor? {
+        if let color = colorDic[model.appName] {
             return color
         }
-        return .clear
+        let icon  = NSWorkspace.shared.icon(forFile: model.appPath)
+        let color = await ImageColorExtractor.extractAverageColor(from: icon)
+        colorDic[model.appName] = color
+        return color
     }
 }
