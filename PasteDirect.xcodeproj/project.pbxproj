@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		CB0D71122E89056D00BA341F /* IgnoredAppsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0D71112E89056D00BA341F /* IgnoredAppsManager.swift */; };
 		CB0D71142E89067A00BA341F /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0D71132E89067A00BA341F /* View+Extension.swift */; };
+		CB0D71442E8A34BC00BA341F /* PasteDirect.icon in Resources */ = {isa = PBXBuildFile; fileRef = CB0D71432E8A34BC00BA341F /* PasteDirect.icon */; };
 		CB1726302B440C1C002CC472 /* KeyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB17262F2B440C1C002CC472 /* KeyHelper.swift */; };
 		CB2CDEF22924E8D800E81836 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB2CDEF12924E8D800E81836 /* Assets.xcassets */; };
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
@@ -92,6 +93,7 @@
 /* Begin PBXFileReference section */
 		CB0D71112E89056D00BA341F /* IgnoredAppsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IgnoredAppsManager.swift; sourceTree = "<group>"; };
 		CB0D71132E89067A00BA341F /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
+		CB0D71432E8A34BC00BA341F /* PasteDirect.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = PasteDirect.icon; sourceTree = "<group>"; };
 		CB17262F2B440C1C002CC472 /* KeyHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyHelper.swift; sourceTree = "<group>"; };
 		CB2CDEEA2924E8D500E81836 /* PasteDirect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PasteDirect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB2CDEF12924E8D800E81836 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -343,6 +345,7 @@
 		CB5999FA2C6F279D00472E62 /* Resource */ = {
 			isa = PBXGroup;
 			children = (
+				CB0D71432E8A34BC00BA341F /* PasteDirect.icon */,
 				CB2CDEF12924E8D800E81836 /* Assets.xcassets */,
 				CBDC03902E83924200F7EEA1 /* Localizable.xcstrings */,
 			);
@@ -512,6 +515,7 @@
 			files = (
 				CB2CDEF22924E8D800E81836 /* Assets.xcassets in Resources */,
 				CBDC03912E83924200F7EEA1 /* Localizable.xcstrings in Resources */,
+				CB0D71442E8A34BC00BA341F /* PasteDirect.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -740,8 +744,9 @@
 		CB2CDF102924E8D900E81836 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = PasteDirect;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
@@ -773,8 +778,9 @@
 		CB2CDF112924E8D900E81836 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = PasteDirect;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
