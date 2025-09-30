@@ -31,9 +31,7 @@ struct SettingCategory: Identifiable, Hashable {
             SettingSection(title: "Paste history", items: [
                 .slider("", key: .historyTime, range: 0 ... 100, step: 33),
                 .text("Total number of items", value: PasteDataStore.main.totalCount.description),
-                .button("Clear all clipboard history", action: {
-                    PasteDataStore.main.clearAllData()
-                }),
+                .button("Clear all clipboard history"),
             ]),
         ]
     )
@@ -76,7 +74,7 @@ enum SettingItem: Identifiable {
     case toggle(LocalizedStringKey, key: PrefKey)
     case text(LocalizedStringKey, value: String)
     case slider(LocalizedStringKey, key: PrefKey, range: ClosedRange<Double>, step: Double)
-    case button(LocalizedStringKey, action: () -> Void)
+    case button(LocalizedStringKey)
     case shortCut(LocalizedStringKey, key: KeyboardShortcuts.Name)
     var id: String {
         switch self {
@@ -86,7 +84,7 @@ enum SettingItem: Identifiable {
             return "text_\(title)"
         case .slider(let title, let key, _, _):
             return "slider_\(key)_\(title)"
-        case .button(let title, _):
+        case .button(let title):
             return "button_\(title)"
         case .shortCut(let title, let key):
             return "shortcut_\(key)_\(title)"
@@ -95,7 +93,7 @@ enum SettingItem: Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .toggle(let title, _), .text(let title, _), .slider(let title, _, _, _), .button(let title, _), .shortCut(let title, _):
+        case .toggle(let title, _), .text(let title, _), .slider(let title, _, _, _), .button(let title), .shortCut(let title, _):
             return title
         }
     }

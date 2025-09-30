@@ -211,18 +211,9 @@ extension PasteDataStore {
     
     /// 删除所有数据
     func clearAllData() {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Clear all clipboard history")
-        alert.informativeText = String(localized: "This action cannot be undone. All clipboard data will be permanently deleted.")
-        alert.addButton(withTitle: String(localized: "Cancel"))
-        alert.addButton(withTitle: String(localized: "Clear"))
-        alert.alertStyle = .warning
-        let response = alert.runModal()
-        if response == .alertSecondButtonReturn {
-            sqlManager.clearAllData()
-            updateTotalCount()
-            resetDefaultList()
-        }
+        sqlManager.clearAllData()
+        updateTotalCount()
+        resetDefaultList()
     }
 }
 
