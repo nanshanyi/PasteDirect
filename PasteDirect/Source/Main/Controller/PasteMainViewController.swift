@@ -8,14 +8,13 @@
 import AppKit
 import Carbon
 import Cocoa
-import RxCocoa
-import RxSwift
+import Combine
 import SnapKit
 
 final class PasteMainViewController: NSViewController {
     private var selectIndexPath = IndexPath(item: 0, section: 0)
     private var dataList = PasteDataStore.main.dataList
-    private let disposeBag = DisposeBag()
+    private var cancellables = Set<AnyCancellable>()
     private var deleteItem = false
 
     // MARK: - lazy property
@@ -80,6 +79,14 @@ final class PasteMainViewController: NSViewController {
         $0.layer?.cornerRadius = 34
         $0.layer?.masksToBounds = true
     }
+    
+    private lazy var settingButton = NSButton().then {
+        $0.isBordered = false
+        let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .regular)
+        let icon = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
+        $0.image = icon?.withSymbolConfiguration(config)
+        $0.contentTintColor = .labelColor
+    }
 }
 
 // MARK: - 生命周期
@@ -88,7 +95,7 @@ extension PasteMainViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
-        initRx()
+        initCombine()
         NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownEvent(_:))
     }
 
@@ -131,6 +138,7 @@ extension PasteMainViewController {
         }
         contentView.addSubview(scrollView)
         contentView.addSubview(searchBar)
+        contentView.addSubview(settingButton)
         effectView.snp.makeConstraints { make in
             make.leading.equalTo(8)
             make.trailing.equalTo(-8)
@@ -150,31 +158,44 @@ extension PasteMainViewController {
             make.height.equalTo(Layout.searchBarHeight)
             make.width.equalTo(Layout.searchBarWidth)
         }
+        
+        settingButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().offset(-20)
+            make.centerY.equalTo(searchBar)
+            make.width.height.equalTo(44)
+        }
     }
 
-    private func initRx() {
-        searchBar.rx.text.orEmpty
-            .skip(1)
-            .debounce(.milliseconds(200), scheduler: MainScheduler.instance)
-            .subscribe(
-                with: self,
-                onNext: { wrapper, text in
-                    wrapper.scrollView.isSearching = !text.isEmpty
-                    wrapper.searchWord(text)
-                }
-            )
-            .disposed(by: disposeBag)
+    private func initCombine() {
+        // 搜索框文本变化监听
+        searchBar.$text
+            .dropFirst()
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+            .sink { [weak self] text in
+                guard let self = self else { return }
+                self.scrollView.isSearching = !text.isEmpty
+                self.searchWord(text)
+            }
+            .store(in: &cancellables)
 
-        dataList.observe(on: MainScheduler.instance)
+        // 数据列表变化监听
+        dataList
+            .receive(on: DispatchQueue.main)
             .filter { [weak self] _ in self?.deleteItem == false }
-            .subscribe(
-                with: self,
-                onNext: { wrapper, _ in
-                    wrapper.deleteItem = false
-                    wrapper.scrollView.isLoading = false
-                    wrapper.collectionView.reloadData()
-                }
-            ).disposed(by: disposeBag)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.deleteItem = false
+                self.scrollView.isLoading = false
+                self.collectionView.reloadData()
+            }
+            .store(in: &cancellables)
+
+        // 设置按钮点击监听
+        settingButton.tapPublisher
+            .sink { [weak self] in
+                self?.settingAction()
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -244,6 +265,11 @@ extension PasteMainViewController {
         if !dataList.value.isEmpty {
             collectionView.selectItems(at: [selectIndexPath], scrollPosition: .nearestVerticalEdge)
         }
+    }
+    
+    private func settingAction() {
+        let app = NSApplication.shared.delegate as? PasteAppDelegate
+        app?.settingsAction()
     }
 }
 

@@ -28,7 +28,7 @@ enum PrefKey: String, CaseIterable {
     case ignoreList
 }
 
-enum HistoryTime: Double {
+enum HistoryTime: Int {
     case now = -1
     case day = 0
     case week = 33

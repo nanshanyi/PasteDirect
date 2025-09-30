@@ -67,7 +67,7 @@ struct SettingItemView: View {
     let item: SettingItem
     @EnvironmentObject private var settingsStore: SettingsStore
     @State var showAlert = false
-    @State private var pendingAlertValue: (key: PrefKey, value: Double, origin: Double)? = nil
+    @State private var pendingAlertValue: (key: PrefKey, value: Int, origin: Int)? = nil
     
     var body: some View {
         HStack {
@@ -79,13 +79,7 @@ struct SettingItemView: View {
                 Spacer()
                 Toggle("", isOn: Binding(
                     get: { settingsStore.getBool(key) },
-                    set: {
-                        settingsStore.setBool(key, value: $0)
-                        if key == .statusDisplay {
-                            let app = NSApplication.shared.delegate as? PasteAppDelegate
-                            app?.statusItemVisible($0)
-                        }
-                    }
+                    set: { settingsStore.setBool(key, value: $0) }
                 ))
                 .toggleStyle(.switch)
                 .controlSize(.small)
@@ -101,16 +95,17 @@ struct SettingItemView: View {
                 VStack {
                     Slider(
                         value: Binding(
-                            get: { settingsStore.getDouble(key) },
+                            get: { Double(settingsStore.getInt(key)) },
                             set: { newValue in
                                 // 记录原始值并显示警告
-                                let originalValue = settingsStore.getDouble(key)
+                                let originalValue = settingsStore.getInt(key)
+                                let newValue = Int(newValue)
                                 if newValue < originalValue {
                                     pendingAlertValue = (key: key, value: newValue, origin: originalValue)
                                     showAlert = true
                                     return
                                 }
-                                settingsStore.setDouble(key, value: newValue)
+                                settingsStore.setInt(key, value: newValue)
                             }
                         ),
                         in: range,
@@ -149,20 +144,14 @@ struct SettingItemView: View {
         .padding(.horizontal, 12)
         .alert("", isPresented: $showAlert) {
             Button("Cancel", role: .cancel) {
-                // 恢复原始值
                 if let pending = pendingAlertValue {
-                    settingsStore.setDouble(pending.key, value: pending.origin)
+                    settingsStore.setInt(pending.key, value: pending.origin)
                 }
                 pendingAlertValue = nil
             }
             Button("Sure") {
-                // 应用零值
                 guard let pending = pendingAlertValue else { return }
-                if let type = HistoryTime(rawValue: pending.value) {
-                    PasteDataStore.main.clearData(for: type)
-                    PasteUserDefaults.historyTime = type.rawValue
-                }
-                settingsStore.setDouble(pending.key, value: pending.value)
+                settingsStore.setInt(pending.key, value: pending.value)
                 pendingAlertValue = nil
             }
         } message: {

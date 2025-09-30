@@ -41,12 +41,13 @@
 		CB5320AC2B3596B5006C4B5D /* PasteSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */; };
 		CB57A8CA2E82A53D00C8F80F /* PasteSettingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB57A8C92E82A53D00C8F80F /* PasteSettingWindowController.swift */; };
 		CB58936C2E856C3E0024564F /* RulesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB58936B2E856C3E0024564F /* RulesDetailView.swift */; };
-		CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = CB9641792C2D752C0099F12F /* RxCocoa */; };
-		CB96417C2C2D752C0099F12F /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB96417B2C2D752C0099F12F /* RxSwift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
 		CBABF7862B344A6600D3A095 /* Then.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBABF7852B344A6600D3A095 /* Then.swift */; };
+		CBB6A2702E8BB16D00B96A5F /* ColorCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB6A26F2E8BB16D00B96A5F /* ColorCache.swift */; };
+		CBB6A2722E8BC85500B96A5F /* SettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB6A2712E8BC85500B96A5F /* SettingStore.swift */; };
+		CBB6A2742E8BD2AA00B96A5F /* NSControl+Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB6A2732E8BD2AA00B96A5F /* NSControl+Combine.swift */; };
 		CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC127172C32D17900E5DBEF /* Date+Extension.swift */; };
 		CBD39A1A2E8A911C0081883D /* ImageColorExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD39A192E8A911C0081883D /* ImageColorExtractor.swift */; };
 		CBD5E39A2C3BD76C00F0F95F /* NSCollectionView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3992C3BD76C00F0F95F /* NSCollectionView+Extension.swift */; };
@@ -129,6 +130,9 @@
 		CB57A8C92E82A53D00C8F80F /* PasteSettingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSettingWindowController.swift; sourceTree = "<group>"; };
 		CB58936B2E856C3E0024564F /* RulesDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesDetailView.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
+		CBB6A26F2E8BB16D00B96A5F /* ColorCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorCache.swift; sourceTree = "<group>"; };
+		CBB6A2712E8BC85500B96A5F /* SettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingStore.swift; sourceTree = "<group>"; };
+		CBB6A2732E8BD2AA00B96A5F /* NSControl+Combine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSControl+Combine.swift"; sourceTree = "<group>"; };
 		CBC127172C32D17900E5DBEF /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
 		CBD39A192E8A911C0081883D /* ImageColorExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageColorExtractor.swift; sourceTree = "<group>"; };
 		CBD5E3992C3BD76C00F0F95F /* NSCollectionView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSCollectionView+Extension.swift"; sourceTree = "<group>"; };
@@ -147,12 +151,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB96417A2C2D752C0099F12F /* RxCocoa in Frameworks */,
 				CB9986FF29260015007E585C /* SQLite in Frameworks */,
 				CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */,
 				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
 				CB99870229260372007E585C /* SnapKit in Frameworks */,
-				CB96417C2C2D752C0099F12F /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				CB0D71112E89056D00BA341F /* IgnoredAppsManager.swift */,
+				CBB6A2712E8BC85500B96A5F /* SettingStore.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				CB2CDF6C2924ECAC00E81836 /* PasteDataStore.swift */,
 				CB2CDF6D2924ECAC00E81836 /* PasteSQLManager.swift */,
 				CB2CDF6E2924ECAC00E81836 /* PasteBoard.swift */,
+				CBB6A26F2E8BB16D00B96A5F /* ColorCache.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -360,6 +364,7 @@
 		CBABF7842B344A2F00D3A095 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				CBB6A2732E8BD2AA00B96A5F /* NSControl+Combine.swift */,
 				CB2CDF5A2924ECAB00E81836 /* KeyboardShortcuts+Extension.swift */,
 				CBABF7852B344A6600D3A095 /* Then.swift */,
 				CB0D71132E89067A00BA341F /* View+Extension.swift */,
@@ -411,8 +416,6 @@
 				CB9986F52925FF46007E585C /* KeyboardShortcuts */,
 				CB9986FE29260015007E585C /* SQLite */,
 				CB99870129260372007E585C /* SnapKit */,
-				CB9641792C2D752C0099F12F /* RxCocoa */,
-				CB96417B2C2D752C0099F12F /* RxSwift */,
 			);
 			productName = PasteDirect;
 			productReference = CB2CDEEA2924E8D500E81836 /* PasteDirect.app */;
@@ -492,7 +495,6 @@
 				CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
-				CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */,
 			);
 			productRefGroup = CB2CDEEB2924E8D500E81836 /* Products */;
 			projectDirPath = "";
@@ -537,11 +539,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBB6A2722E8BC85500B96A5F /* SettingStore.swift in Sources */,
 				CB2CDF842924ECAE00E81836 /* PasteBoard.swift in Sources */,
 				CB2CDF852924ECAE00E81836 /* PasteScrollView.swift in Sources */,
 				CB0D71142E89067A00BA341F /* View+Extension.swift in Sources */,
 				CB2CDF752924ECAE00E81836 /* UIImageColors.swift in Sources */,
 				CB2CDF7A2924ECAE00E81836 /* PasteMainViewController.swift in Sources */,
+				CBB6A2742E8BD2AA00B96A5F /* NSControl+Combine.swift in Sources */,
+				CBB6A2702E8BB16D00B96A5F /* ColorCache.swift in Sources */,
 				CBD5E3BB2C3FCE3600F0F95F /* NSAttributeString+Extension.swift in Sources */,
 				CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */,
 				CB5320AC2B3596B5006C4B5D /* PasteSearchField.swift in Sources */,
@@ -933,14 +938,6 @@
 				minimumVersion = 5.1.9;
 			};
 		};
-		CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 6.7.1;
-			};
-		};
 		CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -972,16 +969,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */;
 			productName = UIColorHexSwift;
-		};
-		CB9641792C2D752C0099F12F /* RxCocoa */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxCocoa;
-		};
-		CB96417B2C2D752C0099F12F /* RxSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB9641782C2D752C0099F12F /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxSwift;
 		};
 		CB9986F52925FF46007E585C /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;

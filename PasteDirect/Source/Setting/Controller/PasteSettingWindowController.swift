@@ -9,15 +9,16 @@ import Cocoa
 import SwiftUI
 
 class PasteSettingWindowController: NSWindowController {
-    private let hostingController = NSHostingController(rootView: SettingsView())
+    private let hostingController = NSHostingController(rootView: SettingsView()).then {
+        $0.sizingOptions = [.preferredContentSize]
+    }
+
     init() {
         let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: true)
-        window.minSize = NSSize(width: 600, height: 500)
         window.titleVisibility = .visible
         window.titlebarSeparatorStyle = .automatic
         super.init(window: window)
         window.contentViewController = hostingController
-        window.center()
     }
 
     @available(*, unavailable)
@@ -31,9 +32,7 @@ class PasteSettingWindowController: NSWindowController {
         } else {
             NSApp.activate(ignoringOtherApps: true)
         }
-        hostingController.view.layoutSubtreeIfNeeded()
         showWindow(self)
         window?.center()
-        window?.orderFront(nil)
     }
 }

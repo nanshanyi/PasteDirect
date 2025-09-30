@@ -7,26 +7,26 @@
 
 import AppKit
 import Foundation
-import RxRelay
-import RxSwift
+import Combine
+import SwiftUI
 import SQLite
 import UIColorHexSwift
-import SwiftUI
 
 typealias Expression = SQLite.Expression
 
 final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
-    let pageSize = 20
-    private(set) var dataList = BehaviorRelay<[PasteboardModel]>(value: [])
+    let pageSize = 50
+
+    private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
     private(set) var totalCount = 0
     private(set) var pageIndex = 0
-    
+    private var currentOffset: Int { pageSize * pageIndex }
     private var sqlManager = PasteSQLManager()
-    private var searchTask: Task<(), Error>?
-    private var colorDic = [String: NSColor?]()
-    
+    private var searchTask: Task<Void, Error>?
+    private var colorCache = ColorCache()
+
     func setup() {
         setupData()
     }
@@ -35,32 +35,35 @@ final class PasteDataStore {
 // MARK: - private 辅助方法
 
 extension PasteDataStore {
-    
     private func setupData() {
+        pageIndex = 0
+        updateTotalCount()
         Task {
-            pageIndex = 0
-            let list = await getItems(limit: pageSize, offset: pageSize * pageIndex)
-            dataList.accept(list)
-            for item in list {
-                await extractColor(from: item)
+            let list = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
+            dataList.send(list)
+            await withTaskGroup(of: Void.self) { group in
+                for item in list {
+                    group.addTask {
+                        await self.colorCache.getOrExtract(for: item)
+                    }
+                }
             }
         }
-        updateTotalCount()
     }
     
     private func updateTotalCount() {
-        totalCount = sqlManager.totoalCount
+        totalCount = sqlManager.totalCount
         Task { @MainActor in
             SettingsStore.shared.totalCountString = totalCount.description
         }
     }
     
-    private func getItems(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel]{
+    private func fetchItemsFromDB(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel] {
         let rows = await sqlManager.search(limit: limit, offset: offset)
-        return await getItems(rows: rows)
+        return await parseItems(rows: rows)
     }
     
-    private func getItems(rows: [Row]) async -> [PasteboardModel] {
+    private func parseItems(rows: [Row]) async -> [PasteboardModel] {
         return rows.compactMap { row in
             if let type = try? row.get(type),
                let data = try? row.get(data),
@@ -94,24 +97,23 @@ extension PasteDataStore {
 // MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
-    
     /// 加载下一页
     /// - Returns: 返回从0到当前页所有数据list
     func loadNextPage() {
+        guard dataList.value.count < totalCount else { return }
+        pageIndex += 1
         Task {
-            guard dataList.value.count < totalCount else { return }
-            pageIndex += 1
             Log("loadNextPage \(pageIndex)")
-            let nextPage = await getItems(limit: pageSize, offset: pageSize * pageIndex)
-            dataList.accept(dataList.value + nextPage)
+            let nextPage = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
+            dataList.send(dataList.value + nextPage)
         }
     }
     
     func resetDefaultList() {
+        pageIndex = 0
         Task {
-            pageIndex = 0
-            let list = await getItems(limit: pageSize, offset: pageSize * pageIndex)
-            dataList.accept(list)
+            let list = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
+            dataList.send(list)
         }
     }
     
@@ -123,9 +125,9 @@ extension PasteDataStore {
         searchTask = Task {
             let filter = appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%")
             let rows = await sqlManager.search(filter: filter)
-            let result = await getItems(rows: rows)
+            let result = await parseItems(rows: rows)
             try Task.checkCancellation()
-            dataList.accept(result)
+            dataList.send(result)
         }
     }
     
@@ -150,16 +152,17 @@ extension PasteDataStore {
             list.removeAll(where: { $0 == model })
             list.insert(model, at: 0)
             list = Array(list.prefix(pageSize))
-            dataList.accept(list)
+            dataList.send(list)
         }
     }
+
     /// 删除单条数据
     /// - Parameter item: PasteboardModel
     func deleteItems(_ items: PasteboardModel...) {
         var list = dataList.value
         list.removeAll(where: { items.contains($0) })
-        dataList.accept(list)
-        deleteItems(filter: items.map{ $0.hashValue}.contains(hashKey))
+        dataList.send(list)
+        deleteItems(filter: items.map { $0.hashValue }.contains(hashKey))
     }
     
     /// 按条件删除数据
@@ -189,18 +192,18 @@ extension PasteDataStore {
         var dateCom = DateComponents()
         switch type {
         case .now:
-            dateCom = DateComponents(calendar: NSCalendar.current)
+            dateCom = DateComponents(calendar: Calendar.current)
         case .day:
-            dateCom = DateComponents(calendar: NSCalendar.current, day: -1)
+            dateCom = DateComponents(calendar: Calendar.current, day: -1)
         case .week:
-            dateCom = DateComponents(calendar: NSCalendar.current, day: -7)
+            dateCom = DateComponents(calendar: Calendar.current, day: -7)
         case .month:
-            dateCom = DateComponents(calendar: NSCalendar.current, month: -1)
+            dateCom = DateComponents(calendar: Calendar.current, month: -1)
         default:
             return
         }
-        if let deadDate = NSCalendar.current.date(byAdding: dateCom, to: Date()) {
-            dataList.accept(dataList.value.filter{ $0.date > deadDate })
+        if let deadDate = Calendar.current.date(byAdding: dateCom, to: Date()) {
+            dataList.send(dataList.value.filter { $0.date > deadDate })
             deleteItems(filter: date < deadDate)
             needRefresh = true
         }
@@ -226,13 +229,8 @@ extension PasteDataStore {
 // MARK: - 颜色处理
 
 extension PasteDataStore {
+    @discardableResult
     func extractColor(from model: PasteboardModel) async -> NSColor? {
-        if let color = colorDic[model.appName] {
-            return color
-        }
-        let icon  = NSWorkspace.shared.icon(forFile: model.appPath)
-        let color = await ImageColorExtractor.extractAverageColor(from: icon)
-        colorDic[model.appName] = color
-        return color
+        await colorCache.getOrExtract(for: model)
     }
 }
