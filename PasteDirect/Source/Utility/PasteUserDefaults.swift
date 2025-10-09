@@ -27,9 +27,6 @@ enum PasteUserDefaults {
     /// 是否启动过App
     @UserDefaultsWrapper(.appAlreadyLaunched, defaultValue: false)
     static var appAlreadyLaunched
-    /// 本地APP颜色表
-    @UserDefaultsWrapper(.appColorData, defaultValue: [String: String]())
-    static var appColorData
     /// 上次清理时间
     @UserDefaultsWrapper(.lastClearDate, defaultValue: "")
     static var lastClearDate

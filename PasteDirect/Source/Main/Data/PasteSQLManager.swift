@@ -51,7 +51,7 @@ final class PasteSQLManager: NSObject {
 // MARK: - 数据库操作 对外接口
 
 extension PasteSQLManager {
-    var totoalCount: Int {
+    var totalCount: Int {
         do {
             return try db?.scalar(table.count) ?? 0
         } catch {

@@ -20,7 +20,7 @@ let maxLength = 300
 
 final class PasteCollectionViewItem: NSCollectionViewItem {
     weak var delegate: PasteCollectionViewItemDelegate?
-    private var pModel: PasteboardModel!
+    private var pModel: PasteboardModel?
     private var keyMonitor: Any?
     private var isAttribute: Bool = true
     private var observation: NSKeyValueObservation?
@@ -39,7 +39,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
     
     private lazy var topMask = NSView().then {
         $0.wantsLayer = true
-        $0.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.25).cgColor
+        $0.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.2).cgColor
     }
 
     private lazy var iconImageView = NSImageView().then {
@@ -206,7 +206,7 @@ extension PasteCollectionViewItem {
     
     func updateItem(model: PasteboardModel) {
         pModel = model
-        switch pModel.type {
+        switch model.type {
         case .image:
             setImageItem()
         case .string:
@@ -214,22 +214,31 @@ extension PasteCollectionViewItem {
         default:
             break
         }
-        if !pModel.appPath.isEmpty {
-            iconImageView.image = NSWorkspace.shared.icon(forFile: pModel.appPath)
-            topView.layer?.backgroundColor = PasteDataStore.main.colorWith(pModel).cgColor
+        if !model.appPath.isEmpty {
+            iconImageView.image = NSWorkspace.shared.icon(forFile: model.appPath)
+            Task {
+                let color = await PasteDataStore.main.extractColor(from: model)
+                updateTopColor(color)
+            }
         } else {
-            topView.layer?.backgroundColor = NSColor.bgColor.cgColor
+            updateTopColor(.bg)
+            
         }
         setViewMenu()
         timeLabel.stringValue = model.date.timeAgo
         typeLabel.stringValue = model.type.string
         bottomLabel.stringValue = model.sizeString(or: pasteImageView.image)
     }
+    
+    @MainActor
+    private func updateTopColor(_ color: NSColor?) {
+        topView.layer?.backgroundColor = color?.cgColor ?? NSColor.bg.cgColor
+    }
 
     private func setStringItem() {
         imageContentView.isHidden = true
         contentLabel.isHidden = false
-        guard let att = pModel.attributeString else { return }
+        guard let att = pModel?.attributeString else { return }
         let showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
         if att.length > 0,
            let color = att.attribute(.backgroundColor, at: 0, effectiveRange: nil) as? NSColor {
@@ -246,19 +255,21 @@ extension PasteCollectionViewItem {
     private func setImageItem() {
         imageContentView.isHidden = false
         contentLabel.isHidden = true
-        let retImage = NSImage(data: pModel.data)
-        pasteImageView.image = retImage
-        imageContentView.image = retImage
+        if let data = pModel?.data, let image = NSImage(data: data) {
+            pasteImageView.image = image
+            imageContentView.image = image
+        }
     }
 
     private func setViewMenu() {
+        
         let menu = NSMenu()
         if let app = NSApplication.shared.delegate as? PasteAppDelegate,
             let name = app.frontApp?.localizedName {
             let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteAttributeTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
-        if pModel.type == .string {
+        if pModel?.type == .string {
             let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteOnlyTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
@@ -295,7 +306,7 @@ extension PasteCollectionViewItem {
     }
 
     private func pasteAction(_ isAttribute: Bool = true) {
-        Log("isAttribute: \(isAttribute) data: \(pModel.dataString)")
+        Log("isAttribute: \(isAttribute) data: \(pModel?.dataString ?? "")")
         PasteBoard.main.pasteData(pModel, isAttribute)
         guard PasteUserDefaults.pasteDirect else { return }
         guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
@@ -309,7 +320,7 @@ extension PasteCollectionViewItem {
 
     @objc
     private func copyItemData() {
-        guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
+        guard let pModel, let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
         app.dismissWindow()
         PasteBoard.main.pasteData(pModel)
         app.frontApp?.activate()
@@ -317,7 +328,7 @@ extension PasteCollectionViewItem {
 
     @objc
     private func deleteItem() {
-        if let indexPath = collectionView?.indexPath(for: self) {
+        if let pModel, let indexPath = collectionView?.indexPath(for: self) {
             delegate?.deleteItem(pModel, indexPath: indexPath)
         }
     }

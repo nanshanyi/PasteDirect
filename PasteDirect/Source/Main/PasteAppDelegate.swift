@@ -54,7 +54,7 @@ extension PasteAppDelegate {
         /// 记录是否第一次启动 设置开机自启
         if !PasteUserDefaults.appAlreadyLaunched {
 #if !DEBUG
-            LaunchAtLogin.isEnabled = true
+            LaunchAtLogin.isEnabled = PasteUserDefaults.onStart
 #endif
             PasteUserDefaults.appAlreadyLaunched = true
             settingsAction()
@@ -97,7 +97,7 @@ extension PasteAppDelegate {
     }
 
     private func setStatusItem() {
-        menuBarItem.isVisible = true
+        menuBarItem.isVisible = PasteUserDefaults.statusDisplay
         menuBarItem.button?.image = NSImage(named: "paste_icon_Normal")
         menuBarItem.button?.target = self
         menuBarItem.button?.action = #selector(statusBarClick)
@@ -116,10 +116,7 @@ extension PasteAppDelegate {
         }
     }
 
-    @objc
-    private func settingsAction() {
-        settingsWindowController.show()
-    }
+    
 }
 
 // MARK: - 对外方法
@@ -140,5 +137,10 @@ extension PasteAppDelegate {
     
     func statusItemVisible(_ isVisible: Bool) {
         menuBarItem.isVisible = isVisible
+    }
+    
+    @objc
+    func settingsAction() {
+        settingsWindowController.show()
     }
 }
