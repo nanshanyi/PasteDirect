@@ -160,7 +160,7 @@ extension PasteMainViewController {
         }
         
         settingButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().offset(-20)
+            make.trailing.equalToSuperview().offset(-16)
             make.centerY.equalTo(searchBar)
             make.width.height.equalTo(44)
         }
@@ -278,10 +278,10 @@ extension PasteMainViewController {
 extension PasteMainViewController: NSCollectionViewDelegate {
     func collectionView(_ collectionView: NSCollectionView, shouldSelectItemsAt indexPaths: Set<IndexPath>) -> Set<IndexPath> {
         if let indexPath = indexPaths.first {
-            selectIndexPath = indexPath
+            resetSelectIndex(indexPath)
         }
         Log("选中\(indexPaths.description)")
-        return indexPaths
+        return [selectIndexPath]
     }
 
     func collectionView(_ collectionView: NSCollectionView, canDragItemsAt indexPaths: Set<IndexPath>, with event: NSEvent) -> Bool {
@@ -291,6 +291,16 @@ extension PasteMainViewController: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
         return dataList.value[indexPath.item].writeItem
+    }
+    
+    func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+        if let indexPath = indexPaths.first,
+           let item = collectionView.layoutAttributesForItem(at: indexPath) {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
+            }
+        }
     }
 }
 
