@@ -263,13 +263,23 @@ extension PasteMainViewController {
         collectionView.item(at: selectIndexPath)?.isSelected = false
         selectIndexPath = indexPath
         if !dataList.value.isEmpty {
-            collectionView.selectItems(at: [selectIndexPath], scrollPosition: .nearestVerticalEdge)
+            collectionView.selectionIndexPaths = [selectIndexPath]
+            scrollTo(indexPath: selectIndexPath)
         }
     }
     
     private func settingAction() {
         let app = NSApplication.shared.delegate as? PasteAppDelegate
         app?.settingsAction()
+    }
+    
+    private func scrollTo(indexPath: IndexPath) {
+       if let item = collectionView.layoutAttributesForItem(at: indexPath) {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
+            }
+        }
     }
 }
 
@@ -291,16 +301,6 @@ extension PasteMainViewController: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
         return dataList.value[indexPath.item].writeItem
-    }
-    
-    func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
-        if let indexPath = indexPaths.first,
-           let item = collectionView.layoutAttributesForItem(at: indexPath) {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.25
-                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
-            }
-        }
     }
 }
 
