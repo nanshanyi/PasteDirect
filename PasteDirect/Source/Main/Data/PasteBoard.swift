@@ -12,7 +12,7 @@ final class PasteBoard {
     static let main = PasteBoard()
 
     private let pasteboard = NSPasteboard.general
-    private let timerInterval = 1.0
+    private let timerInterval = 0.5
     private var changeCount: Int
     private var pasteModel: PasteboardModel?
 

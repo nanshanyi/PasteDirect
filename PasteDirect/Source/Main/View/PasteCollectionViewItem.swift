@@ -121,6 +121,11 @@ extension PasteCollectionViewItem {
             pasteAction()
         }
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        pasteImageView.image = nil
+    }
 }
 
 // MARK: - UI布局
