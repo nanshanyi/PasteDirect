@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSFileProviderPresenceUsageDescription</key>
 	<string>选择文件</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>PasteDirect 需要辅助功能权限来监听剪贴板变化和粘贴内容</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

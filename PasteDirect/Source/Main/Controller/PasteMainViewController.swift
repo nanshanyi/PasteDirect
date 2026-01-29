@@ -43,6 +43,7 @@ final class PasteMainViewController: NSViewController {
         $0.documentView = collectionView
         $0.scrollerStyle = .overlay
         $0.autohidesScrollers = true
+        $0.verticalScrollElasticity = .none
         $0.horizontalScrollElasticity = .automatic
         $0.delegate = self
     }

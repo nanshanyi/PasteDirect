@@ -26,4 +26,22 @@ mac剪切板工具
 
 默认快捷键“cmd+shift+v”，可自行设置快捷键
 
+## 📥 安装说明
+
+### 下载
+从 [Releases](https://github.com/nanshanyi/PasteDirect/releases) 下载最新版本
+
+### 首次运行
+由于是个人开发应用，首次运行需要右键点击 `PasteDirect.app` → 选择"打开"
+
+或使用命令行：
+```bash
+xattr -cr /Applications/PasteDirect.app
+open /Applications/PasteDirect.app
+```
+
+详细安装步骤请查看 [安装指南](./README_installation_guide.md)
+
+### ✅ 更新无忧
+从 v2.2.0 开始，更新应用时辅助功能权限会自动保留，无需重新授权！
 

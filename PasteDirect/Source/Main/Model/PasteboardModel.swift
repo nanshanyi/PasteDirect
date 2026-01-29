@@ -12,7 +12,8 @@ enum PasteModelType {
     case none
     case image
     case string
-    
+    case color
+
     init(with type: PasteboardType) {
         switch type {
         case .rtf, .rtfd, .string:
@@ -23,11 +24,12 @@ enum PasteModelType {
             self = .none
         }
     }
-    
+
     var string: String {
         switch self {
         case .image: return "图片"
         case .string: return "文本"
+        case .color: return "颜色"
         default: return "未知"
         }
     }
@@ -44,8 +46,17 @@ final class PasteboardModel {
     let dataString: String
     let length: Int
     let attributeString: NSAttributedString?
+    let hexColorString: String?
     private(set) lazy var writeItem = PasteboardWritingItem(data: data, type: pasteboardType)
-    private(set) lazy var type = PasteModelType(with: pasteboardType)
+
+    var type: PasteModelType {
+        // 优先检查是否是颜色
+        if hexColorString != nil {
+            return .color
+        }
+        // 否则使用默认逻辑
+        return PasteModelType(with: pasteboardType)
+    }
     
     init(pasteboardType: PasteboardType,
          data: Data,
@@ -68,6 +79,18 @@ final class PasteboardModel {
         self.dataString = dataString
         self.length = length
         self.attributeString = attributeString
+
+        // 颜色识别逻辑：统一在这里处理
+        if pasteboardType.isText() {
+            let trimmed = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let hexColorString = HexColorValidator.isValidHexColor(trimmed) {
+                self.hexColorString = hexColorString
+            } else {
+                self.hexColorString = nil
+            }
+        } else {
+            self.hexColorString = nil
+        }
     }
     
     convenience init?(with item: NSPasteboardItem) {
@@ -77,6 +100,7 @@ final class PasteboardModel {
         var showData: Data?
         var showAtt: NSAttributedString?
         var att = NSAttributedString()
+
         if type.isText() {
             att = NSAttributedString(with: data, type: type) ?? NSAttributedString()
             guard !att.string.allSatisfy({ $0.isWhitespace }) else { return nil }
@@ -108,6 +132,8 @@ final class PasteboardModel {
             return "\(Int(image.size.width)) × \(Int(image.size.height)) 像素"
         case .string:
             return "\(formatter.string(from: NSNumber(value: length)) ?? "")个字符"
+        case .color:
+            return "颜色：\(hexColorString ?? "未知")"
         }
     }
     

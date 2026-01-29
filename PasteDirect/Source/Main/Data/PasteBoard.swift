@@ -12,7 +12,7 @@ final class PasteBoard {
     static let main = PasteBoard()
 
     private let pasteboard = NSPasteboard.general
-    private let timerInterval = 1.0
+    private let timerInterval = 0.5
     private var changeCount: Int
     private var pasteModel: PasteboardModel?
 
@@ -42,14 +42,17 @@ final class PasteBoard {
         changeCount = pasteboard.changeCount
     }
 
-    func pasteData(_ data: PasteboardModel?, _ isAttribute: Bool = true) {
+    func pasteData(_ data: PasteboardModel?, _ isOriginal: Bool = false) {
         guard let data else { return }
         data.updateDate()
         pasteModel = data
         PasteDataStore.main.insertModel(data)
         NSPasteboard.general.clearContents()
-        if data.type == .string, !isAttribute {
+        if data.type == .string, !isOriginal {
             NSPasteboard.general.setString(data.dataString, forType: .string)
+        } else if data.type == .color {
+            let string = isOriginal ? data.dataString : data.hexColorString
+            NSPasteboard.general.setString(string ?? data.dataString, forType: .string)
         } else {
             NSPasteboard.general.setData(data.data, forType: data.pasteboardType)
         }
