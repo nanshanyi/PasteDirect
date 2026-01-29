@@ -216,6 +216,8 @@ extension PasteCollectionViewItem {
             setImageItem()
         case .string:
             setStringItem()
+        case .color:
+            setColorItem()
         default:
             break
         }
@@ -227,12 +229,17 @@ extension PasteCollectionViewItem {
             }
         } else {
             updateTopColor(.bg)
-            
         }
         setViewMenu()
         timeLabel.stringValue = model.date.timeAgo
         typeLabel.stringValue = model.type.string
         bottomLabel.stringValue = model.sizeString(or: pasteImageView.image)
+        if model.pasteboardType.isText(), let bgColor = NSColor(cgColor: contentView.layer?.backgroundColor ?? .black) {
+            let textColor = HexColorValidator.textColor(for: bgColor)
+            bottomLabel.textColor = textColor.withAlphaComponent(0.6)
+        } else {
+            bottomLabel.textColor = .systemGray
+        }
     }
     
     @MainActor
@@ -266,17 +273,45 @@ extension PasteCollectionViewItem {
         }
     }
 
-    private func setViewMenu() {
+    private func setColorItem() {
+        imageContentView.isHidden = true
+        contentLabel.isHidden = false
+        guard let hexColor = NSColor(pModel?.hexColorString ?? "") else {
+            // 降级为普通文本显示
+            setStringItem()
+            return
+        }
         
+        // 设置背景色为颜色值
+        contentView.layer?.backgroundColor = hexColor.cgColor
+        // 计算合适的文本颜色
+        let textColor = HexColorValidator.textColor(for: hexColor)
+        
+        // 创建富文本：显示原始文本
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 14, weight: .semibold),
+            .foregroundColor: textColor
+        ]
+        let attributedText = NSAttributedString(string: pModel?.dataString ?? "", attributes: attrs)
+        contentLabel.attributedStringValue = attributedText
+        contentLabel.alignment = .center
+    }
+
+    private func setViewMenu() {
         let menu = NSMenu()
         if let app = NSApplication.shared.delegate as? PasteAppDelegate,
             let name = app.frontApp?.localizedName {
-            let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteAttributeTextClick), keyEquivalent: "")
+            let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteOriginalTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
         if pModel?.type == .string {
-            let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteOnlyTextClick), keyEquivalent: "")
+            let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
+        }
+        
+        if pModel?.type == .color {
+            let itemColor = NSMenuItem(title: "粘贴为#RRGGBB", action: #selector(pasteTextClick), keyEquivalent: "")
+            menu.addItem(itemColor)
         }
         let item2 = NSMenuItem(title: "复制", action: #selector(copyItemData), keyEquivalent: "")
         menu.addItem(item2)
@@ -301,18 +336,18 @@ extension PasteCollectionViewItem {
     }
 
     @objc
-    private func pasteOnlyTextClick() {
+    private func pasteTextClick() {
         pasteAction(false)
     }
-    
+
     @objc
-    private func pasteAttributeTextClick() {
+    private func pasteOriginalTextClick() {
         pasteAction(true)
     }
 
-    private func pasteAction(_ isAttribute: Bool = true) {
-        Log("isAttribute: \(isAttribute) data: \(pModel?.dataString ?? "")")
-        PasteBoard.main.pasteData(pModel, isAttribute)
+    private func pasteAction(_ isOriginal: Bool = true) {
+        Log("isOriginal: \(isOriginal) data: \(pModel?.dataString ?? "")")
+        PasteBoard.main.pasteData(pModel, isOriginal)
         guard PasteUserDefaults.pasteDirect else { return }
         guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
         app.frontApp?.activate()
