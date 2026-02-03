@@ -351,11 +351,8 @@ extension PasteCollectionViewItem {
         guard PasteUserDefaults.pasteDirect else { return }
         guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
         app.frontApp?.activate()
-        app.dismissWindow {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
-                KeyboardShortcuts.postCmdVEvent()
-            }
-        }
+        app.dismissWindow()
+        KeyboardShortcuts.postCmdVEvent()
     }
 
     @objc
