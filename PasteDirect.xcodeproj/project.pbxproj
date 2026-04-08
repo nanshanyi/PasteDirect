@@ -29,7 +29,6 @@
 		CB2CDF832924ECAE00E81836 /* PasteSQLManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF6D2924ECAC00E81836 /* PasteSQLManager.swift */; };
 		CB2CDF842924ECAE00E81836 /* PasteBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF6E2924ECAC00E81836 /* PasteBoard.swift */; };
 		CB2CDF852924ECAE00E81836 /* PasteScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF702924ECAD00E81836 /* PasteScrollView.swift */; };
-		CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CB2CDF892924ED1D00E81836 /* UIColorHexSwift */; };
 		CB368BD72C78A04100BA72F3 /* NSLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB368BD62C78A04100BA72F3 /* NSLabel.swift */; };
 		CB3A438C2B3AF29D00816B52 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438B2B3AF29D00816B52 /* Log.swift */; };
 		CB3A438E2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB3A438D2B3AFA0700816B52 /* UserInterfaceItemIdentifier.swift */; };
@@ -154,7 +153,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CB9986FF29260015007E585C /* SQLite in Frameworks */,
-				CB2CDF8A2924ED1D00E81836 /* UIColorHexSwift in Frameworks */,
 				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
 				CB99870229260372007E585C /* SnapKit in Frameworks */,
 			);
@@ -415,7 +413,6 @@
 			);
 			name = PasteDirect;
 			packageProductDependencies = (
-				CB2CDF892924ED1D00E81836 /* UIColorHexSwift */,
 				CB9986F52925FF46007E585C /* KeyboardShortcuts */,
 				CB9986FE29260015007E585C /* SQLite */,
 				CB99870129260372007E585C /* SnapKit */,
@@ -494,7 +491,6 @@
 			);
 			mainGroup = CB2CDEE12924E8D500E81836;
 			packageReferences = (
-				CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */,
 				CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
@@ -940,14 +936,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/yeahdongcn/UIColor-Hex-Swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.1.9;
-			};
-		};
 		CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -975,11 +963,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CB2CDF892924ED1D00E81836 /* UIColorHexSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB2CDF882924ED1D00E81836 /* XCRemoteSwiftPackageReference "UIColor-Hex-Swift" */;
-			productName = UIColorHexSwift;
-		};
 		CB9986F52925FF46007E585C /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;

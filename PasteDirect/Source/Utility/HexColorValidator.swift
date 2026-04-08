@@ -6,7 +6,20 @@
 //
 
 import AppKit
-import UIColorHexSwift
+
+extension NSColor {
+    /// 通过 hex 字符串创建颜色，支持 #RGB, #RRGGBB, 0xRRGGBB 等格式
+    convenience init?(_ hex: String) {
+        guard let normalized = HexColorValidator.parseColor(from: hex),
+              normalized.count == 7 else { return nil }
+        let hexStr = String(normalized.dropFirst()) // 去掉 #
+        guard let value = UInt64(hexStr, radix: 16) else { return nil }
+        let r = CGFloat((value >> 16) & 0xFF) / 255.0
+        let g = CGFloat((value >> 8) & 0xFF) / 255.0
+        let b = CGFloat(value & 0xFF) / 255.0
+        self.init(red: r, green: g, blue: b, alpha: 1.0)
+    }
+}
 
 struct HexColorValidator {
 

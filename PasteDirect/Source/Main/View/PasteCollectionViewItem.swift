@@ -9,7 +9,6 @@ import AppKit
 import Carbon
 import KeyboardShortcuts
 import SnapKit
-import UIColorHexSwift
 import Foundation
 
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
