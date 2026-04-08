@@ -10,7 +10,6 @@ import Foundation
 import Combine
 import SwiftUI
 import SQLite
-import UIColorHexSwift
 
 typealias Expression = SQLite.Expression
 
