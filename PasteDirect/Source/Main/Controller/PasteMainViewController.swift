@@ -187,6 +187,7 @@ extension PasteMainViewController {
         // 搜索框文本变化监听
         searchBar.$text
             .dropFirst()
+            .removeDuplicates()
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] text in
                 guard let self = self else { return }
@@ -262,6 +263,8 @@ extension PasteMainViewController {
             resetToDefaultList()
         } else {
             resetSelectIndex()
+            scrollView.noMore = false
+            scrollView.isLoading = false
             PasteDataStore.main.searchData(keyword, filter: currentFilterState)
             Log("search start: \(keyword), filter: \(currentFilterState)")
             collectionView.scroll(.zero)
@@ -309,13 +312,16 @@ extension PasteMainViewController {
         if filterPopover.isShown {
             filterPopover.close()
         } else if searchBar.isFirstResponder {
+            let needRefresh = !searchBar.text.isEmpty || currentFilterState.isActive
             searchBar.objectValue = nil
             filterView.resetFilter()
             currentFilterState = .empty
             updateFilterButtonAppearance()
             searchBar.updateTags([])
             view.window?.makeFirstResponder(collectionView)
-            resetToDefaultList()
+            if needRefresh {
+                resetToDefaultList()
+            }
         } else if currentFilterState.isActive {
             filterView.resetFilter()
             currentFilterState = .empty

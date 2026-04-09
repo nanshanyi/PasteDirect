@@ -52,8 +52,14 @@ final class PasteSQLManager: NSObject {
 
 extension PasteSQLManager {
     var totalCount: Int {
+        count(filter: nil)
+    }
+
+    func count(filter: Expression<Bool>?) -> Int {
         do {
-            return try db?.scalar(table.count) ?? 0
+            var query = table
+            if let f = filter { query = query.filter(f) }
+            return try db?.scalar(query.count) ?? 0
         } catch {
             Log("获取总数失败：\(error)")
             return 0
@@ -120,6 +126,11 @@ extension PasteSQLManager {
         }
         do {
             try db?.run(stateMent)
+            // 为高频查询字段创建索引
+            try db?.run(tab.createIndex(date, ifNotExists: true))
+            try db?.run(tab.createIndex(appName, ifNotExists: true))
+            try db?.run(tab.createIndex(type, ifNotExists: true))
+            try db?.run(tab.createIndex(hashKey, ifNotExists: true))
         } catch {
             Log("Create Table Error: \(error)")
         }

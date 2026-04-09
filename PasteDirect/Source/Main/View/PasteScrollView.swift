@@ -43,7 +43,7 @@ final class PasteScrollView: NSScrollView {
 
     override func scroll(_ clipView: NSClipView, to point: NSPoint) {
         super.scroll(clipView, to: point)
-        if noMore || isSearching { return }
+        if noMore { return }
         let width = NSScreen.main?.frame.width ?? 2000
         if point.x + width + 500 > clipView.documentRect.width {
             if !isLoading {

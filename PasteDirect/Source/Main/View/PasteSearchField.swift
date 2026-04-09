@@ -89,6 +89,7 @@ final class PasteSearchField: NSSearchField {
             make.leading.equalToSuperview().offset(34)
             make.centerY.equalToSuperview()
             make.height.equalTo(20)
+            make.trailing.lessThanOrEqualTo(filterButton.snp.leading).offset(-4)
         }
 
         filterButton.snp.makeConstraints { make in
@@ -110,7 +111,7 @@ final class PasteSearchField: NSSearchField {
         }
 
         tagContainer.layoutSubtreeIfNeeded()
-        let tagsWidth = tags.isEmpty ? 0 : tagContainer.fittingSize.width + 2
+        let tagsWidth = tags.isEmpty ? 0 : tagContainer.frame.width + 2
         customCell?.extraLeadingOffset = tagsWidth
 
         // 强制 field editor 重新布局

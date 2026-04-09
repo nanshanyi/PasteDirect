@@ -26,6 +26,11 @@ final class PasteDataStore {
     private var searchTask: Task<Void, Error>?
     private var colorCache = ColorCache()
 
+    /// 当前生效的筛选条件（用于分页加载时复用）
+    private var currentFilter: Expression<Bool>?
+    /// 当前是否为颜色筛选（需要内存过滤）
+    private var isColorFilter = false
+
     func setup() {
         setupData()
     }
@@ -96,29 +101,34 @@ extension PasteDataStore {
 // MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
-    /// 加载下一页
-    /// - Returns: 返回从0到当前页所有数据list
+    /// 加载下一页（支持筛选条件）
     func loadNextPage() {
         guard dataList.value.count < totalCount else { return }
         pageIndex += 1
-        Task {
+        searchTask?.cancel()
+        searchTask = Task {
             Log("loadNextPage \(pageIndex)")
-            let nextPage = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
+            let rows = await sqlManager.search(filter: currentFilter, limit: pageSize, offset: currentOffset)
+            var nextPage = await parseItems(rows: rows)
+            if isColorFilter {
+                nextPage = nextPage.filter { $0.hexColorString != nil }
+            }
+            try Task.checkCancellation()
             dataList.send(dataList.value + nextPage)
         }
     }
-    
+
     func resetDefaultList() {
         pageIndex = 0
+        currentFilter = nil
+        isColorFilter = false
         Task {
             let list = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
             dataList.send(list)
         }
     }
-    
+
     /// 数据搜索
-    /// - Parameter keyWord: 搜索关键词
-    /// - Returns: 搜索结果list
     func searchData(_ keyWord: String) {
         searchData(keyWord, filter: .empty)
     }
@@ -129,17 +139,14 @@ extension PasteDataStore {
         searchTask = Task {
             var conditions: [Expression<Bool>] = []
 
-            // 关键词搜索
             if !keyWord.isEmpty {
                 conditions.append(appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
             }
 
-            // 应用筛选
             if let app = state.selectedApp {
                 conditions.append(appName == app)
             }
 
-            // 类型筛选
             if let selectedType = state.selectedType {
                 switch selectedType {
                 case .string:
@@ -147,25 +154,29 @@ extension PasteDataStore {
                 case .image:
                     conditions.append(type == PasteboardType.png.rawValue || type == PasteboardType.tiff.rawValue)
                 case .color:
-                    // 颜色是文本类型的子集，先查文本，后面内存过滤
                     conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
                 case .none:
                     break
                 }
             }
 
-            // 日期筛选
             if let dateRange = state.selectedDateRange {
                 let interval = dateRange.dateInterval
                 conditions.append(date >= interval.start && date < interval.end)
             }
 
             let combined = conditions.isEmpty ? nil : conditions.dropFirst().reduce(conditions[0]) { $0 && $1 }
-            let rows = await sqlManager.search(filter: combined)
+
+            // 保存筛选条件供分页使用
+            currentFilter = combined
+            isColorFilter = state.selectedType == .color
+            pageIndex = 0
+            totalCount = sqlManager.count(filter: combined)
+
+            let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
             var result = await parseItems(rows: rows)
 
-            // 颜色类型需要内存过滤
-            if state.selectedType == .color {
+            if isColorFilter {
                 result = result.filter { $0.hexColorString != nil }
             }
 
