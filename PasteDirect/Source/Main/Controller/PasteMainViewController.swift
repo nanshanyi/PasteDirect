@@ -71,7 +71,7 @@ final class PasteMainViewController: NSViewController {
         $0.cell?.controlSize = .large
         $0.focusRingType = .none
         $0.refusesFirstResponder = true
-        $0.placeholderString = "搜索"
+        $0.placeholderString = String(localized: "Search")
         $0.delegate = self
     }
 

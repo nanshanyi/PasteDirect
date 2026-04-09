@@ -11,11 +11,21 @@ import Combine
 // MARK: - FilterState
 
 enum DateRange: String, CaseIterable {
-    case today = "今天"
-    case yesterday = "昨天"
-    case thisWeek = "本周"
-    case lastWeek = "上周"
-    case last30Days = "最近 30 天"
+    case today
+    case yesterday
+    case thisWeek
+    case lastWeek
+    case last30Days
+
+    var title: String {
+        switch self {
+        case .today: return String(localized: "Today")
+        case .yesterday: return String(localized: "Yesterday")
+        case .thisWeek: return String(localized: "This Week")
+        case .lastWeek: return String(localized: "Last Week")
+        case .last30Days: return String(localized: "Last 30 Days")
+        }
+    }
 
     var dateInterval: (start: Date, end: Date) {
         let calendar = Calendar.current
@@ -62,7 +72,7 @@ struct FilterState: Equatable {
             tags.append((app, appIcon))
         }
         if let t = selectedType { tags.append((t.string, nil)) }
-        if let d = selectedDateRange { tags.append((d.rawValue, nil)) }
+        if let d = selectedDateRange { tags.append((d.title, nil)) }
         return tags
     }
 
@@ -76,9 +86,9 @@ private enum FilterSection: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .app: return "应用"
-        case .type: return "类型"
-        case .date: return "日期"
+        case .app: return String(localized: "App")
+        case .type: return String(localized: "Type")
+        case .date: return String(localized: "Date")
         }
     }
 }
@@ -252,13 +262,13 @@ final class PasteFilterView: NSView {
         }
         if allApps.count > apps.count && !showingAllApps {
             let moreIcon = NSImage(systemSymbolName: "ellipsis.circle", accessibilityDescription: nil)
-            appItems.append(FilterItemModel(title: "更多", icon: moreIcon, isMoreButton: true))
+            appItems.append(FilterItemModel(title: String(localized: "More"), icon: moreIcon, isMoreButton: true))
         }
 
         let types: [(String, String, PasteModelType)] = [
-            ("文本", "doc.text", .string),
-            ("图片", "photo", .image),
-            ("颜色", "paintpalette", .color),
+            (String(localized: "Text"), "doc.text", .string),
+            (String(localized: "Image"), "photo", .image),
+            (String(localized: "Color"), "paintpalette", .color),
         ]
         let typeItems: [FilterItemModel] = types.map {
             FilterItemModel(title: $0.0,
@@ -267,7 +277,7 @@ final class PasteFilterView: NSView {
         }
 
         let dateItems: [FilterItemModel] = DateRange.allCases.map {
-            FilterItemModel(title: $0.rawValue,
+            FilterItemModel(title: $0.title,
                             icon: NSImage(systemSymbolName: "calendar", accessibilityDescription: nil),
                             isOn: filterState.selectedDateRange == $0)
         }

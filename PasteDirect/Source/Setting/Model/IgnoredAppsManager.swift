@@ -87,7 +87,7 @@ class IgnoredAppsManager: ObservableObject {
     
     func addAppFromFileChooser() {
         let panel = NSOpenPanel()
-        panel.title = "选择应用程序"
+        panel.title = String(localized: "Select Application")
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.canChooseFiles = true

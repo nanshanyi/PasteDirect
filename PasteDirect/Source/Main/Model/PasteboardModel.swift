@@ -27,10 +27,10 @@ enum PasteModelType {
 
     var string: String {
         switch self {
-        case .image: return "图片"
-        case .string: return "文本"
-        case .color: return "颜色"
-        default: return "未知"
+        case .image: return String(localized: "Image")
+        case .string: return String(localized: "Text")
+        case .color: return String(localized: "Color")
+        default: return String(localized: "Unknown")
         }
     }
 }
@@ -129,11 +129,11 @@ final class PasteboardModel {
             return ""
         case .image:
             guard let image else { return "" }
-            return "\(Int(image.size.width)) × \(Int(image.size.height)) 像素"
+            return "\(Int(image.size.width)) × \(Int(image.size.height)) \(String(localized: "pixels"))"
         case .string:
-            return "\(formatter.string(from: NSNumber(value: length)) ?? "")个字符"
+            return "\(formatter.string(from: NSNumber(value: length)) ?? "")\(String(localized: "characters"))"
         case .color:
-            return "颜色：\(hexColorString ?? "未知")"
+            return "\(String(localized: "Color"))\(String(localized: "colon"))\(hexColorString ?? String(localized: "Unknown"))"
         }
     }
     

@@ -300,21 +300,21 @@ extension PasteCollectionViewItem {
         let menu = NSMenu()
         if let app = NSApplication.shared.delegate as? PasteAppDelegate,
             let name = app.frontApp?.localizedName {
-            let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteOriginalTextClick), keyEquivalent: "")
+            let item = NSMenuItem(title: String(localized: "Paste to \(name)"), action: #selector(pasteOriginalTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
         if pModel?.type == .string {
-            let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteTextClick), keyEquivalent: "")
+            let item1 = NSMenuItem(title: String(localized: "Paste as Plain Text"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
         
         if pModel?.type == .color {
-            let itemColor = NSMenuItem(title: "粘贴为#RRGGBB", action: #selector(pasteTextClick), keyEquivalent: "")
+            let itemColor = NSMenuItem(title: String(localized: "Paste as #RRGGBB"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(itemColor)
         }
-        let item2 = NSMenuItem(title: "复制", action: #selector(copyItemData), keyEquivalent: "")
+        let item2 = NSMenuItem(title: String(localized: "Copy"), action: #selector(copyItemData), keyEquivalent: "")
         menu.addItem(item2)
-        let item3 = NSMenuItem(title: "删除", action: #selector(deleteItem), keyEquivalent: "d")
+        let item3 = NSMenuItem(title: String(localized: "Delete"), action: #selector(deleteItem), keyEquivalent: "d")
         item3.keyEquivalentModifierMask = .init(rawValue: 0)
         menu.addItem(item3)
         view.menu = menu
