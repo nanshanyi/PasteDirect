@@ -127,7 +127,7 @@ extension PasteAppDelegate {
     }
 
     func showOrDismissWindow(_ frame: NSRect? = nil) {
-        if mainWindowController.isVisable {
+        if mainWindowController.isVisible {
             mainWindowController.dismissWindow()
         } else {
             frontApp = NSWorkspace.shared.frontmostApplication

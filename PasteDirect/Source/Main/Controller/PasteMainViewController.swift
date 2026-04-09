@@ -18,6 +18,7 @@ final class PasteMainViewController: NSViewController {
     private var deleteItem = false
     private var currentFilterState = FilterState.empty
     private var previewPopover: PastePreviewPopover?
+    private var contentView: NSView!
 
     // MARK: - lazy property
 
@@ -50,24 +51,6 @@ final class PasteMainViewController: NSViewController {
         $0.delegate = self
     }
 
-    private lazy var effectView: NSView = {
-        if #available(macOS 26.0, *) {
-           let glassView = NSGlassEffectView()
-            glassView.frame = view.frame
-            glassView.cornerRadius = 34
-            glassView.contentView = contentView
-            return glassView
-        } else {
-           let effectView = NSVisualEffectView()
-            effectView.wantsLayer = true
-            effectView.frame = view.frame
-            effectView.state = .active
-            effectView.blendingMode = .behindWindow
-            effectView.layer?.cornerRadius = 34
-            return effectView
-        }
-    }()
-
     private lazy var searchBar = PasteSearchField().then {
         $0.cell?.controlSize = .large
         $0.focusRingType = .none
@@ -76,13 +59,6 @@ final class PasteMainViewController: NSViewController {
         $0.delegate = self
     }
 
-    private lazy var contentView = NSView().then {
-        $0.wantsLayer = true
-        $0.layer?.backgroundColor = .clear
-        $0.layer?.cornerRadius = 34
-        $0.layer?.masksToBounds = true
-    }
-    
     private lazy var settingButton = NSButton().then {
         $0.isBordered = false
         let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .regular)
@@ -106,6 +82,30 @@ final class PasteMainViewController: NSViewController {
 // MARK: - 生命周期
 
 extension PasteMainViewController {
+    override func loadView() {
+        let contentView = NSView()
+        contentView.wantsLayer = true
+        if #available(macOS 26.0, *) {
+            let glassView = NSGlassEffectView()
+            glassView.cornerRadius = 34
+            glassView.contentView = contentView
+            view = glassView
+        } else {
+            let effectView = NSVisualEffectView()
+            effectView.wantsLayer = true
+            effectView.state = .active
+            effectView.blendingMode = .behindWindow
+            effectView.layer?.cornerRadius = 34
+            effectView.layer?.masksToBounds = true
+            effectView.addSubview(contentView)
+            contentView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+            view = effectView
+        }
+        self.contentView = contentView
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
@@ -115,11 +115,6 @@ extension PasteMainViewController {
 
     override func viewDidAppear() {
         view.window?.makeFirstResponder(collectionView)
-        view.frame = NSRect(x: view.frame.origin.x, y: -Layout.viewHeight, width: view.frame.width, height: Layout.viewHeight)
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25
-            self.view.animator().setFrameOrigin(.zero)
-        }
         if PasteDataStore.main.needRefresh {
             PasteDataStore.main.needRefresh.toggle()
             if dataList.value.count < PasteDataStore.main.pageSize {
@@ -147,23 +142,9 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func initSubviews() {
-        view.wantsLayer = true
-        view.addSubview(effectView)
-        if effectView is NSVisualEffectView {
-            effectView.addSubview(contentView)
-            contentView.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
-        }
         contentView.addSubview(scrollView)
         contentView.addSubview(searchBar)
         contentView.addSubview(settingButton)
-        effectView.snp.makeConstraints { make in
-            make.leading.equalTo(8)
-            make.trailing.equalTo(-8)
-            make.top.equalToSuperview()
-            make.bottom.equalTo(-8)
-        }
 
         scrollView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()

@@ -9,12 +9,16 @@ import Carbon
 import Cocoa
 
 final class PasteMainWindowController: NSWindowController {
-    var isVisable: Bool { window?.isVisible ?? false }
+
+    var isVisible: Bool { window?.isVisible ?? false }
+
+    /// 记录目标 frame，动画用
+    private var targetFrame: NSRect = .zero
 
     init() {
-        let window = PasteMainWindow(contentViewController: PasteMainViewController())
-        super.init(window: window)
-        setUpWindow()
+        let panel = PasteMainPanel(contentViewController: PasteMainViewController())
+        super.init(window: panel)
+        panel.delegate = self
     }
 
     @available(*, unavailable)
@@ -22,34 +26,48 @@ final class PasteMainWindowController: NSWindowController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func setUpWindow() {
-        window?.delegate = self
-        window?.styleMask = [.borderless, .fullSizeContentView]
-        window?.level = .statusBar
-        window?.hasShadow = false
-        window?.backgroundColor = .clear
-    }
-}
+    // MARK: - Show / Dismiss
 
-extension PasteMainWindowController {
-    func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
-        let view = window?.contentViewController?.view
-        NSAnimationContext.runAnimationGroup({ context in
+    func show(in screenFrame: NSRect?) {
+        guard let window else { return }
+        let screen = screenFrame ?? .zero
+        let height = Layout.viewHeight
+
+        // 目标位置：屏幕底部，左右各留 8pt，底部留 8pt
+        targetFrame = NSRect(x: screen.origin.x + 8, y: screen.origin.y + 8, width: screen.width - 16, height: height)
+
+        // 起始位置：在屏幕下方（不可见）
+        var startFrame = targetFrame
+        startFrame.origin.y -= height
+        window.setFrame(startFrame, display: true)
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+
+        NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
-            view?.animator().setFrameOrigin(NSPoint(x: 0, y: -(view?.bounds.height ?? 300)))
-        }) {
-            self.window?.resignFirstResponder()
-            self.window?.setIsVisible(false)
-            completionHandler?()
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            window.animator().setFrame(self.targetFrame, display: true)
         }
     }
-    
-    func show(in frame: NSRect?) {
-        let frame = frame ?? .zero
-        window?.setFrame(frame, display: true)
-        window?.setIsVisible(true)
-        window?.becomeFirstResponder()
-        NSApp.activate(ignoringOtherApps: true)
+
+    func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
+        guard let window, window.isVisible else {
+            completionHandler?()
+            return
+        }
+
+        // 向下滑出
+        var endFrame = window.frame
+        endFrame.origin.y -= endFrame.height
+
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.25
+            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+            window.animator().setFrame(endFrame, display: true)
+        }) { [weak self] in
+            self?.window?.orderOut(nil)
+            completionHandler?()
+        }
     }
 }
 
@@ -58,7 +76,7 @@ extension PasteMainWindowController {
 extension PasteMainWindowController: NSWindowDelegate {
     func windowDidResignKey(_ notification: Notification) {
         #if !DEBUG
-            dismissWindow()
+        dismissWindow()
         #endif
     }
 }
