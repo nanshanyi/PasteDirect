@@ -16,6 +16,7 @@ final class PasteMainViewController: NSViewController {
     private var dataList = PasteDataStore.main.dataList
     private var cancellables = Set<AnyCancellable>()
     private var deleteItem = false
+    private var currentFilterState = FilterState.empty
 
     // MARK: - lazy property
 
@@ -73,7 +74,7 @@ final class PasteMainViewController: NSViewController {
         $0.placeholderString = "搜索"
         $0.delegate = self
     }
-    
+
     private lazy var contentView = NSView().then {
         $0.wantsLayer = true
         $0.layer?.backgroundColor = .clear
@@ -87,6 +88,17 @@ final class PasteMainViewController: NSViewController {
         let icon = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         $0.image = icon?.withSymbolConfiguration(config)
         $0.contentTintColor = .labelColor
+    }
+
+    private lazy var filterView = PasteFilterView(frame: NSRect(x: 0, y: 0, width: PasteFilterView.contentWidth, height: 300))
+
+    private lazy var filterPopover = NSPopover().then {
+        $0.behavior = .transient
+        $0.animates = true
+        $0.contentSize = NSSize(width: PasteFilterView.contentWidth, height: 300)
+        let vc = NSViewController()
+        vc.view = filterView
+        $0.contentViewController = vc
     }
 }
 
@@ -121,6 +133,10 @@ extension PasteMainViewController {
     override func viewDidDisappear() {
         super.viewDidDisappear()
         searchBar.objectValue = nil
+        filterView.resetFilter()
+        currentFilterState = .empty
+        updateFilterButtonAppearance()
+        searchBar.updateTags([])
         PasteDataStore.main.clearExpiredData()
     }
 }
@@ -146,20 +162,20 @@ extension PasteMainViewController {
             make.top.equalToSuperview()
             make.bottom.equalTo(-8)
         }
-        
+
         scrollView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview().offset(-20)
             make.top.equalTo(searchBar.snp.bottom).offset(20)
         }
-        
+
         searchBar.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.equalToSuperview().offset(20)
             make.height.equalTo(Layout.searchBarHeight)
             make.width.equalTo(Layout.searchBarWidth)
         }
-        
+
         settingButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().offset(-16)
             make.centerY.equalTo(searchBar)
@@ -174,8 +190,8 @@ extension PasteMainViewController {
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] text in
                 guard let self = self else { return }
-                self.scrollView.isSearching = !text.isEmpty
-                self.searchWord(text)
+                self.scrollView.isSearching = !text.isEmpty || self.currentFilterState.isActive
+                self.performSearch()
             }
             .store(in: &cancellables)
 
@@ -197,6 +213,27 @@ extension PasteMainViewController {
                 self?.settingAction()
             }
             .store(in: &cancellables)
+
+        // 筛选按钮点击
+        searchBar.filterButton.tapPublisher
+            .sink { [weak self] in
+                self?.showFilterPopover()
+            }
+            .store(in: &cancellables)
+
+        // 筛选状态变化监听
+        filterView.$filterState
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] state in
+                guard let self = self else { return }
+                self.currentFilterState = state
+                self.updateFilterButtonAppearance()
+                self.searchBar.updateTags(state.activeTags)
+                self.scrollView.isSearching = !self.searchBar.text.isEmpty || state.isActive
+                self.performSearch()
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -204,14 +241,47 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func searchWord(_ keyword: String) {
-        if keyword.isEmpty {
+        performSearch()
+    }
+
+    /// 按倒序移除最后一个筛选标签：日期 > 类型 > 应用
+    private func removeLastFilterTag() {
+        if filterView.filterState.selectedDateRange != nil {
+            filterView.removeFilter(.date)
+        } else if filterView.filterState.selectedType != nil {
+            filterView.removeFilter(.type)
+        } else if filterView.filterState.selectedApp != nil {
+            filterView.removeFilter(.app)
+        }
+    }
+
+    private func performSearch() {
+        let keyword = searchBar.text
+        let hasFilter = currentFilterState.isActive
+        if keyword.isEmpty && !hasFilter {
             resetToDefaultList()
         } else {
             resetSelectIndex()
-            PasteDataStore.main.searchData(keyword)
-            Log("search start: \(keyword)")
+            PasteDataStore.main.searchData(keyword, filter: currentFilterState)
+            Log("search start: \(keyword), filter: \(currentFilterState)")
             collectionView.scroll(.zero)
         }
+    }
+
+    private func showFilterPopover() {
+        if filterPopover.isShown {
+            filterPopover.close()
+            return
+        }
+        let topApps = PasteDataStore.main.topApps()
+        let allApps = PasteDataStore.main.allApps()
+        filterView.configure(apps: topApps, allApps: allApps)
+        let btn = searchBar.filterButton
+        filterPopover.show(relativeTo: btn.bounds, of: btn, preferredEdge: .maxY)
+    }
+
+    private func updateFilterButtonAppearance() {
+        searchBar.filterButton.contentTintColor = currentFilterState.isActive ? .controlAccentColor : .secondaryLabelColor
     }
 
     private func resetToDefaultList() {
@@ -236,9 +306,21 @@ extension PasteMainViewController {
     }
     
     private func escapeKeyDown() {
-        if searchBar.isFirstResponder {
+        if filterPopover.isShown {
+            filterPopover.close()
+        } else if searchBar.isFirstResponder {
             searchBar.objectValue = nil
+            filterView.resetFilter()
+            currentFilterState = .empty
+            updateFilterButtonAppearance()
+            searchBar.updateTags([])
             view.window?.makeFirstResponder(collectionView)
+            resetToDefaultList()
+        } else if currentFilterState.isActive {
+            filterView.resetFilter()
+            currentFilterState = .empty
+            updateFilterButtonAppearance()
+            searchBar.updateTags([])
             resetToDefaultList()
         } else {
             let app = NSApplication.shared.delegate as? PasteAppDelegate
@@ -360,5 +442,15 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
 extension PasteMainViewController: NSSearchFieldDelegate {
     func controlTextDidEndEditing(_ obj: Notification) {
         view.window?.makeFirstResponder(collectionView)
+    }
+
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.deleteBackward(_:)) {
+            if textView.string.isEmpty && currentFilterState.isActive {
+                removeLastFilterTag()
+                return true
+            }
+        }
+        return false
     }
 }

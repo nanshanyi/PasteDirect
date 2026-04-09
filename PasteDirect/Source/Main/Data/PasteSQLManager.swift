@@ -138,6 +138,33 @@ extension PasteSQLManager {
 //
 //    }
 
+    /// 查询去重的应用列表，按出现次数降序
+    func distinctApps(limit count: Int = 5) -> [(name: String, path: String)] {
+        // SELECT appName, appPath, COUNT(*) as cnt FROM pasteContent GROUP BY appName ORDER BY cnt DESC LIMIT count
+        do {
+            let cnt = appName.count
+            let query = table
+                .select(appName, appPath, cnt)
+                .group(appName)
+                .order(cnt.desc)
+                .limit(count)
+            guard let rows = try db?.prepare(query) else { return [] }
+            return rows.compactMap { row in
+                guard let name = try? row.get(appName),
+                      let path = try? row.get(appPath) else { return nil }
+                return (name: name, path: path)
+            }
+        } catch {
+            Log("查询应用列表失败：\(error)")
+            return []
+        }
+    }
+
+    /// 查询所有去重应用
+    func allDistinctApps() -> [(name: String, path: String)] {
+        distinctApps(limit: 1000)
+    }
+
     // 查
     func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString, showData, length], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
         guard !Task.isCancelled else {

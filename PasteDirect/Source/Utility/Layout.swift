@@ -16,6 +16,6 @@ enum Layout {
     static let edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: -20, right: 0)
     static let lineSpacing: CGFloat = 20
     static let searchBarHeight: CGFloat = 30
-    static let searchBarWidth: CGFloat = 300
+    static let searchBarWidth: CGFloat = 400
     
 }

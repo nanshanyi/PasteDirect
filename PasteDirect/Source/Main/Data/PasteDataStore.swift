@@ -120,11 +120,55 @@ extension PasteDataStore {
     /// - Parameter keyWord: 搜索关键词
     /// - Returns: 搜索结果list
     func searchData(_ keyWord: String) {
+        searchData(keyWord, filter: .empty)
+    }
+
+    /// 带筛选条件的搜索
+    func searchData(_ keyWord: String, filter state: FilterState) {
         searchTask?.cancel()
         searchTask = Task {
-            let filter = appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%")
-            let rows = await sqlManager.search(filter: filter)
-            let result = await parseItems(rows: rows)
+            var conditions: [Expression<Bool>] = []
+
+            // 关键词搜索
+            if !keyWord.isEmpty {
+                conditions.append(appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
+            }
+
+            // 应用筛选
+            if let app = state.selectedApp {
+                conditions.append(appName == app)
+            }
+
+            // 类型筛选
+            if let selectedType = state.selectedType {
+                switch selectedType {
+                case .string:
+                    conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
+                case .image:
+                    conditions.append(type == PasteboardType.png.rawValue || type == PasteboardType.tiff.rawValue)
+                case .color:
+                    // 颜色是文本类型的子集，先查文本，后面内存过滤
+                    conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
+                case .none:
+                    break
+                }
+            }
+
+            // 日期筛选
+            if let dateRange = state.selectedDateRange {
+                let interval = dateRange.dateInterval
+                conditions.append(date >= interval.start && date < interval.end)
+            }
+
+            let combined = conditions.isEmpty ? nil : conditions.dropFirst().reduce(conditions[0]) { $0 && $1 }
+            let rows = await sqlManager.search(filter: combined)
+            var result = await parseItems(rows: rows)
+
+            // 颜色类型需要内存过滤
+            if state.selectedType == .color {
+                result = result.filter { $0.hexColorString != nil }
+            }
+
             try Task.checkCancellation()
             dataList.send(result)
         }
@@ -213,6 +257,16 @@ extension PasteDataStore {
         sqlManager.clearAllData()
         updateTotalCount()
         resetDefaultList()
+    }
+
+    /// 获取常用应用列表（前5个）
+    func topApps() -> [(name: String, path: String)] {
+        sqlManager.distinctApps(limit: 5)
+    }
+
+    /// 获取所有应用列表
+    func allApps() -> [(name: String, path: String)] {
+        sqlManager.allDistinctApps()
     }
 }
 
