@@ -197,7 +197,7 @@ extension PasteDataStore {
 
             // 保存筛选条件供分页使用
             currentFilter = combined
-            isColorFilter = state.selectedType == .color
+                isColorFilter = state.selectedType == .color
             totalCount = sqlManager.count(filter: combined)
 
             let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
@@ -206,7 +206,7 @@ extension PasteDataStore {
             if isColorFilter {
                 result = result.filter { $0.hexColorString != nil }
             }
-
+ 
             try Task.checkCancellation()
             dbOffset = pageSize
             dataList.send(result)

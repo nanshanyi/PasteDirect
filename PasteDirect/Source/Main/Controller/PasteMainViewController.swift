@@ -17,6 +17,7 @@ final class PasteMainViewController: NSViewController {
     private var cancellables = Set<AnyCancellable>()
     private var deleteItem = false
     private var currentFilterState = FilterState.empty
+    private var previewPopover: PastePreviewPopover?
 
     // MARK: - lazy property
 
@@ -132,6 +133,7 @@ extension PasteMainViewController {
 
     override func viewDidDisappear() {
         super.viewDidDisappear()
+        closePreviewPopover()
         searchBar.objectValue = nil
         filterView.resetFilter()
         currentFilterState = .empty
@@ -306,12 +308,16 @@ extension PasteMainViewController {
             deleteKeyDown()
         } else if event.keyCode == kVK_Return {
             returnKeyDown()
+        } else if event.keyCode == 49 { // kVK_Space
+            spaceKeyDown()
         }
         return event
     }
     
     private func escapeKeyDown() {
-        if filterPopover.isShown {
+        if previewPopover?.isShown == true {
+            closePreviewPopover()
+        } else if filterPopover.isShown {
             filterPopover.close()
         } else if searchBar.isFirstResponder {
             let needRefresh = !searchBar.text.isEmpty || currentFilterState.isActive
@@ -350,6 +356,30 @@ extension PasteMainViewController {
         item.pasteItem()
     }
 
+    private func spaceKeyDown() {
+        guard !searchBar.isFirstResponder else { return }
+        if previewPopover?.isShown == true {
+            closePreviewPopover()
+        } else {
+            guard selectIndexPath.item < dataList.value.count else { return }
+            let model = dataList.value[selectIndexPath.item]
+            guard let itemView = collectionView.item(at: selectIndexPath)?.view else { return }
+            showPreviewPopover(for: model, relativeTo: itemView)
+        }
+    }
+
+    private func showPreviewPopover(for model: PasteboardModel, relativeTo view: NSView) {
+        closePreviewPopover()
+        let popover = PastePreviewPopover(model: model)
+        previewPopover = popover
+        popover.show(relativeTo: view.bounds, of: view, preferredEdge: .maxY)
+    }
+
+    private func closePreviewPopover() {
+        previewPopover?.close()
+        previewPopover = nil
+    }
+
     private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
         collectionView.item(at: selectIndexPath)?.isSelected = false
         selectIndexPath = indexPath
@@ -380,6 +410,12 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     func collectionView(_ collectionView: NSCollectionView, shouldSelectItemsAt indexPaths: Set<IndexPath>) -> Set<IndexPath> {
         if let indexPath = indexPaths.first {
             resetSelectIndex(indexPath)
+            if previewPopover?.isShown == true, indexPath.item < dataList.value.count {
+                let model = dataList.value[indexPath.item]
+                if let itemView = collectionView.item(at: indexPath)?.view {
+                    showPreviewPopover(for: model, relativeTo: itemView)
+                }
+            }
         }
         Log("选中\(indexPaths.description)")
         return [selectIndexPath]
@@ -438,6 +474,14 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
         PasteDataStore.main.deleteItems(item)
         collectionView.animator().deleteItems(at: [indexPath])
         resetSelectIndex(indexPath)
+    }
+
+    func previewItem(_ item: PasteboardModel, relativeTo view: NSView) {
+        if previewPopover?.isShown == true {
+            closePreviewPopover()
+        } else {
+            showPreviewPopover(for: item, relativeTo: view)
+        }
     }
 }
 

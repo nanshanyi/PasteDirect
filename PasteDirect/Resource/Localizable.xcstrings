@@ -4,6 +4,46 @@
     "" : {
 
     },
+    "%lld days ago" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld天前"
+          }
+        }
+      }
+    },
+    "%lld hours ago" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld小时前"
+          }
+        }
+      }
+    },
+    "%lld minutes ago" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld分钟前"
+          }
+        }
+      }
+    },
+    "%lld months ago" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld月前"
+          }
+        }
+      }
+    },
     "Always paste as plain text" : {
       "localizations" : {
         "zh-Hans" : {
@@ -14,12 +54,32 @@
         }
       }
     },
+    "App" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
+          }
+        }
+      }
+    },
+    "characters" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个字符"
           }
         }
       }
@@ -55,12 +115,68 @@
         }
       }
     },
+    "colon" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": "
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "："
+          }
+        }
+      }
+    },
+    "Color" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "颜色"
+          }
+        }
+      }
+    },
+    "Copy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制"
+          }
+        }
+      }
+    },
+    "Date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        }
+      }
+    },
     "Day" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "天"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
           }
         }
       }
@@ -122,6 +238,46 @@
         }
       }
     },
+    "Image" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片"
+          }
+        }
+      }
+    },
+    "Just now" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刚刚"
+          }
+        }
+      }
+    },
+    "Last 30 Days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近 30 天"
+          }
+        }
+      }
+    },
+    "Last Week" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上周"
+          }
+        }
+      }
+    },
     "Launch at Login" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -153,12 +309,42 @@
         }
       }
     },
+    "More" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更多"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "确定"
+          }
+        }
+      }
+    },
+    "Paste as #RRGGBB" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴为#RRGGBB"
+          }
+        }
+      }
+    },
+    "Paste as Plain Text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴为纯文本"
           }
         }
       }
@@ -184,6 +370,16 @@
         }
       }
     },
+    "Paste to %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴到%@"
+          }
+        }
+      }
+    },
     "Paste to the currently active application" : {
       "localizations" : {
         "zh-Hans" : {
@@ -200,6 +396,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PasteDirect 需要辅助功能权限"
+          }
+        }
+      }
+    },
+    "pixels" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "像素"
+          }
+        }
+      }
+    },
+    "Preview" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预览"
           }
         }
       }
@@ -224,12 +440,32 @@
         }
       }
     },
+    "Search" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
+          }
+        }
+      }
+    },
     "Select a category from the sidebar" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "选择一个分类"
+          }
+        }
+      }
+    },
+    "Select Application" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择应用程序"
           }
         }
       }
@@ -274,178 +510,22 @@
         }
       }
     },
-    "This action cannot be undone. All clipboard data will be permanently deleted." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此操作无法撤消，所有剪贴板数据将被永久删除。\n"
-          }
-        }
-      }
-    },
-    "Total number of items" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "总计条数"
-          }
-        }
-      }
-    },
-    "Week" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "周"
-          }
-        }
-      }
-    },
-    "You have items that are older than the new history limit. Do you want to delete these older items and apply the new limit?" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "您有比新的历史限制更旧的项目。是否要删除这些较旧的项目并应用新的限制？"
-          }
-        }
-      }
-    },
-    "App" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "应用"
-          }
-        }
-      }
-    },
-    "characters" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "个字符"
-          }
-        }
-      }
-    },
-    "colon" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ": "
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "："
-          }
-        }
-      }
-    },
-    "Color" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "颜色"
-          }
-        }
-      }
-    },
-    "Date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "日期"
-          }
-        }
-      }
-    },
-    "Image" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "图片"
-          }
-        }
-      }
-    },
-    "Last 30 Days" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最近 30 天"
-          }
-        }
-      }
-    },
-    "Last Week" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上周"
-          }
-        }
-      }
-    },
-    "More" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更多"
-          }
-        }
-      }
-    },
-    "Paste as Plain Text" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "粘贴为纯文本"
-          }
-        }
-      }
-    },
-    "pixels" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "像素"
-          }
-        }
-      }
-    },
-    "Search" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "搜索"
-          }
-        }
-      }
-    },
     "Text" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "文本"
+          }
+        }
+      }
+    },
+    "This action cannot be undone. All clipboard data will be permanently deleted." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作无法撤消，所有剪贴板数据将被永久删除。\n"
           }
         }
       }
@@ -470,6 +550,16 @@
         }
       }
     },
+    "Total number of items" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "总计条数"
+          }
+        }
+      }
+    },
     "Type" : {
       "localizations" : {
         "zh-Hans" : {
@@ -490,6 +580,16 @@
         }
       }
     },
+    "Week" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周"
+          }
+        }
+      }
+    },
     "Yesterday" : {
       "localizations" : {
         "zh-Hans" : {
@@ -500,102 +600,12 @@
         }
       }
     },
-    "Copy" : {
+    "You have items that are older than the new history limit. Do you want to delete these older items and apply the new limit?" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "复制"
-          }
-        }
-      }
-    },
-    "Delete" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "删除"
-          }
-        }
-      }
-    },
-    "Just now" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刚刚"
-          }
-        }
-      }
-    },
-    "Paste as #RRGGBB" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "粘贴为#RRGGBB"
-          }
-        }
-      }
-    },
-    "Paste to %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "粘贴到%@"
-          }
-        }
-      }
-    },
-    "Select Application" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择应用程序"
-          }
-        }
-      }
-    },
-    "%lld months ago" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld月前"
-          }
-        }
-      }
-    },
-    "%lld days ago" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld天前"
-          }
-        }
-      }
-    },
-    "%lld hours ago" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld小时前"
-          }
-        }
-      }
-    },
-    "%lld minutes ago" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld分钟前"
+            "value" : "您有比新的历史限制更旧的项目。是否要删除这些较旧的项目并应用新的限制？"
           }
         }
       }

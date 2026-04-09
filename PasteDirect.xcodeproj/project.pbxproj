@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6C41EE1CD0B7EA0BF39B26DC /* PasteFilterItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */; };
 		0D022D1631A85B5809537CE5 /* PasteFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823EEAC8102B1567D446F5FF /* PasteFilterView.swift */; };
+		6C41EE1CD0B7EA0BF39B26DC /* PasteFilterItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */; };
 		CB0D71122E89056D00BA341F /* IgnoredAppsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0D71112E89056D00BA341F /* IgnoredAppsManager.swift */; };
 		CB0D71142E89067A00BA341F /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0D71132E89067A00BA341F /* View+Extension.swift */; };
 		CB0D71442E8A34BC00BA341F /* PasteDirect.icon in Resources */ = {isa = PBXBuildFile; fileRef = CB0D71432E8A34BC00BA341F /* PasteDirect.icon */; };
@@ -56,6 +56,7 @@
 		CBD5E3AB2C3D0B6A00F0F95F /* NSTextField+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3AA2C3D0B6A00F0F95F /* NSTextField+Extension.swift */; };
 		CBD5E3B12C3E3EF100F0F95F /* PasteUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B02C3E3EF100F0F95F /* PasteUserDefaults.swift */; };
 		CBD5E3B32C3E68EF00F0F95F /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B22C3E68EF00F0F95F /* PasteCollectionViewItem.swift */; };
+		BB50FCDD53651B2C064B8F69 /* PastePreviewPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C109D42740C759184D084557 /* PastePreviewPanel.swift */; };
 		CBD5E3B52C3E88F500F0F95F /* PasteEffectImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */; };
 		CBD5E3B72C3E8BC200F0F95F /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B62C3E8BC200F0F95F /* Layout.swift */; };
 		CBD5E3B92C3FC01C00F0F95F /* PasteBoardType.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */; };
@@ -93,6 +94,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		823EEAC8102B1567D446F5FF /* PasteFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterView.swift; sourceTree = "<group>"; };
+		C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterItem.swift; sourceTree = "<group>"; };
 		CB0D71112E89056D00BA341F /* IgnoredAppsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IgnoredAppsManager.swift; sourceTree = "<group>"; };
 		CB0D71132E89067A00BA341F /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 		CB0D71432E8A34BC00BA341F /* PasteDirect.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = PasteDirect.icon; sourceTree = "<group>"; };
@@ -130,8 +133,6 @@
 		CB49E9232E84DCF4000F8436 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardWritingItem.swift; sourceTree = "<group>"; };
 		CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSearchField.swift; sourceTree = "<group>"; };
-		C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterItem.swift; sourceTree = "<group>"; };
-		823EEAC8102B1567D446F5FF /* PasteFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterView.swift; sourceTree = "<group>"; };
 		CB57A8C92E82A53D00C8F80F /* PasteSettingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSettingWindowController.swift; sourceTree = "<group>"; };
 		CB58936B2E856C3E0024564F /* RulesDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesDetailView.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
@@ -144,6 +145,7 @@
 		CBD5E3AA2C3D0B6A00F0F95F /* NSTextField+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTextField+Extension.swift"; sourceTree = "<group>"; };
 		CBD5E3B02C3E3EF100F0F95F /* PasteUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUserDefaults.swift; sourceTree = "<group>"; };
 		CBD5E3B22C3E68EF00F0F95F /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
+		C109D42740C759184D084557 /* PastePreviewPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastePreviewPanel.swift; sourceTree = "<group>"; };
 		CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEffectImageView.swift; sourceTree = "<group>"; };
 		CBD5E3B62C3E8BC200F0F95F /* Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
 		CBD5E3B82C3FC01C00F0F95F /* PasteBoardType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteBoardType.swift; sourceTree = "<group>"; };
@@ -293,6 +295,7 @@
 			children = (
 				CB2CDF702924ECAD00E81836 /* PasteScrollView.swift */,
 				CBD5E3B22C3E68EF00F0F95F /* PasteCollectionViewItem.swift */,
+				C109D42740C759184D084557 /* PastePreviewPanel.swift */,
 				CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */,
 				CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */,
 				C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */,
@@ -582,6 +585,7 @@
 				CB2CDF762924ECAE00E81836 /* PrefKey.swift in Sources */,
 				CB368BD72C78A04100BA72F3 /* NSLabel.swift in Sources */,
 				CBD5E3B32C3E68EF00F0F95F /* PasteCollectionViewItem.swift in Sources */,
+				BB50FCDD53651B2C064B8F69 /* PastePreviewPanel.swift in Sources */,
 				CB58936C2E856C3E0024564F /* RulesDetailView.swift in Sources */,
 				CB1726302B440C1C002CC472 /* KeyHelper.swift in Sources */,
 				CB3EAA962F0BB88900FBB225 /* HexColorValidator.swift in Sources */,

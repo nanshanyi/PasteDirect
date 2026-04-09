@@ -13,6 +13,7 @@ import Foundation
 
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func deleteItem(_ item: PasteboardModel, indexPath: IndexPath)
+    func previewItem(_ item: PasteboardModel, relativeTo view: NSView)
 }
 
 let maxLength = 300
@@ -312,6 +313,10 @@ extension PasteCollectionViewItem {
             let itemColor = NSMenuItem(title: String(localized: "Paste as #RRGGBB"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(itemColor)
         }
+        let previewItem = NSMenuItem(title: String(localized: "Preview"), action: #selector(previewItemAction), keyEquivalent: " ")
+        previewItem.keyEquivalentModifierMask = .init(rawValue: 0)
+        menu.addItem(previewItem)
+        menu.addItem(.separator())
         let item2 = NSMenuItem(title: String(localized: "Copy"), action: #selector(copyItemData), keyEquivalent: "")
         menu.addItem(item2)
         let item3 = NSMenuItem(title: String(localized: "Delete"), action: #selector(deleteItem), keyEquivalent: "d")
@@ -367,6 +372,12 @@ extension PasteCollectionViewItem {
         if let pModel, let indexPath = collectionView?.indexPath(for: self) {
             delegate?.deleteItem(pModel, indexPath: indexPath)
         }
+    }
+
+    @objc
+    private func previewItemAction() {
+        guard let pModel else { return }
+        delegate?.previewItem(pModel, relativeTo: view)
     }
 }
 
