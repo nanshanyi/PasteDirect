@@ -191,7 +191,6 @@ extension PasteMainViewController {
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [weak self] text in
                 guard let self = self else { return }
-                self.scrollView.isSearching = !text.isEmpty || self.currentFilterState.isActive
                 self.performSearch()
             }
             .store(in: &cancellables)
@@ -203,8 +202,15 @@ extension PasteMainViewController {
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 self.deleteItem = false
-                self.scrollView.isLoading = false
                 self.collectionView.reloadData()
+            }
+            .store(in: &cancellables)
+
+        // loadState 监听 → 控制 scrollView.canLoadMore
+        PasteDataStore.main.$loadState
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.scrollView.canLoadMore = (state == .idle)
             }
             .store(in: &cancellables)
 
@@ -231,7 +237,6 @@ extension PasteMainViewController {
                 self.currentFilterState = state
                 self.updateFilterButtonAppearance()
                 self.searchBar.updateTags(state.activeTags)
-                self.scrollView.isSearching = !self.searchBar.text.isEmpty || state.isActive
                 self.performSearch()
             }
             .store(in: &cancellables)
@@ -263,8 +268,6 @@ extension PasteMainViewController {
             resetToDefaultList()
         } else {
             resetSelectIndex()
-            scrollView.noMore = false
-            scrollView.isLoading = false
             PasteDataStore.main.searchData(keyword, filter: currentFilterState)
             Log("search start: \(keyword), filter: \(currentFilterState)")
             collectionView.scroll(.zero)
@@ -288,7 +291,6 @@ extension PasteMainViewController {
     }
 
     private func resetToDefaultList() {
-        scrollView.resetState()
         resetSelectIndex()
         PasteDataStore.main.resetDefaultList()
     }
@@ -423,11 +425,6 @@ extension PasteMainViewController: NSCollectionViewDataSource {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        if dataList.value.count >= PasteDataStore.main.totalCount {
-            scrollView.noMore = true
-            scrollView.isLoading = false
-            return
-        }
         PasteDataStore.main.loadNextPage()
     }
 }

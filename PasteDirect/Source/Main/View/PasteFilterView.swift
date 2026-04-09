@@ -132,7 +132,7 @@ private final class LeftAlignedFlowLayout: NSCollectionViewFlowLayout {
 
     override func prepare() {
         super.prepare()
-        guard let cv = collectionView else { return }
+        guard let _ = collectionView else { return }
         let fullRect = NSRect(origin: .zero, size: collectionViewContentSize)
         let allAttrs = super.layoutAttributesForElements(in: fullRect).map { $0.copy() as! NSCollectionViewLayoutAttributes }
 
