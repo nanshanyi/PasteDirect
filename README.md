@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-5.0-orange" alt="Swift 5.0">
-  <img src="https://img.shields.io/badge/version-2.3.1-green" alt="Version 2.3.1">
+  <img src="https://img.shields.io/badge/version-2.4.0-green" alt="Version 2.4.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -22,6 +22,7 @@
 - 🎨 **颜色识别** — 自动检测剪贴板中的 Hex 颜色值并可视化展示
 - ⌨️ **快捷键呼出** — 默认 `⌘⇧V`，支持自定义快捷键
 - 🔍 **快速搜索** — 输入关键词即时过滤历史记录
+- 🏷️ **多维筛选** — 按类型（文本/图片/颜色）、来源应用、时间范围组合筛选
 - 🖱️ **多种粘贴方式** — 双击粘贴、回车粘贴、拖拽到目标位置
 - 📝 **纯文本模式** — 一键去除富文本格式，粘贴为纯文本
 - 🧹 **自动清理** — 可设置保留时长：1 天 / 1 周 / 1 月
@@ -110,7 +111,6 @@ open PasteDirect.xcodeproj
 | [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) | 全局快捷键 |
 | [SQLite.swift](https://github.com/nicklama/SQLite.swift) | 本地数据库 |
 | [SnapKit](https://github.com/SnapKit/SnapKit) | Auto Layout |
-
 
 ## License
 

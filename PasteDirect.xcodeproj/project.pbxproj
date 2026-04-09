@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6C41EE1CD0B7EA0BF39B26DC /* PasteFilterItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */; };
+		0D022D1631A85B5809537CE5 /* PasteFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823EEAC8102B1567D446F5FF /* PasteFilterView.swift */; };
 		CB0D71122E89056D00BA341F /* IgnoredAppsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0D71112E89056D00BA341F /* IgnoredAppsManager.swift */; };
 		CB0D71142E89067A00BA341F /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0D71132E89067A00BA341F /* View+Extension.swift */; };
 		CB0D71442E8A34BC00BA341F /* PasteDirect.icon in Resources */ = {isa = PBXBuildFile; fileRef = CB0D71432E8A34BC00BA341F /* PasteDirect.icon */; };
@@ -128,6 +130,8 @@
 		CB49E9232E84DCF4000F8436 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		CB5044DD2C5CD4F700F9DE75 /* PasteboardWritingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardWritingItem.swift; sourceTree = "<group>"; };
 		CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSearchField.swift; sourceTree = "<group>"; };
+		C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterItem.swift; sourceTree = "<group>"; };
+		823EEAC8102B1567D446F5FF /* PasteFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterView.swift; sourceTree = "<group>"; };
 		CB57A8C92E82A53D00C8F80F /* PasteSettingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSettingWindowController.swift; sourceTree = "<group>"; };
 		CB58936B2E856C3E0024564F /* RulesDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesDetailView.swift; sourceTree = "<group>"; };
 		CBABF7852B344A6600D3A095 /* Then.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Then.swift; sourceTree = "<group>"; };
@@ -291,6 +295,8 @@
 				CBD5E3B22C3E68EF00F0F95F /* PasteCollectionViewItem.swift */,
 				CB5320AB2B3596B5006C4B5D /* PasteSearchField.swift */,
 				CBD5E3B42C3E88F500F0F95F /* PasteEffectImageView.swift */,
+				C38BD175FAA1E29FEE84F600 /* PasteFilterItem.swift */,
+				823EEAC8102B1567D446F5FF /* PasteFilterView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -549,6 +555,8 @@
 				CBD5E3BB2C3FCE3600F0F95F /* NSAttributeString+Extension.swift in Sources */,
 				CBC127182C32D17900E5DBEF /* Date+Extension.swift in Sources */,
 				CB5320AC2B3596B5006C4B5D /* PasteSearchField.swift in Sources */,
+				6C41EE1CD0B7EA0BF39B26DC /* PasteFilterItem.swift in Sources */,
+				0D022D1631A85B5809537CE5 /* PasteFilterView.swift in Sources */,
 				CB2CDF822924ECAE00E81836 /* PasteDataStore.swift in Sources */,
 				CBD5E3AB2C3D0B6A00F0F95F /* NSTextField+Extension.swift in Sources */,
 				CBD39A1A2E8A911C0081883D /* ImageColorExtractor.swift in Sources */,
@@ -769,7 +777,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.3.1;
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -816,7 +824,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.3.1;
+				MARKETING_VERSION = 2.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

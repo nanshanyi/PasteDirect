@@ -13,18 +13,31 @@ import SQLite
 
 typealias Expression = SQLite.Expression
 
+enum LoadState {
+    case idle
+    case loading
+    case noMore
+}
+
 final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
     let pageSize = 50
 
     private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
+    @Published private(set) var loadState: LoadState = .idle
     private(set) var totalCount = 0
-    private(set) var pageIndex = 0
-    private var currentOffset: Int { pageSize * pageIndex }
     private var sqlManager = PasteSQLManager()
     private var searchTask: Task<Void, Error>?
+    private var loadTask: Task<Void, Error>?
     private var colorCache = ColorCache()
+
+    /// 当前生效的筛选条件（用于分页加载时复用）
+    private var currentFilter: Expression<Bool>?
+    /// 当前是否为颜色筛选（需要内存过滤）
+    private var isColorFilter = false
+    /// 已扫描过的 DB 行数（颜色筛选时与展示条数不同）
+    private var dbOffset = 0
 
     func setup() {
         setupData()
@@ -35,10 +48,10 @@ final class PasteDataStore {
 
 extension PasteDataStore {
     private func setupData() {
-        pageIndex = 0
         updateTotalCount()
+        dbOffset = pageSize
         Task {
-            let list = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
+            let list = await fetchItemsFromDB(limit: pageSize, offset: 0)
             dataList.send(list)
             await withTaskGroup(of: Void.self) { group in
                 for item in list {
@@ -96,37 +109,108 @@ extension PasteDataStore {
 // MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
-    /// 加载下一页
-    /// - Returns: 返回从0到当前页所有数据list
+    /// 加载下一页（支持筛选条件）
     func loadNextPage() {
-        guard dataList.value.count < totalCount else { return }
-        pageIndex += 1
-        Task {
-            Log("loadNextPage \(pageIndex)")
-            let nextPage = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
-            dataList.send(dataList.value + nextPage)
+        guard loadState == .idle else { return }
+        loadState = .loading
+        loadTask?.cancel()
+        loadTask = Task {
+            do {
+                var accumulated = [PasteboardModel]()
+                var offset = dbOffset
+                // 循环加载直到凑够一页或没有更多数据（颜色筛选时内存过滤可能导致不足一页）
+                while accumulated.count < pageSize {
+                    Log("loadNextPage offset=\(offset)")
+                    let rows = await sqlManager.search(filter: currentFilter, limit: pageSize, offset: offset)
+                    var batch = await parseItems(rows: rows)
+                    if isColorFilter {
+                        batch = batch.filter { $0.hexColorString != nil }
+                    }
+                    try Task.checkCancellation()
+                    accumulated.append(contentsOf: batch)
+                    offset += rows.count
+                    // DB 返回不足一页，说明真的没有更多了
+                    if rows.count < pageSize { break }
+                }
+                dbOffset = offset
+                dataList.send(dataList.value + accumulated)
+                loadState = accumulated.isEmpty ? .noMore : .idle
+            } catch {
+                loadState = .idle
+            }
         }
     }
-    
+
     func resetDefaultList() {
-        pageIndex = 0
+        currentFilter = nil
+        isColorFilter = false
+        loadTask?.cancel()
+        loadState = .loading
+        dbOffset = pageSize
         Task {
-            let list = await fetchItemsFromDB(limit: pageSize, offset: currentOffset)
+            let list = await fetchItemsFromDB(limit: pageSize, offset: 0)
             dataList.send(list)
+            loadState = .idle
         }
     }
-    
+
     /// 数据搜索
-    /// - Parameter keyWord: 搜索关键词
-    /// - Returns: 搜索结果list
     func searchData(_ keyWord: String) {
+        searchData(keyWord, filter: .empty)
+    }
+
+    /// 带筛选条件的搜索
+    func searchData(_ keyWord: String, filter state: FilterState) {
         searchTask?.cancel()
+        loadTask?.cancel()
+        loadState = .loading
         searchTask = Task {
-            let filter = appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%")
-            let rows = await sqlManager.search(filter: filter)
-            let result = await parseItems(rows: rows)
+            var conditions: [Expression<Bool>] = []
+
+            if !keyWord.isEmpty {
+                conditions.append(appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
+            }
+
+            if let app = state.selectedApp {
+                conditions.append(appName == app)
+            }
+
+            if let selectedType = state.selectedType {
+                switch selectedType {
+                case .string:
+                    conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
+                case .image:
+                    conditions.append(type == PasteboardType.png.rawValue || type == PasteboardType.tiff.rawValue)
+                case .color:
+                    conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
+                case .none:
+                    break
+                }
+            }
+
+            if let dateRange = state.selectedDateRange {
+                let interval = dateRange.dateInterval
+                conditions.append(date >= interval.start && date < interval.end)
+            }
+
+            let combined = conditions.isEmpty ? nil : conditions.dropFirst().reduce(conditions[0]) { $0 && $1 }
+
+            // 保存筛选条件供分页使用
+            currentFilter = combined
+            isColorFilter = state.selectedType == .color
+            totalCount = sqlManager.count(filter: combined)
+
+            let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
+            var result = await parseItems(rows: rows)
+
+            if isColorFilter {
+                result = result.filter { $0.hexColorString != nil }
+            }
+
             try Task.checkCancellation()
+            dbOffset = pageSize
             dataList.send(result)
+            loadState = .idle
         }
     }
     
@@ -161,6 +245,7 @@ extension PasteDataStore {
         var list = dataList.value
         list.removeAll(where: { items.contains($0) })
         dataList.send(list)
+        dbOffset = max(0, dbOffset - items.count)
         deleteItems(filter: items.map { $0.hashValue }.contains(hashKey))
     }
     
@@ -213,6 +298,16 @@ extension PasteDataStore {
         sqlManager.clearAllData()
         updateTotalCount()
         resetDefaultList()
+    }
+
+    /// 获取常用应用列表（前5个）
+    func topApps() -> [(name: String, path: String)] {
+        sqlManager.distinctApps(limit: 5)
+    }
+
+    /// 获取所有应用列表
+    func allApps() -> [(name: String, path: String)] {
+        sqlManager.allDistinctApps()
     }
 }
 

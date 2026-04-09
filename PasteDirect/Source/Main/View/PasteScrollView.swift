@@ -14,10 +14,8 @@ protocol PasteScrollViewDelegate: NSObjectProtocol {
 
 final class PasteScrollView: NSScrollView {
     weak var delegate: PasteScrollViewDelegate?
-    var isSearching = false
-    var isLoading = false
-    var noMore = false
-    
+    var canLoadMore = true
+
     override var hasVerticalScroller: Bool {
         get { false }
         set { /* ignore */ }
@@ -43,19 +41,11 @@ final class PasteScrollView: NSScrollView {
 
     override func scroll(_ clipView: NSClipView, to point: NSPoint) {
         super.scroll(clipView, to: point)
-        if noMore || isSearching { return }
-        let width = NSScreen.main?.frame.width ?? 2000
-        if point.x + width + 500 > clipView.documentRect.width {
-            if !isLoading {
-                isLoading = true
-                delegate?.loadMoreData()
-            }
+        guard canLoadMore else { return }
+        let visibleWidth = documentVisibleRect.width
+        if point.x + visibleWidth * 2 > clipView.documentRect.width {
+            canLoadMore = false
+            delegate?.loadMoreData()
         }
-    }
-    
-    func resetState() {
-        isSearching = false
-        isLoading = false
-        noMore = false
     }
 }
