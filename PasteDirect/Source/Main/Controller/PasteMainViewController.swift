@@ -12,11 +12,8 @@ import Combine
 import SnapKit
 
 final class PasteMainViewController: NSViewController {
-    private var selectIndexPath = IndexPath(item: 0, section: 0)
-    private var dataList = PasteDataStore.main.dataList
+    private let viewModel = PasteMainViewModel()
     private var cancellables = Set<AnyCancellable>()
-    private var deleteItem = false
-    private var currentFilterState = FilterState.empty
     private var previewPopover: PastePreviewPopover?
     private var contentView: NSView!
 
@@ -109,21 +106,13 @@ extension PasteMainViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
-        initCombine()
+        bindViewModel()
         NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: keyDownEvent(_:))
     }
 
     override func viewDidAppear() {
         view.window?.makeFirstResponder(collectionView)
-        if PasteDataStore.main.needRefresh {
-            PasteDataStore.main.needRefresh.toggle()
-            if dataList.value.count < PasteDataStore.main.pageSize {
-                resetToDefaultList()
-            } else {
-                resetSelectIndex()
-                collectionView.reloadData()
-            }
-        }
+        viewModel.handleViewDidAppear()
     }
 
     override func viewDidDisappear() {
@@ -131,14 +120,13 @@ extension PasteMainViewController {
         closePreviewPopover()
         searchBar.objectValue = nil
         filterView.resetFilter()
-        currentFilterState = .empty
+        viewModel.handleViewDidDisappear()
         updateFilterButtonAppearance()
         searchBar.updateTags([])
-        PasteDataStore.main.clearExpiredData()
     }
 }
 
-// MARK: - UI & Rx
+// MARK: - UI & 绑定
 
 extension PasteMainViewController {
     private func initSubviews() {
@@ -166,61 +154,66 @@ extension PasteMainViewController {
         }
     }
 
-    private func initCombine() {
-        // 搜索框文本变化监听
+    private func bindViewModel() {
+        // 搜索框文本
         searchBar.$text
             .dropFirst()
             .removeDuplicates()
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
-            .sink { [weak self] text in
-                guard let self = self else { return }
-                self.performSearch()
-            }
-            .store(in: &cancellables)
-
-        // 数据列表变化监听
-        dataList
-            .receive(on: DispatchQueue.main)
-            .filter { [weak self] _ in self?.deleteItem == false }
             .sink { [weak self] _ in
-                guard let self = self else { return }
-                self.deleteItem = false
-                self.collectionView.reloadData()
+                guard let self else { return }
+                self.viewModel.performSearch(keyword: self.searchBar.text)
             }
             .store(in: &cancellables)
 
-        // loadState 监听 → 控制 scrollView.canLoadMore
-        PasteDataStore.main.$loadState
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                self?.scrollView.canLoadMore = (state == .idle)
+        // 数据变化
+        viewModel.dataChange
+            .sink { [weak self] change in
+                guard let self else { return }
+                switch change {
+                case .reload(let scrollToBeginning):
+                    self.collectionView.reloadData()
+                    if scrollToBeginning {
+                        self.collectionView.scroll(.zero)
+                    }
+                case .delete(let indexPath):
+                    self.collectionView.animator().deleteItems(at: [indexPath])
+                    self.resetSelectIndex(indexPath)
+                }
             }
             .store(in: &cancellables)
 
-        // 设置按钮点击监听
+        // canLoadMore
+        viewModel.$canLoadMore
+            .sink { [weak self] canLoad in
+                self?.scrollView.canLoadMore = canLoad
+            }
+            .store(in: &cancellables)
+
+        // 设置按钮
         settingButton.tapPublisher
             .sink { [weak self] in
                 self?.settingAction()
             }
             .store(in: &cancellables)
 
-        // 筛选按钮点击
+        // 筛选按钮
         searchBar.filterButton.tapPublisher
             .sink { [weak self] in
                 self?.showFilterPopover()
             }
             .store(in: &cancellables)
 
-        // 筛选状态变化监听
+        // 筛选状态变化
         filterView.$filterState
             .dropFirst()
             .removeDuplicates()
             .sink { [weak self] state in
-                guard let self = self else { return }
-                self.currentFilterState = state
+                guard let self else { return }
+                self.viewModel.updateFilter(state)
                 self.updateFilterButtonAppearance()
                 self.searchBar.updateTags(state.activeTags)
-                self.performSearch()
+                self.viewModel.performSearch(keyword: self.searchBar.text)
             }
             .store(in: &cancellables)
     }
@@ -229,55 +222,59 @@ extension PasteMainViewController {
 // MARK: - 私有方法
 
 extension PasteMainViewController {
-    private func searchWord(_ keyword: String) {
-        performSearch()
-    }
-
-    /// 按倒序移除最后一个筛选标签：日期 > 类型 > 应用
-    private func removeLastFilterTag() {
-        if filterView.filterState.selectedDateRange != nil {
-            filterView.removeFilter(.date)
-        } else if filterView.filterState.selectedType != nil {
-            filterView.removeFilter(.type)
-        } else if filterView.filterState.selectedApp != nil {
-            filterView.removeFilter(.app)
-        }
-    }
-
-    private func performSearch() {
-        let keyword = searchBar.text
-        let hasFilter = currentFilterState.isActive
-        if keyword.isEmpty && !hasFilter {
-            resetToDefaultList()
-        } else {
-            resetSelectIndex()
-            PasteDataStore.main.searchData(keyword, filter: currentFilterState)
-            Log("search start: \(keyword), filter: \(currentFilterState)")
-            collectionView.scroll(.zero)
-        }
-    }
-
     private func showFilterPopover() {
         if filterPopover.isShown {
             filterPopover.close()
             return
         }
-        let topApps = PasteDataStore.main.topApps()
-        let allApps = PasteDataStore.main.allApps()
-        filterView.configure(apps: topApps, allApps: allApps)
+        filterView.configure(apps: viewModel.topApps(), allApps: viewModel.allApps())
         let btn = searchBar.filterButton
         filterPopover.show(relativeTo: btn.bounds, of: btn, preferredEdge: .maxY)
     }
 
     private func updateFilterButtonAppearance() {
-        searchBar.filterButton.contentTintColor = currentFilterState.isActive ? .controlAccentColor : .secondaryLabelColor
+        searchBar.filterButton.contentTintColor = viewModel.filterIsActive ? .controlAccentColor : .secondaryLabelColor
     }
 
-    private func resetToDefaultList() {
-        resetSelectIndex()
-        PasteDataStore.main.resetDefaultList()
+    private func settingAction() {
+        AppContext.coordinator.showSettings()
     }
 
+    private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
+        let old = viewModel.selectedIndexPath
+        collectionView.item(at: old)?.isSelected = false
+        viewModel.resetSelection(to: indexPath)
+        if !viewModel.items.isEmpty {
+            collectionView.selectionIndexPaths = [indexPath]
+            scrollTo(indexPath: indexPath)
+        }
+    }
+
+    private func scrollTo(indexPath: IndexPath) {
+        if let item = collectionView.layoutAttributesForItem(at: indexPath) {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
+            }
+        }
+    }
+
+    private func showPreviewPopover(for model: PasteboardModel, relativeTo view: NSView) {
+        closePreviewPopover()
+        let popover = PastePreviewPopover(model: model)
+        previewPopover = popover
+        popover.show(relativeTo: view.bounds, of: view, preferredEdge: .maxY)
+    }
+
+    private func closePreviewPopover() {
+        previewPopover?.close()
+        previewPopover = nil
+    }
+}
+
+// MARK: - 键盘事件
+
+extension PasteMainViewController {
     private func keyDownEvent(_ event: NSEvent) -> NSEvent? {
         if KeyHelper.numberCharacters.contains(where: { $0 == event.keyCode }) {
             if !searchBar.isFirstResponder {
@@ -294,47 +291,42 @@ extension PasteMainViewController {
         }
         return event
     }
-    
+
     private func escapeKeyDown() {
         if previewPopover?.isShown == true {
             closePreviewPopover()
         } else if filterPopover.isShown {
             filterPopover.close()
         } else if searchBar.isFirstResponder {
-            let needRefresh = !searchBar.text.isEmpty || currentFilterState.isActive
+            let needRefresh = !searchBar.text.isEmpty || viewModel.filterIsActive
             searchBar.objectValue = nil
             filterView.resetFilter()
-            currentFilterState = .empty
+            viewModel.updateFilter(.empty)
             updateFilterButtonAppearance()
             searchBar.updateTags([])
             view.window?.makeFirstResponder(collectionView)
             if needRefresh {
-                resetToDefaultList()
+                viewModel.resetToDefaultList()
             }
-        } else if currentFilterState.isActive {
+        } else if viewModel.filterIsActive {
             filterView.resetFilter()
-            currentFilterState = .empty
+            viewModel.updateFilter(.empty)
             updateFilterButtonAppearance()
             searchBar.updateTags([])
-            resetToDefaultList()
+            viewModel.resetToDefaultList()
         } else {
-            let app = NSApplication.shared.delegate as? PasteAppDelegate
-            app?.dismissWindow()
+            AppContext.coordinator.dismissWindow()
         }
     }
-    
+
     private func deleteKeyDown() {
         guard !searchBar.isFirstResponder else { return }
-        if selectIndexPath.item < dataList.value.count {
-            let item = dataList.value[selectIndexPath.item]
-            deleteItem(item, indexPath: selectIndexPath)
-        }
+        viewModel.deleteItem(at: viewModel.selectedIndexPath)
     }
-    
+
     private func returnKeyDown() {
         guard !searchBar.isFirstResponder else { return }
-        guard let item = collectionView.item(at: selectIndexPath) as? PasteCollectionViewItem else { return }
-        item.pasteItem()
+        viewModel.pasteItem(at: viewModel.selectedIndexPath)
     }
 
     private func spaceKeyDown() {
@@ -342,45 +334,9 @@ extension PasteMainViewController {
         if previewPopover?.isShown == true {
             closePreviewPopover()
         } else {
-            guard selectIndexPath.item < dataList.value.count else { return }
-            let model = dataList.value[selectIndexPath.item]
-            guard let itemView = collectionView.item(at: selectIndexPath)?.view else { return }
+            guard let model = viewModel.item(at: viewModel.selectedIndexPath),
+                  let itemView = collectionView.item(at: viewModel.selectedIndexPath)?.view else { return }
             showPreviewPopover(for: model, relativeTo: itemView)
-        }
-    }
-
-    private func showPreviewPopover(for model: PasteboardModel, relativeTo view: NSView) {
-        closePreviewPopover()
-        let popover = PastePreviewPopover(model: model)
-        previewPopover = popover
-        popover.show(relativeTo: view.bounds, of: view, preferredEdge: .maxY)
-    }
-
-    private func closePreviewPopover() {
-        previewPopover?.close()
-        previewPopover = nil
-    }
-
-    private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
-        collectionView.item(at: selectIndexPath)?.isSelected = false
-        selectIndexPath = indexPath
-        if !dataList.value.isEmpty {
-            collectionView.selectionIndexPaths = [selectIndexPath]
-            scrollTo(indexPath: selectIndexPath)
-        }
-    }
-    
-    private func settingAction() {
-        let app = NSApplication.shared.delegate as? PasteAppDelegate
-        app?.settingsAction()
-    }
-    
-    private func scrollTo(indexPath: IndexPath) {
-       if let item = collectionView.layoutAttributesForItem(at: indexPath) {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.25
-                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
-            }
         }
     }
 }
@@ -391,15 +347,14 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     func collectionView(_ collectionView: NSCollectionView, shouldSelectItemsAt indexPaths: Set<IndexPath>) -> Set<IndexPath> {
         if let indexPath = indexPaths.first {
             resetSelectIndex(indexPath)
-            if previewPopover?.isShown == true, indexPath.item < dataList.value.count {
-                let model = dataList.value[indexPath.item]
+            if previewPopover?.isShown == true, let model = viewModel.item(at: indexPath) {
                 if let itemView = collectionView.item(at: indexPath)?.view {
                     showPreviewPopover(for: model, relativeTo: itemView)
                 }
             }
         }
         Log("选中\(indexPaths.description)")
-        return [selectIndexPath]
+        return [viewModel.selectedIndexPath]
     }
 
     func collectionView(_ collectionView: NSCollectionView, canDragItemsAt indexPaths: Set<IndexPath>, with event: NSEvent) -> Bool {
@@ -408,7 +363,7 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
-        return dataList.value[indexPath.item].writeItem
+        return viewModel.item(at: indexPath)?.writeItem
     }
 }
 
@@ -420,15 +375,17 @@ extension PasteMainViewController: NSCollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataList.value.count
+        return viewModel.items.count
     }
 
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
         let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
-        cItem.updateItem(model: dataList.value[indexPath.item])
-        if selectIndexPath == indexPath {
+        if let model = viewModel.item(at: indexPath) {
+            cItem.updateItem(model: model)
+        }
+        if viewModel.selectedIndexPath == indexPath {
             cItem.isSelected = true
             collectionView.selectionIndexPaths = [indexPath]
         } else {
@@ -442,7 +399,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
 
 extension PasteMainViewController: PasteScrollViewDelegate {
     func loadMoreData() {
-        PasteDataStore.main.loadNextPage()
+        viewModel.loadNextPage()
     }
 }
 
@@ -450,11 +407,7 @@ extension PasteMainViewController: PasteScrollViewDelegate {
 
 extension PasteMainViewController: PasteCollectionViewItemDelegate {
     func deleteItem(_ item: PasteboardModel, indexPath: IndexPath) {
-        defer { deleteItem = false }
-        deleteItem = true
-        PasteDataStore.main.deleteItems(item)
-        collectionView.animator().deleteItems(at: [indexPath])
-        resetSelectIndex(indexPath)
+        viewModel.deleteItem(at: indexPath)
     }
 
     func previewItem(_ item: PasteboardModel, relativeTo view: NSView) {
@@ -464,8 +417,17 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
             showPreviewPopover(for: item, relativeTo: view)
         }
     }
+
+    func pasteItem(_ item: PasteboardModel, isOriginal: Bool) {
+        viewModel.pasteModel(item, isOriginal: isOriginal)
+    }
+
+    func copyItem(_ item: PasteboardModel) {
+        viewModel.copyModel(item)
+    }
 }
 
+// MARK: - NSSearchFieldDelegate
 
 extension PasteMainViewController: NSSearchFieldDelegate {
     func controlTextDidEndEditing(_ obj: Notification) {
@@ -474,8 +436,8 @@ extension PasteMainViewController: NSSearchFieldDelegate {
 
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.deleteBackward(_:)) {
-            if textView.string.isEmpty && currentFilterState.isActive {
-                removeLastFilterTag()
+            if textView.string.isEmpty && viewModel.filterIsActive {
+                viewModel.removeLastFilterTag(from: filterView)
                 return true
             }
         }

@@ -7,13 +7,14 @@
 
 import AppKit
 import Carbon
-import KeyboardShortcuts
 import SnapKit
 import Foundation
 
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func deleteItem(_ item: PasteboardModel, indexPath: IndexPath)
     func previewItem(_ item: PasteboardModel, relativeTo view: NSView)
+    func pasteItem(_ item: PasteboardModel, isOriginal: Bool)
+    func copyItem(_ item: PasteboardModel)
 }
 
 let maxLength = 300
@@ -299,8 +300,7 @@ extension PasteCollectionViewItem {
 
     private func setViewMenu() {
         let menu = NSMenu()
-        if let app = NSApplication.shared.delegate as? PasteAppDelegate,
-            let name = app.frontApp?.localizedName {
+        if let name = AppContext.coordinator.frontAppName {
             let item = NSMenuItem(title: String(localized: "Paste to \(name)"), action: #selector(pasteOriginalTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
@@ -350,21 +350,14 @@ extension PasteCollectionViewItem {
     }
 
     private func pasteAction(_ isOriginal: Bool = true) {
-        Log("isOriginal: \(isOriginal) data: \(pModel?.dataString ?? "")")
-        PasteBoard.main.pasteData(pModel, isOriginal)
-        guard PasteUserDefaults.pasteDirect else { return }
-        guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
-        app.frontApp?.activate()
-        app.dismissWindow()
-        KeyboardShortcuts.postCmdVEvent()
+        guard let pModel else { return }
+        delegate?.pasteItem(pModel, isOriginal: isOriginal)
     }
 
     @objc
     private func copyItemData() {
-        guard let pModel, let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
-        app.dismissWindow()
-        PasteBoard.main.pasteData(pModel)
-        app.frontApp?.activate()
+        guard let pModel else { return }
+        delegate?.copyItem(pModel)
     }
 
     @objc

@@ -19,9 +19,6 @@ class PasteSettingWindowController: NSWindowController {
         window.titlebarSeparatorStyle = .automatic
         window.contentViewController = hostingController
         super.init(window: window)
-        // 提前触发布局
-        hostingController.view.layoutSubtreeIfNeeded()
-        window.layoutIfNeeded()
         showWindow(self)
     }
 

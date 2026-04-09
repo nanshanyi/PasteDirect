@@ -24,8 +24,8 @@ final class PasteAppDelegate: NSObject {
 
     private lazy var mainWindowController = PasteMainWindowController()
 
-    var frontApp: NSRunningApplication?
-    
+    private var frontApp: NSRunningApplication?
+
     private lazy var settingsWindowController = PasteSettingWindowController()
 }
 
@@ -33,6 +33,7 @@ final class PasteAppDelegate: NSObject {
 
 extension PasteAppDelegate: NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        AppContext.coordinator = self
         initPaste()
     }
 
@@ -116,17 +117,7 @@ extension PasteAppDelegate {
         }
     }
 
-    
-}
-
-// MARK: - 对外方法
-
-extension PasteAppDelegate {
-    func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
-        mainWindowController.dismissWindow(completionHandler)
-    }
-
-    func showOrDismissWindow(_ frame: NSRect? = nil) {
+    private func showOrDismissWindow(_ frame: NSRect? = nil) {
         if mainWindowController.isVisible {
             mainWindowController.dismissWindow()
         } else {
@@ -134,13 +125,33 @@ extension PasteAppDelegate {
             mainWindowController.show(in: frame)
         }
     }
-    
-    func statusItemVisible(_ isVisible: Bool) {
-        menuBarItem.isVisible = isVisible
-    }
-    
+
     @objc
-    func settingsAction() {
+    private func settingsAction() {
+        showSettings()
+    }
+}
+
+// MARK: - AppCoordinator
+
+extension PasteAppDelegate: AppCoordinator {
+    var frontAppName: String? {
+        frontApp?.localizedName
+    }
+
+    func activateFrontApp() {
+        frontApp?.activate()
+    }
+
+    func dismissWindow(_ completionHandler: (() -> Void)? = nil) {
+        mainWindowController.dismissWindow(completionHandler)
+    }
+
+    func showSettings() {
         settingsWindowController.show()
+    }
+
+    func setStatusItemVisible(_ isVisible: Bool) {
+        menuBarItem.isVisible = isVisible
     }
 }
