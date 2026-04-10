@@ -22,7 +22,7 @@ enum LoadState {
 final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
-    let pageSize = 50
+    let pageSize = 20
 
     private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
     @Published private(set) var loadState: LoadState = .idle

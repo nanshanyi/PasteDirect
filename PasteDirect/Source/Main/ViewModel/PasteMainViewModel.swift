@@ -175,5 +175,6 @@ final class PasteMainViewModel {
     func handleViewDidDisappear() {
         filterState = .empty
         store.clearExpiredData()
+        resetToDefaultList()
     }
 }
