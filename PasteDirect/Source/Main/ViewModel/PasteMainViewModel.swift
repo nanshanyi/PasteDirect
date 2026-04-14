@@ -162,19 +162,16 @@ final class PasteMainViewModel {
 
     func handleViewDidAppear() {
         if store.needRefresh {
-            store.needRefresh.toggle()
-            if items.count < store.pageSize {
-                resetToDefaultList()
-            } else {
-                resetSelection()
-                dataChange.send(.reload(scrollToBeginning: true))
-            }
+            store.needRefresh = false
+            resetToDefaultList()
         }
     }
 
-    func handleViewDidDisappear() {
+    func handleViewDidDisappear(needsReset: Bool) {
         filterState = .empty
         store.clearExpiredData()
-        resetToDefaultList()
+        if needsReset {
+            resetToDefaultList()
+        }
     }
 }
