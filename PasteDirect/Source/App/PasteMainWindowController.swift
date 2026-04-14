@@ -33,8 +33,9 @@ final class PasteMainWindowController: NSWindowController {
         let screen = screenFrame ?? .zero
         let height = Layout.viewHeight
 
-        // 目标位置：屏幕底部，左右各留 8pt，底部留 8pt
-        targetFrame = NSRect(x: screen.origin.x + 8, y: screen.origin.y + 8, width: screen.width - 16, height: height)
+        // 目标位置：屏幕底部，四周留 screenPadding
+        let inset = Layout.screenPadding
+        targetFrame = NSRect(x: screen.origin.x + inset, y: screen.origin.y + inset, width: screen.width - inset * 2, height: height)
 
         // 起始位置：在屏幕下方（不可见）
         var startFrame = targetFrame

@@ -30,7 +30,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
         $0.layer?.backgroundColor = .clear
-        $0.layer?.cornerRadius = 16
+        $0.layer?.cornerRadius = Layout.itemCornerRadius
         $0.layer?.borderColor = NSColor("#3970ff")?.cgColor
     }
 
@@ -79,7 +79,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.trailing.equalToSuperview().offset(-Layout.spacing)
             make.top.equalToSuperview().offset(Layout.spacing)
-            make.bottom.equalToSuperview().offset(-24)
+            make.bottom.equalToSuperview().offset(-Layout.itemBottomOffset)
         }
     }
 
@@ -112,7 +112,7 @@ extension PasteCollectionViewItem {
 
     override var isSelected: Bool {
         didSet {
-            contentView.layer?.borderWidth = isSelected ? 4 : 0
+            contentView.layer?.borderWidth = isSelected ? Layout.itemBorderWidth : 0
         }
     }
 
@@ -159,7 +159,7 @@ extension PasteCollectionViewItem {
 
         timeLabel.snp.makeConstraints { make in
             make.leading.equalTo(typeLabel)
-            make.bottom.equalToSuperview().offset(-12)
+            make.bottom.equalToSuperview().offset(-Layout.spacing)
         }
 
         iconImageView.snp.makeConstraints { make in
@@ -181,7 +181,7 @@ extension PasteCollectionViewItem {
 
         topView.snp.makeConstraints { make in
             make.leading.trailing.top.equalToSuperview()
-            make.height.equalTo(60)
+            make.height.equalTo(Layout.itemTopViewHeight)
         }
 
         imageContentView.snp.makeConstraints { make in
@@ -193,12 +193,12 @@ extension PasteCollectionViewItem {
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.trailing.equalToSuperview().offset(-Layout.spacing)
             make.top.equalTo(topView.snp.bottom).offset(Layout.spacing)
-            make.bottom.equalToSuperview().offset(-24)
+            make.bottom.equalToSuperview().offset(-Layout.itemBottomOffset)
         }
 
         bottomView.snp.makeConstraints { make in
             make.leading.trailing.bottom.equalToSuperview()
-            make.height.equalTo(24)
+            make.height.equalTo(Layout.itemBottomViewHeight)
         }
     }
 }

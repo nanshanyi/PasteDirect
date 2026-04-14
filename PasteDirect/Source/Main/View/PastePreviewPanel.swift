@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import Carbon
 import SnapKit
 
 // MARK: - PastePreviewPopover
@@ -13,10 +14,12 @@ import SnapKit
 final class PastePreviewPopover: NSPopover {
 
     private let previewVC = PastePreviewViewController()
+    private var keyMonitor: Any?
 
-    static let maxWidth: CGFloat = 800
-    static let maxHeight: CGFloat = 400
-
+    static let maxWidth: CGFloat = Layout.previewMaxSize
+    static let maxHeight: CGFloat = Layout.previewMaxHeight
+    static let miniHeight: CGFloat = Layout.previewMinHeight
+    static let minWidth: CGFloat = Layout.previewMinWidth
     init(model: PasteboardModel) {
         super.init()
         behavior = .transient
@@ -24,19 +27,36 @@ final class PastePreviewPopover: NSPopover {
         contentViewController = previewVC
         _ = previewVC.view
         configure(with: model)
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self, self.isShown else { return event }
+            switch Int(event.keyCode) {
+            case kVK_Space, kVK_Escape:
+                self.close()
+                return nil
+            case kVK_LeftArrow, kVK_RightArrow:
+                // 让 collectionView 处理左右键切换
+                self.close()
+                return event
+            default:
+                return event
+            }
+        }
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+    }
+
     func configure(with model: PasteboardModel) {
         let size = Self.fitSize(for: model)
         previewVC.configure(with: model, contentSize: size)
-        contentSize = size
+        contentSize = NSSize(width: size.width + Layout.previewPadding, height: size.height + Layout.previewInfoPadding)
     }
 
-    private static let minWidth: CGFloat = 400
 
     private static func fitSize(for model: PasteboardModel) -> NSSize {
         switch model.type {
@@ -47,20 +67,23 @@ final class PastePreviewPopover: NSPopover {
             let screenScale = NSScreen.main?.backingScaleFactor ?? 2.0
             let w = image.size.width / screenScale
             let h = image.size.height / screenScale
-            return NSSize(width: min(w, 800), height: min(h, 800))
+            return NSSize(width: min(w, Layout.previewMaxSize), height: min(h, Layout.previewMaxSize))
         case .string:
             return textFitSize(for: model)
         default:
-            return NSSize(width: 400, height: 400)
+            return NSSize(width: Layout.previewMinWidth, height: Layout.previewMinWidth)
         }
     }
 
     private static func textFitSize(for model: PasteboardModel) -> NSSize {
         let font = NSFont.systemFont(ofSize: 13)
-        let maxLayoutWidth = maxWidth - 24
+        let maxLayoutWidth = maxWidth - Layout.previewPadding
         var boundingSize = NSSize(width: maxWidth, height: maxHeight)
         if let attributeString = model.attributeString {
-            boundingSize = attributeString.boundingRect(with: NSSize(width: maxLayoutWidth, height: .greatestFiniteMagnitude)).size
+            boundingSize = attributeString.boundingRect(
+                with: NSSize(width: maxLayoutWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading]
+            ).size
         } else {
             boundingSize = (model.dataString as NSString).boundingRect(
                 with: NSSize(width: maxLayoutWidth, height: .greatestFiniteMagnitude),
@@ -68,8 +91,9 @@ final class PastePreviewPopover: NSPopover {
                 attributes: [.font: font]
             ).size
         }
-        let w = min(max(ceil(boundingSize.width + 24), minWidth), maxWidth)
-        return NSSize(width: w, height: maxHeight)
+        let w = min(max(ceil(boundingSize.width + Layout.previewPadding), minWidth), maxWidth)
+        let h = min(max(boundingSize.height, miniHeight), maxHeight)
+        return NSSize(width: w, height: h)
     }
 }
 
@@ -93,7 +117,7 @@ final class PastePreviewViewController: NSViewController {
         tv.isEditable = false
         tv.isSelectable = true
         tv.drawsBackground = false
-        tv.textContainerInset = NSSize(width: 12, height: 12)
+        tv.textContainerInset = NSSize(width: Layout.previewTextInset, height: Layout.previewTextInset)
         tv.isVerticallyResizable = true
         tv.isHorizontallyResizable = false
         tv.autoresizingMask = [.width]
@@ -111,7 +135,7 @@ final class PastePreviewViewController: NSViewController {
 
     private lazy var colorContentView = NSView().then {
         $0.wantsLayer = true
-        $0.layer?.cornerRadius = 16
+        $0.layer?.cornerRadius = Layout.previewCornerRadius
         $0.layer?.masksToBounds = true
     }
 
@@ -166,7 +190,7 @@ final class PastePreviewViewController: NSViewController {
         // 图片：居中，宽高在 showImage 中更新
         imageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview().offset(-20)
+            make.centerY.equalToSuperview().offset(-Layout.previewCornerRadius)
             make.width.equalTo(0)
             make.height.equalTo(0)
         }
@@ -181,18 +205,18 @@ final class PastePreviewViewController: NSViewController {
 
         hexLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.leading.trailing.equalToSuperview().inset(16)
+            make.leading.trailing.equalToSuperview().inset(Layout.previewCornerRadius)
         }
 
         // 底部信息栏
         typeLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(12)
+            make.leading.equalToSuperview().offset(Layout.previewTextInset)
             make.bottom.equalToSuperview().offset(-8)
         }
 
         infoLabel.snp.makeConstraints { make in
             make.leading.equalTo(typeLabel.snp.trailing).offset(4)
-            make.trailing.equalToSuperview().offset(-12)
+            make.trailing.equalToSuperview().offset(-Layout.previewTextInset)
             make.centerY.equalTo(typeLabel)
         }
 
@@ -209,6 +233,7 @@ final class PastePreviewViewController: NSViewController {
             showImage(model, size: contentSize)
         case .color:
             showColor(model)
+             
         default:
             break
         }
@@ -259,8 +284,8 @@ final class PastePreviewViewController: NSViewController {
         guard let image = NSImage(data: model.data) else { return }
         imageView.image = image
 
-        let imgW = size.width - 16
-        let imgH = size.height - 56
+        let imgW = size.width
+        let imgH = size.height
         imageView.snp.updateConstraints { make in
             make.width.equalTo(imgW)
             make.height.equalTo(imgH)
