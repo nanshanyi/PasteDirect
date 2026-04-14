@@ -65,6 +65,7 @@
 		CBD1CAFB2F87B2A6003ACBD7 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CBD1CA872F87B2A6003ACBD7 /* Localizable.xcstrings */; };
 		CBD1CAFC2F87B2A6003ACBD7 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBD1CAC62F87B2A6003ACBD7 /* Info.plist */; };
 		CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */; };
+		CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +104,7 @@
 		CB2CDF052924E8D900E81836 /* PasteDirectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PasteDirectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectUITests.swift; sourceTree = "<group>"; };
 		CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionView.swift; sourceTree = "<group>"; };
 		CBD1CA862F87B2A6003ACBD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBD1CA872F87B2A6003ACBD7 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		CBD1CA882F87B2A6003ACBD7 /* PasteDirect.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = PasteDirect.icon; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 				CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */,
 				CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */,
 				CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */,
+				CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */,
 				CBD1CA982F87B2A6003ACBD7 /* PasteScrollView.swift */,
 				CBD1CA992F87B2A6003ACBD7 /* PasteSearchField.swift */,
 			);
@@ -591,6 +594,7 @@
 				CBD1CAE32F87B2A6003ACBD7 /* PasteMainWindowController.swift in Sources */,
 				CBD1CAE42F87B2A6003ACBD7 /* ImageColorExtractor.swift in Sources */,
 				CBD1CAE52F87B2A6003ACBD7 /* NSLabel.swift in Sources */,
+				CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */,
 				CBD1CAE62F87B2A6003ACBD7 /* PasteScrollView.swift in Sources */,
 				CBD1CAE72F87B2A6003ACBD7 /* PasteDataStore.swift in Sources */,
 				CBD1CAE82F87B2A6003ACBD7 /* PasteFilterItem.swift in Sources */,
@@ -799,7 +803,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.5.0;
+				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -846,7 +850,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.5.0;
+				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
