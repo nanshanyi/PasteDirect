@@ -7,12 +7,14 @@
 
 import AppKit
 import Carbon
-import KeyboardShortcuts
 import SnapKit
 import Foundation
 
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func deleteItem(_ item: PasteboardModel, indexPath: IndexPath)
+    func previewItem(_ item: PasteboardModel, relativeTo view: NSView)
+    func pasteItem(_ item: PasteboardModel, isOriginal: Bool)
+    func copyItem(_ item: PasteboardModel)
 }
 
 let maxLength = 300
@@ -28,7 +30,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
         $0.wantsLayer = true
         $0.layer?.masksToBounds = true
         $0.layer?.backgroundColor = .clear
-        $0.layer?.cornerRadius = 16
+        $0.layer?.cornerRadius = Layout.itemCornerRadius
         $0.layer?.borderColor = NSColor("#3970ff")?.cgColor
     }
 
@@ -77,7 +79,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.trailing.equalToSuperview().offset(-Layout.spacing)
             make.top.equalToSuperview().offset(Layout.spacing)
-            make.bottom.equalToSuperview().offset(-24)
+            make.bottom.equalToSuperview().offset(-Layout.itemBottomOffset)
         }
     }
 
@@ -110,7 +112,7 @@ extension PasteCollectionViewItem {
 
     override var isSelected: Bool {
         didSet {
-            contentView.layer?.borderWidth = isSelected ? 4 : 0
+            contentView.layer?.borderWidth = isSelected ? Layout.itemBorderWidth : 0
         }
     }
 
@@ -157,7 +159,7 @@ extension PasteCollectionViewItem {
 
         timeLabel.snp.makeConstraints { make in
             make.leading.equalTo(typeLabel)
-            make.bottom.equalToSuperview().offset(-12)
+            make.bottom.equalToSuperview().offset(-Layout.spacing)
         }
 
         iconImageView.snp.makeConstraints { make in
@@ -179,7 +181,7 @@ extension PasteCollectionViewItem {
 
         topView.snp.makeConstraints { make in
             make.leading.trailing.top.equalToSuperview()
-            make.height.equalTo(60)
+            make.height.equalTo(Layout.itemTopViewHeight)
         }
 
         imageContentView.snp.makeConstraints { make in
@@ -191,12 +193,12 @@ extension PasteCollectionViewItem {
             make.leading.equalToSuperview().offset(Layout.spacing)
             make.trailing.equalToSuperview().offset(-Layout.spacing)
             make.top.equalTo(topView.snp.bottom).offset(Layout.spacing)
-            make.bottom.equalToSuperview().offset(-24)
+            make.bottom.equalToSuperview().offset(-Layout.itemBottomOffset)
         }
 
         bottomView.snp.makeConstraints { make in
             make.leading.trailing.bottom.equalToSuperview()
-            make.height.equalTo(24)
+            make.height.equalTo(Layout.itemBottomViewHeight)
         }
     }
 }
@@ -298,23 +300,26 @@ extension PasteCollectionViewItem {
 
     private func setViewMenu() {
         let menu = NSMenu()
-        if let app = NSApplication.shared.delegate as? PasteAppDelegate,
-            let name = app.frontApp?.localizedName {
-            let item = NSMenuItem(title: "粘贴到\(name)", action: #selector(pasteOriginalTextClick), keyEquivalent: "")
+        if let name = AppContext.coordinator.frontAppName {
+            let item = NSMenuItem(title: String(localized: "Paste to \(name)"), action: #selector(pasteOriginalTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
         if pModel?.type == .string {
-            let item1 = NSMenuItem(title: "粘贴为纯文本", action: #selector(pasteTextClick), keyEquivalent: "")
+            let item1 = NSMenuItem(title: String(localized: "Paste as Plain Text"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
         
         if pModel?.type == .color {
-            let itemColor = NSMenuItem(title: "粘贴为#RRGGBB", action: #selector(pasteTextClick), keyEquivalent: "")
+            let itemColor = NSMenuItem(title: String(localized: "Paste as #RRGGBB"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(itemColor)
         }
-        let item2 = NSMenuItem(title: "复制", action: #selector(copyItemData), keyEquivalent: "")
+        let previewItem = NSMenuItem(title: String(localized: "Preview"), action: #selector(previewItemAction), keyEquivalent: " ")
+        previewItem.keyEquivalentModifierMask = .init(rawValue: 0)
+        menu.addItem(previewItem)
+        menu.addItem(.separator())
+        let item2 = NSMenuItem(title: String(localized: "Copy"), action: #selector(copyItemData), keyEquivalent: "")
         menu.addItem(item2)
-        let item3 = NSMenuItem(title: "删除", action: #selector(deleteItem), keyEquivalent: "d")
+        let item3 = NSMenuItem(title: String(localized: "Delete"), action: #selector(deleteItem), keyEquivalent: "d")
         item3.keyEquivalentModifierMask = .init(rawValue: 0)
         menu.addItem(item3)
         view.menu = menu
@@ -345,21 +350,14 @@ extension PasteCollectionViewItem {
     }
 
     private func pasteAction(_ isOriginal: Bool = true) {
-        Log("isOriginal: \(isOriginal) data: \(pModel?.dataString ?? "")")
-        PasteBoard.main.pasteData(pModel, isOriginal)
-        guard PasteUserDefaults.pasteDirect else { return }
-        guard let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
-        app.frontApp?.activate()
-        app.dismissWindow()
-        KeyboardShortcuts.postCmdVEvent()
+        guard let pModel else { return }
+        delegate?.pasteItem(pModel, isOriginal: isOriginal)
     }
 
     @objc
     private func copyItemData() {
-        guard let pModel, let app = NSApplication.shared.delegate as? PasteAppDelegate else { return }
-        app.dismissWindow()
-        PasteBoard.main.pasteData(pModel)
-        app.frontApp?.activate()
+        guard let pModel else { return }
+        delegate?.copyItem(pModel)
     }
 
     @objc
@@ -367,6 +365,12 @@ extension PasteCollectionViewItem {
         if let pModel, let indexPath = collectionView?.indexPath(for: self) {
             delegate?.deleteItem(pModel, indexPath: indexPath)
         }
+    }
+
+    @objc
+    private func previewItemAction() {
+        guard let pModel else { return }
+        delegate?.previewItem(pModel, relativeTo: view)
     }
 }
 

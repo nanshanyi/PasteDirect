@@ -47,6 +47,7 @@ final class PasteSearchField: NSSearchField {
 
     let filterButton = NSButton().then {
         $0.isBordered = false
+        $0.refusesFirstResponder = true
         let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .regular)
         let icon = NSImage(systemSymbolName: "line.3.horizontal.decrease", accessibilityDescription: nil)
         $0.image = icon?.withSymbolConfiguration(config)

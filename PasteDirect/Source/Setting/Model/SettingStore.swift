@@ -44,8 +44,7 @@ final class SettingsStore: ObservableObject {
         case .onStart:
             LaunchAtLogin.isEnabled = value
         case .statusDisplay:
-            let app = NSApplication.shared.delegate as? PasteAppDelegate
-            app?.statusItemVisible(value)
+            AppContext.coordinator.setStatusItemVisible(value)
         default:
             break
         }

@@ -22,7 +22,7 @@ enum LoadState {
 final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
-    let pageSize = 50
+    let pageSize = 20
 
     private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
     @Published private(set) var loadState: LoadState = .idle
@@ -53,29 +53,26 @@ extension PasteDataStore {
         Task {
             let list = await fetchItemsFromDB(limit: pageSize, offset: 0)
             dataList.send(list)
-            await withTaskGroup(of: Void.self) { group in
-                for item in list {
-                    group.addTask {
-                        await self.colorCache.getOrExtract(for: item)
-                    }
-                }
+            for item in list {
+                Task { await self.colorCache.getOrExtract(for: item) }
             }
         }
     }
     
     private func updateTotalCount() {
         totalCount = sqlManager.totalCount
+        let count = totalCount
         Task { @MainActor in
-            SettingsStore.shared.totalCountString = totalCount.description
+            SettingsStore.shared.totalCountString = count.description
         }
     }
     
     private func fetchItemsFromDB(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel] {
         let rows = await sqlManager.search(limit: limit, offset: offset)
-        return await parseItems(rows: rows)
+        return parseItems(rows: rows)
     }
     
-    private func parseItems(rows: [Row]) async -> [PasteboardModel] {
+    private func parseItems(rows: [Row]) -> [PasteboardModel] {
         return rows.compactMap { row in
             if let type = try? row.get(type),
                let data = try? row.get(data),
@@ -118,19 +115,19 @@ extension PasteDataStore {
             do {
                 var accumulated = [PasteboardModel]()
                 var offset = dbOffset
-                // 循环加载直到凑够一页或没有更多数据（颜色筛选时内存过滤可能导致不足一页）
+                // 颜色筛选时用更大批次减少 DB round-trip
+                let batchSize = isColorFilter ? pageSize * 3 : pageSize
                 while accumulated.count < pageSize {
                     Log("loadNextPage offset=\(offset)")
-                    let rows = await sqlManager.search(filter: currentFilter, limit: pageSize, offset: offset)
-                    var batch = await parseItems(rows: rows)
+                    let rows = await sqlManager.search(filter: currentFilter, limit: batchSize, offset: offset)
+                    var batch = parseItems(rows: rows)
                     if isColorFilter {
                         batch = batch.filter { $0.hexColorString != nil }
                     }
                     try Task.checkCancellation()
                     accumulated.append(contentsOf: batch)
                     offset += rows.count
-                    // DB 返回不足一页，说明真的没有更多了
-                    if rows.count < pageSize { break }
+                    if rows.count < batchSize { break }
                 }
                 dbOffset = offset
                 dataList.send(dataList.value + accumulated)
@@ -197,16 +194,16 @@ extension PasteDataStore {
 
             // 保存筛选条件供分页使用
             currentFilter = combined
-            isColorFilter = state.selectedType == .color
+                isColorFilter = state.selectedType == .color
             totalCount = sqlManager.count(filter: combined)
 
             let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
-            var result = await parseItems(rows: rows)
+            var result = parseItems(rows: rows)
 
             if isColorFilter {
                 result = result.filter { $0.hexColorString != nil }
             }
-
+ 
             try Task.checkCancellation()
             dbOffset = pageSize
             dataList.send(result)
@@ -228,14 +225,15 @@ extension PasteDataStore {
     /// - Parameter model: PasteboardModel
     func insertModel(_ model: PasteboardModel) {
         needRefresh = true
+        // 先更新内存列表，再异步写 DB，让 UI 立即响应
+        var list = dataList.value
+        list.removeAll(where: { $0 == model })
+        list.insert(model, at: 0)
+        list = Array(list.prefix(pageSize))
+        dataList.send(list)
         Task {
             await sqlManager.insert(item: model)
             updateTotalCount()
-            var list = dataList.value
-            list.removeAll(where: { $0 == model })
-            list.insert(model, at: 0)
-            list = Array(list.prefix(pageSize))
-            dataList.send(list)
         }
     }
 
@@ -287,9 +285,16 @@ extension PasteDataStore {
             return
         }
         if let deadDate = Calendar.current.date(byAdding: dateCom, to: Date()) {
-            dataList.send(dataList.value.filter { $0.date > deadDate })
-            deleteItems(filter: date < deadDate)
-            needRefresh = true
+            let filtered = dataList.value.filter { $0.date > deadDate }
+            let hasExpired = filtered.count < dataList.value.count
+            if hasExpired {
+                dataList.send(filtered)
+                needRefresh = true
+            }
+            Task {
+                await sqlManager.delete(filter: date < deadDate)
+                updateTotalCount()
+            }
         }
     }
     
