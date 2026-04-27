@@ -28,12 +28,9 @@
 - 🧹 **自动清理** — 可设置保留时长：1 天 / 1 周 / 1 月
 - 🚫 **应用过滤** — 可忽略特定应用（如钥匙串、密码管理器）的剪贴板内容
 - 🪟 **适配 macOS 26** — 全面支持液态玻璃（Liquid Glass）效果
-<p align="center">
-  <img width="2048" alt="PasteDirect 主界面" src="https://github.com/user-attachments/assets/4d0537b6-6a1b-4ca4-941f-ca69c6fd12fd" />
-</p>
-<p align="center">
-  <img width="2048" alt="PasteDirect 图片支持" src="https://github.com/user-attachments/assets/ba789e7e-502a-4ed1-83ef-208447130406" />
-</p>
+<img width="2704" height="958" alt="2026_04_27_10_40_37" src="https://github.com/user-attachments/assets/27c5215e-8603-4f63-8413-42eb5f08329d" />
+<img width="2706" height="1404" alt="2026_04_27_10_41_07" src="https://github.com/user-attachments/assets/1cf3e03c-c9c5-442b-b909-ac82c2773ccc" />
+<img width="2704" height="1514" alt="2026_04_27_10_41_27" src="https://github.com/user-attachments/assets/ef2999b6-c240-4c3a-94a4-1849e1c5b42d" />
 
 ## 安装
 
