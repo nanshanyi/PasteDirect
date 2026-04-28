@@ -10,7 +10,7 @@ import Combine
 
 // MARK: - FilterState
 
-enum DateRange: String, CaseIterable {
+enum DateRange: String, CaseIterable, Sendable {
     case today
     case yesterday
     case thisWeek
@@ -51,7 +51,7 @@ enum DateRange: String, CaseIterable {
     }
 }
 
-struct FilterState: Equatable {
+struct FilterState: Equatable, Sendable {
     var selectedApp: String?
     var selectedAppPath: String?
     var selectedType: PasteModelType?
