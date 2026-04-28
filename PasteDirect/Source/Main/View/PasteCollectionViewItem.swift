@@ -7,6 +7,7 @@
 
 import AppKit
 import Carbon
+import Combine
 import SnapKit
 import Foundation
 
@@ -23,9 +24,8 @@ let maxLength = 300
 final class PasteCollectionViewItem: NSCollectionViewItem {
     weak var delegate: PasteCollectionViewItemDelegate?
     private var pModel: PasteboardModel?
-    private var keyMonitor: Any?
     private var isAttribute: Bool = true
-    private var observation: NSKeyValueObservation?
+    private var appearanceCancellable: AnyCancellable?
 
     private lazy var contentView = NSView().then {
         $0.wantsLayer = true
@@ -126,7 +126,16 @@ extension PasteCollectionViewItem {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        pModel = nil
         pasteImageView.image = nil
+        imageContentView.image = nil
+        contentLabel.stringValue = ""
+        contentLabel.attributedStringValue = NSAttributedString()
+        contentLabel.alignment = .left
+        contentView.layer?.backgroundColor = .clear
+        topView.layer?.backgroundColor = NSColor.bg.cgColor
+        iconImageView.image = nil
+        isAttribute = true
     }
 }
 
@@ -331,13 +340,13 @@ extension PasteCollectionViewItem {
 
 extension PasteCollectionViewItem {
     private func initObserver() {
-        observation = NSApp.observe(\.effectiveAppearance) { [weak self] app, _ in
-            app.effectiveAppearance.performAsCurrentDrawingAppearance {
-                if self?.isAttribute != true {
-                    self?.contentView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
+        appearanceCancellable = NSApp.publisher(for: \.effectiveAppearance)
+            .sink { [weak self] appearance in
+                appearance.performAsCurrentDrawingAppearance {
+                    guard let self, !self.isAttribute else { return }
+                    self.contentView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
                 }
             }
-        }
     }
 
     @objc

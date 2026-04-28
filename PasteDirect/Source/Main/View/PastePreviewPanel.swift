@@ -14,7 +14,6 @@ import SnapKit
 final class PastePreviewPopover: NSPopover {
 
     private let previewVC = PastePreviewViewController()
-    private var keyMonitor: Any?
 
     static let maxWidth: CGFloat = Layout.previewMaxSize
     static let maxHeight: CGFloat = Layout.previewMaxHeight
@@ -27,28 +26,10 @@ final class PastePreviewPopover: NSPopover {
         contentViewController = previewVC
         _ = previewVC.view
         configure(with: model)
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard let self, self.isShown else { return event }
-            switch Int(event.keyCode) {
-            case kVK_Space, kVK_Escape:
-                self.close()
-                return nil
-            case kVK_LeftArrow, kVK_RightArrow:
-                // 让 collectionView 处理左右键切换
-                self.close()
-                return event
-            default:
-                return event
-            }
-        }
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    deinit {
-        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
     }
 
     func configure(with model: PasteboardModel) {

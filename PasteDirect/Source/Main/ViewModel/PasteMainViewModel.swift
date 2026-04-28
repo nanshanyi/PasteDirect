@@ -38,8 +38,12 @@ final class PasteMainViewModel {
     private var needsScrollToBeginning = false
 
     init() {
+        initObserve()
+    }
+    
+    private func initObserve() {
         store.dataList
-            .dropFirst()
+            .receive(on: DispatchQueue.main)
             .filter { [weak self] _ in
                 guard let self else { return false }
                 if self.suppressReload {
@@ -56,7 +60,7 @@ final class PasteMainViewModel {
                 self.dataChange.send(.reload(scrollToBeginning: scroll))
             }
             .store(in: &cancellables)
-
+        
         store.$loadState
             .sink { [weak self] state in
                 self?.canLoadMore = (state == .idle)
@@ -97,12 +101,12 @@ final class PasteMainViewModel {
         }
     }
 
-    func topApps() -> [(name: String, path: String)] {
-        store.topApps()
+    func topApps() async -> [(name: String, path: String)] {
+        await store.topApps()
     }
 
-    func allApps() -> [(name: String, path: String)] {
-        store.allApps()
+    func allApps() async -> [(name: String, path: String)] {
+        await store.allApps()
     }
 
     // MARK: - 数据操作

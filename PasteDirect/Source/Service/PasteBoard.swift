@@ -22,9 +22,11 @@ final class PasteBoard {
     }
 
     func startListening() {
-        Timer.scheduledTimer(withTimeInterval: timerInterval, repeats: true) {[weak self] _ in
-            self?.checkForChangesInPasteboard()
-        }
+        Timer.scheduledTimer(timeInterval: timerInterval, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
+    }
+
+    @objc private func timerFired() {
+        checkForChangesInPasteboard()
     }
 
     private func checkForChangesInPasteboard() {

@@ -9,9 +9,6 @@ import AppKit
 import Foundation
 import Combine
 import SwiftUI
-import SQLite
-
-typealias Expression = SQLite.Expression
 
 enum LoadState: Sendable {
     case idle
@@ -27,13 +24,14 @@ final class PasteDataStore {
 
     private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
     @Published private(set) var loadState: LoadState = .idle
-    private var sqlManager = PasteSQLManager()
+    private let sqlManager = PasteSQLManager()
     private var searchTask: Task<Void, Error>?
     private var loadTask: Task<Void, Error>?
     private var colorCache = ColorCache()
 
-    /// 当前生效的筛选条件（用于分页加载时复用）
-    private var currentFilter: Expression<Bool>?
+    /// 当前生效的筛选参数（Sendable，用于分页加载时复用）
+    private var currentKeyword: String = ""
+    private var currentFilterState: FilterState = .empty
     /// 当前是否为颜色筛选（需要内存过滤）
     private var isColorFilter = false
     /// 已扫描过的 DB 行数（颜色筛选时与展示条数不同）
@@ -48,60 +46,27 @@ final class PasteDataStore {
 
 extension PasteDataStore {
     private func setupData() {
-        updateTotalCount()
-        updateStorageSize()
         dbOffset = pageSize
         Task {
-            let list = await fetchItemsFromDB(limit: pageSize, offset: 0)
+            await sqlManager.setup()
+            await updateTotalCount()
+            await updateStorageSize()
+            let list = await sqlManager.search(limit: pageSize, offset: 0)
             dataList.send(list)
             for item in list {
                 Task { await self.colorCache.getOrExtract(for: item) }
             }
         }
     }
-    
-    private func updateTotalCount() {
-        let count = sqlManager.totalCount
+
+    private func updateTotalCount() async {
+        let count = await sqlManager.totalCount
         SettingsStore.shared.totalCountString = count.description
     }
-    
-    func updateStorageSize() {
-        let size = sqlManager.databaseSize
+
+    func updateStorageSize() async {
+        let size = await sqlManager.databaseSize
         SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
-    }
-    
-    private func fetchItemsFromDB(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel] {
-        let rows = await sqlManager.search(limit: limit, offset: offset)
-        return parseItems(rows: rows)
-    }
-    
-    private func parseItems(rows: [Row]) -> [PasteboardModel] {
-        return rows.compactMap { row in
-            if let type = try? row.get(type),
-               let data = try? row.get(data),
-               let hashV = try? row.get(hashKey),
-               let date = try? row.get(date) {
-                let appName = try? row.get(appName)
-                let appPath = try? row.get(appPath)
-                let showData = try? row.get(showData) ?? data
-                let dataString = try? row.get(dataString)
-                let length = try? row.get(length)
-                let pType = PasteboardType(type)
-                
-                return PasteboardModel(
-                    pasteboardType: pType,
-                    data: data,
-                    showData: showData,
-                    hashValue: hashV,
-                    date: date,
-                    appPath: appPath ?? "",
-                    appName: appName ?? "",
-                    dataString: dataString ?? "",
-                    length: length ?? 0
-                )
-            }
-            return nil
-        }
     }
 }
 
@@ -113,22 +78,25 @@ extension PasteDataStore {
         guard loadState == .idle else { return }
         loadState = .loading
         loadTask?.cancel()
+        let keyword = currentKeyword
+        let state = currentFilterState
+        let isColor = isColorFilter
         loadTask = Task {
             do {
                 var accumulated = [PasteboardModel]()
                 var offset = dbOffset
-                let batchSize = isColorFilter ? pageSize * 3 : pageSize
-                while accumulated.count < pageSize {
+                let batchSize = isColor ? pageSize * 3 : pageSize
+                let maxIterations = isColor ? 10 : 1
+                var iterations = 0
+                while accumulated.count < pageSize, iterations < maxIterations {
+                    iterations += 1
                     Log("loadNextPage offset=\(offset)")
-                    let rows = await sqlManager.search(filter: currentFilter, limit: batchSize, offset: offset)
-                    var batch = parseItems(rows: rows)
-                    if isColorFilter {
-                        batch = batch.filter { $0.hexColorString != nil }
-                    }
+                    let batch = await sqlManager.searchWithParams(keyword: keyword, state: state, limit: batchSize, offset: offset)
+                    let filtered = isColor ? batch.filter { $0.hexColorString != nil } : batch
                     try Task.checkCancellation()
-                    accumulated.append(contentsOf: batch)
-                    offset += rows.count
-                    if rows.count < batchSize { break }
+                    accumulated.append(contentsOf: filtered)
+                    offset += batch.count
+                    if batch.count < batchSize { break }
                 }
                 dbOffset = offset
                 dataList.send(dataList.value + accumulated)
@@ -140,13 +108,14 @@ extension PasteDataStore {
     }
 
     func resetDefaultList() {
-        currentFilter = nil
+        currentKeyword = ""
+        currentFilterState = .empty
         isColorFilter = false
         loadTask?.cancel()
         loadState = .loading
         dbOffset = pageSize
         Task {
-            let list = await fetchItemsFromDB(limit: pageSize, offset: 0)
+            let list = await sqlManager.search(limit: pageSize, offset: 0)
             dataList.send(list)
             loadState = .idle
         }
@@ -162,54 +131,23 @@ extension PasteDataStore {
         searchTask?.cancel()
         loadTask?.cancel()
         loadState = .loading
+        currentKeyword = keyWord
+        currentFilterState = state
+        isColorFilter = state.selectedType == .color
         searchTask = Task {
-            var conditions: [Expression<Bool>] = []
-
-            if !keyWord.isEmpty {
-                conditions.append(appName.like("%\(keyWord)%") || dataString.like("%\(keyWord)%"))
+            do {
+                let result = await sqlManager.searchWithParams(keyword: keyWord, state: state, limit: pageSize, offset: 0)
+                let filtered = isColorFilter ? result.filter { $0.hexColorString != nil } : result
+                try Task.checkCancellation()
+                dbOffset = pageSize
+                dataList.send(filtered)
+                loadState = .idle
+            } catch {
+                loadState = .idle
             }
-
-            if let app = state.selectedApp {
-                conditions.append(appName == app)
-            }
-
-            if let selectedType = state.selectedType {
-                switch selectedType {
-                case .string:
-                    conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
-                case .image:
-                    conditions.append(type == PasteboardType.png.rawValue || type == PasteboardType.tiff.rawValue)
-                case .color:
-                    conditions.append(type == PasteboardType.rtf.rawValue || type == PasteboardType.rtfd.rawValue || type == PasteboardType.string.rawValue)
-                case .none:
-                    break
-                }
-            }
-
-            if let dateRange = state.selectedDateRange {
-                let interval = dateRange.dateInterval
-                conditions.append(date >= interval.start && date < interval.end)
-            }
-
-            let combined = conditions.isEmpty ? nil : conditions.dropFirst().reduce(conditions[0]) { $0 && $1 }
-
-            currentFilter = combined
-            isColorFilter = state.selectedType == .color
-
-            let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
-            var result = parseItems(rows: rows)
-
-            if isColorFilter {
-                result = result.filter { $0.hexColorString != nil }
-            }
- 
-            try Task.checkCancellation()
-            dbOffset = pageSize
-            dataList.send(result)
-            loadState = .idle
         }
     }
-    
+
     /// 增加新数据
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
@@ -218,7 +156,7 @@ extension PasteDataStore {
             await extractColor(from: model)
         }
     }
-    
+
     /// 插入数据
     func insertModel(_ model: PasteboardModel) {
         needRefresh = true
@@ -229,7 +167,7 @@ extension PasteDataStore {
         dataList.send(list)
         Task {
             await sqlManager.insert(item: model)
-            updateTotalCount()
+            await updateTotalCount()
         }
     }
 
@@ -239,18 +177,14 @@ extension PasteDataStore {
         list.removeAll(where: { items.contains($0) })
         dataList.send(list)
         dbOffset = max(0, dbOffset - items.count)
-        deleteItems(filter: items.map { $0.hashValue }.contains(hashKey))
-    }
-    
-    /// 按条件删除数据
-    func deleteItems(filter: Expression<Bool>) {
         Task {
-            await sqlManager.delete(filter: filter)
-            updateTotalCount()
-            resetDefaultList()
+            for item in items {
+                await sqlManager.deleteByHash(item.hashValue)
+            }
+            await updateTotalCount()
         }
     }
-    
+
     /// 删除过期数据
     func clearExpiredData() {
         let lastDate = PasteUserDefaults.lastClearDate
@@ -261,7 +195,7 @@ extension PasteDataStore {
         guard let type = HistoryTime(rawValue: current) else { return }
         clearData(for: type)
     }
-    
+
     /// 按时间类型删除数据
     func clearData(for type: HistoryTime) {
         var dateCom = DateComponents()
@@ -285,27 +219,30 @@ extension PasteDataStore {
                 needRefresh = true
             }
             Task {
-                await sqlManager.delete(filter: date < deadDate)
-                updateTotalCount()
+                await sqlManager.deleteBeforeDate(deadDate)
+                await updateTotalCount()
             }
         }
     }
-    
+
     /// 删除所有数据
     func clearAllData() {
-        sqlManager.clearAllData()
-        updateTotalCount()
-        resetDefaultList()
+        Task {
+            await sqlManager.clearAllData()
+            await updateTotalCount()
+            await updateStorageSize()
+            resetDefaultList()
+        }
     }
 
     /// 获取常用应用列表（前5个）
-    func topApps() -> [(name: String, path: String)] {
-        sqlManager.distinctApps(limit: 5)
+    func topApps() async -> [(name: String, path: String)] {
+        await sqlManager.distinctApps(limit: 5)
     }
 
     /// 获取所有应用列表
-    func allApps() -> [(name: String, path: String)] {
-        sqlManager.allDistinctApps()
+    func allApps() async -> [(name: String, path: String)] {
+        await sqlManager.allDistinctApps()
     }
 }
 

@@ -92,7 +92,7 @@ extension PasteAppDelegate {
     }
     
     private func readPrivileges(prompt: Bool) -> Bool {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: prompt]
+        let options: NSDictionary = ["AXTrustedCheckOptionPrompt": prompt]
         let status = AXIsProcessTrustedWithOptions(options)
         Log(String(format: "Reading Accessibility privileges - Current access status %{public}@", String(status)))
         return status
@@ -114,7 +114,9 @@ extension PasteAppDelegate {
         if event.type == .leftMouseUp {
             showOrDismissWindow(frame)
         } else if event.type == .rightMouseUp {
-            menuBarItem.popUpMenu(rMenu)
+            menuBarItem.menu = rMenu
+            menuBarItem.button?.performClick(nil)
+            menuBarItem.menu = nil
         }
     }
 

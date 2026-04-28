@@ -13,7 +13,7 @@ class IgnoredAppsManager: ObservableObject {
     @Published var ignoredApps: [AppInfo] = []
     var ingoredAppItems: [AppItem] = []
     var defaultApps:[AppItem] = [
-        AppItem(bundleID: "com.apple.Passwords", path: "/Applications/PasteDirect.app"),
+        AppItem(bundleID: "com.apple.Passwords", path: "/Applications/Passwords.app"),
         AppItem(bundleID: "com.apple.keychainaccess", path: "/System/Library/CoreServices/Applications/Keychain Access.app")
     ]
     
