@@ -54,6 +54,7 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         return PasteModelType(with: pasteboardType)
     }
 
+    @MainActor
     var writeItem: PasteboardWritingItem {
         PasteboardWritingItem(data: data, type: pasteboardType)
     }

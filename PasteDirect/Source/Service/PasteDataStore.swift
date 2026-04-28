@@ -54,7 +54,8 @@ extension PasteDataStore {
             let list = await sqlManager.search(limit: pageSize, offset: 0)
             dataList.send(list)
             for item in list {
-                Task { await self.colorCache.getOrExtract(for: item) }
+                let icon = NSWorkspace.shared.icon(forFile: item.appPath)
+                Task { await self.colorCache.getOrExtract(for: item, icon: icon) }
             }
         }
     }
@@ -88,6 +89,7 @@ extension PasteDataStore {
                 let batchSize = isColor ? pageSize * 3 : pageSize
                 let maxIterations = isColor ? 10 : 1
                 var iterations = 0
+                var dbExhausted = false
                 while accumulated.count < pageSize, iterations < maxIterations {
                     iterations += 1
                     Log("loadNextPage offset=\(offset)")
@@ -96,11 +98,14 @@ extension PasteDataStore {
                     try Task.checkCancellation()
                     accumulated.append(contentsOf: filtered)
                     offset += batch.count
-                    if batch.count < batchSize { break }
+                    if batch.count < batchSize {
+                        dbExhausted = true
+                        break
+                    }
                 }
                 dbOffset = offset
                 dataList.send(dataList.value + accumulated)
-                loadState = accumulated.isEmpty ? .noMore : .idle
+                loadState = (accumulated.isEmpty || dbExhausted) ? .noMore : .idle
             } catch {
                 loadState = .idle
             }
@@ -251,6 +256,7 @@ extension PasteDataStore {
 extension PasteDataStore {
     @discardableResult
     func extractColor(from model: PasteboardModel) async -> NSColor? {
-        await colorCache.getOrExtract(for: model)
+        let icon = NSWorkspace.shared.icon(forFile: model.appPath)
+        return await colorCache.getOrExtract(for: model, icon: icon)
     }
 }

@@ -43,7 +43,6 @@ final class PasteMainViewModel {
     
     private func initObserve() {
         store.dataList
-            .receive(on: DispatchQueue.main)
             .filter { [weak self] _ in
                 guard let self else { return false }
                 if self.suppressReload {

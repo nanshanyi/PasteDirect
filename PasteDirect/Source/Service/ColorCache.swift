@@ -10,27 +10,26 @@ import AppKit
 actor ColorCache {
     private var cache = [Int: NSColor?]()
     private var ongoingTasks = [Int: Task<NSColor?, Never>]()
-    
+
     @discardableResult
-    func getOrExtract(for model: PasteboardModel) async -> NSColor? {
+    func getOrExtract(for model: PasteboardModel, icon: NSImage) async -> NSColor? {
         let key = model.appPath.hashValue
-        
+
         if let color = cache[key] { return color }
-        
+
         if let existingTask = ongoingTasks[key] {
             return await existingTask.value
         }
-        
+
         let task = Task<NSColor?, Never> {
-            let icon = NSWorkspace.shared.icon(forFile: model.appPath)
-            return await ImageColorExtractor.extractAverageColor(from: icon)
+            await ImageColorExtractor.extractAverageColor(from: icon)
         }
-        
+
         ongoingTasks[key] = task
         let color = await task.value
         ongoingTasks.removeValue(forKey: key)
         cache[key] = color
-        
+
         return color
     }
 }

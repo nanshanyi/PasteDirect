@@ -39,6 +39,7 @@ final class PastePreviewPopover: NSPopover {
     }
 
 
+    @MainActor
     private static func fitSize(for model: PasteboardModel) -> NSSize {
         switch model.type {
         case .image:
@@ -56,6 +57,7 @@ final class PastePreviewPopover: NSPopover {
         }
     }
 
+    @MainActor
     private static func textFitSize(for model: PasteboardModel) -> NSSize {
         let font = NSFont.systemFont(ofSize: 13)
         let maxLayoutWidth = maxWidth - Layout.previewPadding

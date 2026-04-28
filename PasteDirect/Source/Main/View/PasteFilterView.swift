@@ -61,21 +61,6 @@ struct FilterState: Equatable, Sendable {
         selectedApp != nil || selectedType != nil || selectedDateRange != nil
     }
 
-    var activeTags: [(text: String, icon: NSImage?)] {
-        var tags: [(String, NSImage?)] = []
-        if let app = selectedApp {
-            var appIcon: NSImage?
-            if let path = selectedAppPath {
-                appIcon = NSWorkspace.shared.icon(forFile: path)
-                appIcon?.size = NSSize(width: 14, height: 14)
-            }
-            tags.append((app, appIcon))
-        }
-        if let t = selectedType { tags.append((t.string, nil)) }
-        if let d = selectedDateRange { tags.append((d.title, nil)) }
-        return tags
-    }
-
     static let empty = FilterState()
 }
 

@@ -217,7 +217,10 @@ extension PasteMainViewController {
                 guard let self else { return }
                 self.viewModel.updateFilter(state)
                 self.updateFilterButtonAppearance()
-                self.searchBar.updateTags(state.activeTags)
+                self.searchBar.updateTags(self.activeTags(for: state))
+                if state.isActive {
+                    self.view.window?.makeFirstResponder(self.searchBar)
+                }
                 self.viewModel.performSearch(keyword: self.searchBar.text)
             }
             .store(in: &cancellables)
@@ -266,6 +269,21 @@ extension PasteMainViewController {
 
     private func updateFilterButtonAppearance() {
         searchBar.filterButton.contentTintColor = viewModel.filterIsActive ? .controlAccentColor : .secondaryLabelColor
+    }
+
+    private func activeTags(for state: FilterState) -> [(text: String, icon: NSImage?)] {
+        var tags: [(String, NSImage?)] = []
+        if let app = state.selectedApp {
+            var appIcon: NSImage?
+            if let path = state.selectedAppPath {
+                appIcon = NSWorkspace.shared.icon(forFile: path)
+                appIcon?.size = NSSize(width: 14, height: 14)
+            }
+            tags.append((app, appIcon))
+        }
+        if let t = state.selectedType { tags.append((t.string, nil)) }
+        if let d = state.selectedDateRange { tags.append((d.title, nil)) }
+        return tags
     }
 
     private func settingAction() {

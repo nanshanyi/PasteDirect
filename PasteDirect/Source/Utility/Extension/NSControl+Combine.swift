@@ -17,7 +17,7 @@ extension NSControl {
         if let existing = objc_getAssociatedObject(self, &tapSubjectKey) as? ControlTapHelper {
             return existing.subject.eraseToAnyPublisher()
         }
-        let helper = ControlTapHelper()
+        let helper = ControlTapHelper(originalTarget: target, originalAction: action)
         objc_setAssociatedObject(self, &tapSubjectKey, helper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         target = helper
         action = #selector(ControlTapHelper.handleAction(_:))
@@ -27,8 +27,18 @@ extension NSControl {
 
 private final class ControlTapHelper: NSObject {
     let subject = PassthroughSubject<Void, Never>()
+    private weak var originalTarget: AnyObject?
+    private let originalAction: Selector?
 
-    @objc func handleAction(_ sender: Any) {
+    init(originalTarget: AnyObject?, originalAction: Selector?) {
+        self.originalTarget = originalTarget
+        self.originalAction = originalAction
+    }
+
+    @MainActor @objc func handleAction(_ sender: Any) {
         subject.send(())
+        if let target = originalTarget, let action = originalAction {
+            NSApp.sendAction(action, to: target, from: sender)
+        }
     }
 }

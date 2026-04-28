@@ -31,9 +31,10 @@ actor PasteSQLManager {
     private var table: Table
 
     init() {
-        let path = NSSearchPathForDirectoriesInDomains(
+        let docDir = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
-        ).first!.appending("/paste/paste.sqlite3")
+        ).first ?? NSTemporaryDirectory()
+        let path = docDir.appending("/paste/paste.sqlite3")
         let dirPath = (path as NSString).deletingLastPathComponent
         var isDir = ObjCBool(false)
         let filExist = FileManager.default.fileExists(atPath: dirPath, isDirectory: &isDir)
