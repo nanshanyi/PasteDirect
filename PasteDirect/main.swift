@@ -8,9 +8,9 @@
 import Cocoa
 import Foundation
 
-autoreleasepool { () -> Void in
-  let mc = NSApplication.shared
-  let mcDelegate = PasteAppDelegate()
-  mc.delegate = mcDelegate
-  mc.run()
+MainActor.assumeIsolated {
+    let mc = NSApplication.shared
+    let mcDelegate = PasteAppDelegate()
+    mc.delegate = mcDelegate
+    mc.run()
 }

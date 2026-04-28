@@ -8,6 +8,7 @@
 import AppKit
 import Foundation
 
+@MainActor
 final class PasteBoard {
     static let main = PasteBoard()
 
@@ -44,17 +45,17 @@ final class PasteBoard {
 
     func pasteData(_ data: PasteboardModel?, _ isOriginal: Bool = false) {
         guard let data else { return }
-        data.updateDate()
-        pasteModel = data
-        PasteDataStore.main.insertModel(data)
+        let updated = data.withUpdatedDate()
+        pasteModel = updated
+        PasteDataStore.main.insertModel(updated)
         NSPasteboard.general.clearContents()
-        if data.type == .string, !isOriginal {
-            NSPasteboard.general.setString(data.dataString, forType: .string)
-        } else if data.type == .color {
-            let string = isOriginal ? data.dataString : data.hexColorString
-            NSPasteboard.general.setString(string ?? data.dataString, forType: .string)
+        if updated.type == .string, !isOriginal {
+            NSPasteboard.general.setString(updated.dataString, forType: .string)
+        } else if updated.type == .color {
+            let string = isOriginal ? updated.dataString : updated.hexColorString
+            NSPasteboard.general.setString(string ?? updated.dataString, forType: .string)
         } else {
-            NSPasteboard.general.setData(data.data, forType: data.pasteboardType)
+            NSPasteboard.general.setData(updated.data, forType: updated.pasteboardType)
         }
     }
 }

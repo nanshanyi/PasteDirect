@@ -13,12 +13,13 @@ import SQLite
 
 typealias Expression = SQLite.Expression
 
-enum LoadState {
+enum LoadState: Sendable {
     case idle
     case loading
     case noMore
 }
 
+@MainActor
 final class PasteDataStore {
     static let main = PasteDataStore()
     var needRefresh = false
@@ -61,16 +62,12 @@ extension PasteDataStore {
     
     private func updateTotalCount() {
         let count = sqlManager.totalCount
-        Task { @MainActor in
-            SettingsStore.shared.totalCountString = count.description
-        }
+        SettingsStore.shared.totalCountString = count.description
     }
     
     func updateStorageSize() {
         let size = sqlManager.databaseSize
-        Task { @MainActor in
-            SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
-        }
+        SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
     }
     
     private func fetchItemsFromDB(limit: Int = 50, offset: Int? = nil) async -> [PasteboardModel] {
@@ -100,8 +97,7 @@ extension PasteDataStore {
                     appPath: appPath ?? "",
                     appName: appName ?? "",
                     dataString: dataString ?? "",
-                    length: length ?? 0,
-                    attributeString: NSAttributedString(with: showData, type: pType)
+                    length: length ?? 0
                 )
             }
             return nil
@@ -121,7 +117,6 @@ extension PasteDataStore {
             do {
                 var accumulated = [PasteboardModel]()
                 var offset = dbOffset
-                // 颜色筛选时用更大批次减少 DB round-trip
                 let batchSize = isColorFilter ? pageSize * 3 : pageSize
                 while accumulated.count < pageSize {
                     Log("loadNextPage offset=\(offset)")
@@ -198,9 +193,8 @@ extension PasteDataStore {
 
             let combined = conditions.isEmpty ? nil : conditions.dropFirst().reduce(conditions[0]) { $0 && $1 }
 
-            // 保存筛选条件供分页使用
             currentFilter = combined
-                isColorFilter = state.selectedType == .color
+            isColorFilter = state.selectedType == .color
 
             let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
             var result = parseItems(rows: rows)
@@ -217,7 +211,6 @@ extension PasteDataStore {
     }
     
     /// 增加新数据
-    /// - Parameter item: 新的item
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
         insertModel(model)
@@ -227,10 +220,8 @@ extension PasteDataStore {
     }
     
     /// 插入数据
-    /// - Parameter model: PasteboardModel
     func insertModel(_ model: PasteboardModel) {
         needRefresh = true
-        // 先更新内存列表，再异步写 DB，让 UI 立即响应
         var list = dataList.value
         list.removeAll(where: { $0 == model })
         list.insert(model, at: 0)
@@ -243,7 +234,6 @@ extension PasteDataStore {
     }
 
     /// 删除单条数据
-    /// - Parameter item: PasteboardModel
     func deleteItems(_ items: PasteboardModel...) {
         var list = dataList.value
         list.removeAll(where: { items.contains($0) })
@@ -253,7 +243,6 @@ extension PasteDataStore {
     }
     
     /// 按条件删除数据
-    /// - Parameter filter: Expression<Bool>
     func deleteItems(filter: Expression<Bool>) {
         Task {
             await sqlManager.delete(filter: filter)
@@ -274,7 +263,6 @@ extension PasteDataStore {
     }
     
     /// 按时间类型删除数据
-    /// - Parameter type: HistoryTime
     func clearData(for type: HistoryTime) {
         var dateCom = DateComponents()
         switch type {

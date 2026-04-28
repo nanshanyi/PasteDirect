@@ -9,6 +9,7 @@ import AppKit
 import Combine
 import KeyboardShortcuts
 
+@MainActor
 final class PasteMainViewModel {
     // MARK: - 输出状态
 
@@ -38,7 +39,7 @@ final class PasteMainViewModel {
 
     init() {
         store.dataList
-            .receive(on: DispatchQueue.main)
+            .dropFirst()
             .filter { [weak self] _ in
                 guard let self else { return false }
                 if self.suppressReload {
@@ -57,7 +58,6 @@ final class PasteMainViewModel {
             .store(in: &cancellables)
 
         store.$loadState
-            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.canLoadMore = (state == .idle)
             }

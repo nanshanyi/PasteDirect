@@ -10,6 +10,7 @@ import Carbon
 import Cocoa
 import KeyboardShortcuts
 
+@MainActor
 final class PasteAppDelegate: NSObject {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private lazy var rMenu = NSMenu(title: "").then {
