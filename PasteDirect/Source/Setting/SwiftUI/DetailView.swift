@@ -116,8 +116,8 @@ struct SettingItemView: View {
         switch item {
         case let .toggle(title, key):
             toggleItem(title: title, key: key)
-        case let .text(title, _):
-            textItem(title: title)
+        case let .text(title, keyPath):
+            textItem(title: title, keyPath: keyPath)
         case let .slider(_, key, range, step):
             sliderItem(key: key, range: range, step: step)
         case let .button(title):
@@ -142,10 +142,10 @@ struct SettingItemView: View {
         }
     }
 
-    private func textItem(title: LocalizedStringKey) -> some View {
+    private func textItem(title: LocalizedStringKey, keyPath: KeyPath<SettingsStore, String>) -> some View {
         Group {
             textLabel(title)
-            Text(settingsStore.totalCountString)
+            Text(settingsStore[keyPath: keyPath])
                 .font(.system(size: 13))
                 .foregroundColor(.primary)
             Spacer()

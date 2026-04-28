@@ -20,21 +20,26 @@ let dataString = Expression<String>("dataString")
 let length = Expression<Int>("length")
 
 final class PasteSQLManager: NSObject {
-    private lazy var db: Connection? = {
+    private let dbPath: String = {
         let path = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
-        ).first!.appending("/paste")
+        ).first!.appending("/paste/paste.sqlite3")
+        let dirPath = (path as NSString).deletingLastPathComponent
         var isDir = ObjCBool(false)
-        let filExist = FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
+        let filExist = FileManager.default.fileExists(atPath: dirPath, isDirectory: &isDir)
         if !filExist || !isDir.boolValue {
             do {
-                try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
+                try FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
             } catch {
                 Log(error.localizedDescription)
             }
         }
+        return path
+    }()
+
+    private lazy var db: Connection? = {
         do {
-            let db = try Connection("\(path)/paste.sqlite3")
+            let db = try Connection(dbPath)
             db.busyTimeout = 5.0
             return db
         } catch {
@@ -53,6 +58,12 @@ final class PasteSQLManager: NSObject {
 extension PasteSQLManager {
     var totalCount: Int {
         count(filter: nil)
+    }
+    
+    var databaseSize: Int {
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: dbPath),
+              let fileSize = attributes[.size] as? Int else { return 0 }
+        return fileSize
     }
 
     func count(filter: Expression<Bool>?) -> Int {

@@ -30,7 +30,8 @@ struct SettingCategory: Identifiable, Hashable {
             ]),
             SettingSection(title: "Paste history", items: [
                 .slider("", key: .historyTime, range: 0 ... 100, step: 33),
-                .text("Total number of items", value: PasteDataStore.main.totalCount.description),
+                .text("Total number of items", storeKeyPath: \.totalCountString),
+                .text("Storage size", storeKeyPath: \.storageSizeString),
                 .button("Clear all clipboard history"),
             ]),
         ]
@@ -72,7 +73,7 @@ struct SettingSection: Identifiable {
 
 enum SettingItem: Identifiable {
     case toggle(LocalizedStringKey, key: PrefKey)
-    case text(LocalizedStringKey, value: String)
+    case text(LocalizedStringKey, storeKeyPath: KeyPath<SettingsStore, String>)
     case slider(LocalizedStringKey, key: PrefKey, range: ClosedRange<Double>, step: Double)
     case button(LocalizedStringKey)
     case shortCut(LocalizedStringKey, key: KeyboardShortcuts.Name)

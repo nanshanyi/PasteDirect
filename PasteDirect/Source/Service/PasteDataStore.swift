@@ -26,7 +26,6 @@ final class PasteDataStore {
 
     private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
     @Published private(set) var loadState: LoadState = .idle
-    private(set) var totalCount = 0
     private var sqlManager = PasteSQLManager()
     private var searchTask: Task<Void, Error>?
     private var loadTask: Task<Void, Error>?
@@ -49,6 +48,7 @@ final class PasteDataStore {
 extension PasteDataStore {
     private func setupData() {
         updateTotalCount()
+        updateStorageSize()
         dbOffset = pageSize
         Task {
             let list = await fetchItemsFromDB(limit: pageSize, offset: 0)
@@ -60,10 +60,16 @@ extension PasteDataStore {
     }
     
     private func updateTotalCount() {
-        totalCount = sqlManager.totalCount
-        let count = totalCount
+        let count = sqlManager.totalCount
         Task { @MainActor in
             SettingsStore.shared.totalCountString = count.description
+        }
+    }
+    
+    func updateStorageSize() {
+        let size = sqlManager.databaseSize
+        Task { @MainActor in
+            SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
         }
     }
     
@@ -195,7 +201,6 @@ extension PasteDataStore {
             // 保存筛选条件供分页使用
             currentFilter = combined
                 isColorFilter = state.selectedType == .color
-            totalCount = sqlManager.count(filter: combined)
 
             let rows = await sqlManager.search(filter: combined, limit: pageSize, offset: 0)
             var result = parseItems(rows: rows)

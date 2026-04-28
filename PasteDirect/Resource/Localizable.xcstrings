@@ -560,6 +560,16 @@
         }
       }
     },
+    "Storage size" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储大小"
+          }
+        }
+      }
+    },
     "Type" : {
       "localizations" : {
         "zh-Hans" : {
