@@ -125,6 +125,7 @@ final class PasteDirectTests: XCTestCase {
 
     // MARK: - PasteUserDefaults
 
+    @MainActor
     func testUserDefaultsReadWrite() {
         let original = PasteUserDefaults.pasteDirect
         PasteUserDefaults.pasteDirect = !original

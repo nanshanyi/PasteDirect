@@ -15,11 +15,11 @@ struct ImageColorExtractor {
     }
         
     private static func _extractDominantColors(from image: NSImage) -> [NSColor] {
-        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let resizedImage = resizeImageForProcessing(cgImage) else {
             return []
         }
         
-        let resizedImage = resizeImageForProcessing(cgImage)
         let pixelData = extractPixelData(from: resizedImage)
         
         return performKMeansClustering(pixels: pixelData, clusterCount: 2)
@@ -31,11 +31,11 @@ struct ImageColorExtractor {
     }
     
     static func extractAverageColor(from image: NSImage) async -> NSColor {
-        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let resizedImage = resizeImageForProcessing(cgImage) else {
             return NSColor.black
         }
         
-        let resizedImage = resizeImageForProcessing(cgImage)
         let pixelData = extractPixelData(from: resizedImage)
         
         guard !pixelData.isEmpty else { return NSColor.black }
@@ -66,7 +66,7 @@ struct ImageColorExtractor {
         return color
     }
     
-    static func resizeImageForProcessing(_ cgImage: CGImage) -> CGImage {
+    static func resizeImageForProcessing(_ cgImage: CGImage) -> CGImage? {
         let maxDimension: CGFloat = 100
         let width = CGFloat(cgImage.width)
         let height = CGFloat(cgImage.height)
@@ -76,16 +76,18 @@ struct ImageColorExtractor {
         let newHeight = Int(height * ratio)
         
         let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let context = CGContext(data: nil,
+        guard let context = CGContext(data: nil,
                                 width: newWidth,
                                 height: newHeight,
                                 bitsPerComponent: 8,
                                 bytesPerRow: newWidth * 4,
                                 space: colorSpace,
-                                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+                                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else {
+            return nil
+        }
         
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
-        return context.makeImage()!
+        return context.makeImage()
     }
     
     private static func extractPixelData(from cgImage: CGImage) -> [SIMD3<Float>] {
@@ -186,8 +188,8 @@ struct ImageColorExtractor {
     }
     
     private static func initializeCentroids(from pixels: [SIMD3<Float>], count: Int) -> [SIMD3<Float>] {
-        var centroids: [SIMD3<Float>] = []
-        centroids.append(pixels.randomElement()!)
+        guard let first = pixels.randomElement() else { return [] }
+        var centroids: [SIMD3<Float>] = [first]
         
         for _ in 1..<count {
             var distances: [Float] = []
@@ -196,7 +198,7 @@ struct ImageColorExtractor {
                 let minDistance = centroids.map {
                     let diff = pixel - $0
                     return simd_dot(diff, diff)
-                }.min()!
+                }.min() ?? Float(0)
                 distances.append(minDistance)
             }
             
