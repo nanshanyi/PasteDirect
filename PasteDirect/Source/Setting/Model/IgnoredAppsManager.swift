@@ -7,6 +7,7 @@
 
 import Cocoa
 
+@MainActor
 class IgnoredAppsManager: ObservableObject {
     static let shared = IgnoredAppsManager()
     @Published var ignoredApps: [AppInfo] = []

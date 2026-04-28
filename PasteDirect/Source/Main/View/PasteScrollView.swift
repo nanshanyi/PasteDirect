@@ -8,6 +8,7 @@
 import Cocoa
 import Foundation
 
+@MainActor
 protocol PasteScrollViewDelegate: NSObjectProtocol {
     func loadMoreData()
 }

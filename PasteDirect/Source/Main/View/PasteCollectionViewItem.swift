@@ -10,6 +10,7 @@ import Carbon
 import SnapKit
 import Foundation
 
+@MainActor
 protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func deleteItem(_ item: PasteboardModel, indexPath: IndexPath)
     func previewItem(_ item: PasteboardModel, relativeTo view: NSView)
