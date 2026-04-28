@@ -10,8 +10,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
-  <img src="https://img.shields.io/badge/Swift-5.0-orange" alt="Swift 5.0">
-  <img src="https://img.shields.io/badge/version-3.0.0-green" alt="Version 3.0.0">
+  <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
+  <img src="https://img.shields.io/badge/version-3.1.0-green" alt="Version 3.1.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -23,6 +23,7 @@
 - ⌨️ **快捷键呼出** — 默认 `⌘⇧V`，支持自定义快捷键
 - 🔍 **快速搜索** — 输入关键词即时过滤历史记录
 - 🏷️ **多维筛选** — 按类型（文本/图片/颜色）、来源应用、时间范围组合筛选
+- 👁️ **空格预览** — 按空格键快速预览选中内容，支持文本、图片、颜色详情
 - 🖱️ **多种粘贴方式** — 双击粘贴、回车粘贴、拖拽到目标位置
 - 📝 **纯文本模式** — 一键去除富文本格式，粘贴为纯文本
 - 🧹 **自动清理** — 可设置保留时长：1 天 / 1 周 / 1 月
@@ -65,6 +66,7 @@ open /Applications/PasteDirect.app
 | `⌘⇧V` | 呼出 / 隐藏剪贴板面板（可自定义） |
 | 双击 | 粘贴选中项 |
 | `Enter` | 粘贴选中项 |
+| `Space` | 预览选中项 |
 | `Delete` | 删除选中项 |
 | 拖拽 | 将条目拖拽到目标位置直接粘贴 |
 | 输入文字 | 搜索过滤历史记录 |
@@ -88,8 +90,8 @@ open /Applications/PasteDirect.app
 ### 环境要求
 
 - macOS 13.0+
-- Xcode 14+
-- Swift 5.0+
+- Xcode 16+
+- Swift 6
 
 ### 构建步骤
 
