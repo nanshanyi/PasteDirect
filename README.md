@@ -54,6 +54,8 @@ open /Applications/PasteDirect.app
 ```
 
 首次启动后，系统会提示授予「辅助功能」权限，这是监听剪贴板和模拟粘贴操作所必需的。
+<img width="530" height="494" alt="image" src="https://github.com/user-attachments/assets/cf00f162-b4ff-4ddc-8c7c-974d5bc2caca" />
+自签名证书系统会有安全提示，系统设置->隐私与安全性->当然打开即可
 
 ### 更新无忧
 
