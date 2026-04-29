@@ -7,59 +7,38 @@
 
 import Cocoa
 import Combine
+import ObjectiveC
+
+private nonisolated(unsafe) var tapSubjectKey: UInt8 = 0
 
 extension NSControl {
+    @MainActor
     var tapPublisher: AnyPublisher<Void, Never> {
-        return ControlTapPublisher(control: self)
-            .eraseToAnyPublisher()
-    }
-}
-
-private struct ControlTapPublisher: Publisher {
-    typealias Output = Void
-    typealias Failure = Never
-
-    let control: NSControl
-
-    func receive<S>(subscriber: S) where S: Subscriber, S.Failure == Never, S.Input == Void {
-        let subscription = ControlTapSubscription(subscriber: subscriber, control: control)
-        subscriber.receive(subscription: subscription)
-    }
-}
-
-private final class ControlTapSubscription<S: Subscriber>: Subscription where S.Input == Void, S.Failure == Never {
-    private var subscriber: S?
-    private weak var control: NSControl?
-    private var target: ControlTarget?
-
-    init(subscriber: S, control: NSControl) {
-        self.subscriber = subscriber
-        self.control = control
-        self.target = ControlTarget { [weak self] in
-            _ = self?.subscriber?.receive(())
+        if let existing = objc_getAssociatedObject(self, &tapSubjectKey) as? ControlTapHelper {
+            return existing.subject.eraseToAnyPublisher()
         }
-        control.target = target
-        control.action = #selector(ControlTarget.action(_:))
-    }
-
-    func request(_ demand: Subscribers.Demand) {}
-
-    func cancel() {
-        subscriber = nil
-        control?.target = nil
-        control?.action = nil
-        target = nil
+        let helper = ControlTapHelper(originalTarget: target, originalAction: action)
+        objc_setAssociatedObject(self, &tapSubjectKey, helper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        target = helper
+        action = #selector(ControlTapHelper.handleAction(_:))
+        return helper.subject.eraseToAnyPublisher()
     }
 }
 
-private final class ControlTarget: NSObject {
-    let handler: () -> Void
+private final class ControlTapHelper: NSObject {
+    let subject = PassthroughSubject<Void, Never>()
+    private weak var originalTarget: AnyObject?
+    private let originalAction: Selector?
 
-    init(handler: @escaping () -> Void) {
-        self.handler = handler
+    init(originalTarget: AnyObject?, originalAction: Selector?) {
+        self.originalTarget = originalTarget
+        self.originalAction = originalAction
     }
 
-    @objc func action(_ sender: Any) {
-        handler()
+    @MainActor @objc func handleAction(_ sender: Any) {
+        subject.send(())
+        if let target = originalTarget, let action = originalAction {
+            NSApp.sendAction(action, to: target, from: sender)
+        }
     }
 }

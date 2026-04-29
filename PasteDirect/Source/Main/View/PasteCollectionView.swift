@@ -8,6 +8,7 @@
 import Carbon
 import Cocoa
 
+@MainActor
 protocol PasteCollectionViewKeyDelegate: AnyObject {
     func collectionViewDidPressDelete()
     func collectionViewDidPressReturn()

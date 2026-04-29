@@ -6,56 +6,92 @@
 //
 
 import Foundation
-import SQLite
+@preconcurrency import SQLite
 
-let id = Expression<Int>("id")
-let hashKey = Expression<Int>("hashKey")
-let type = Expression<String>("type")
-let data = Expression<Data>("data")
-let showData = Expression<Data?>("showData")
-let date = Expression<Date>("date")
-let appPath = Expression<String>("appPath")
-let appName = Expression<String>("appName")
-let dataString = Expression<String>("dataString")
-let length = Expression<Int>("length")
+typealias Expression = SQLite.Expression
 
-final class PasteSQLManager: NSObject {
-    private lazy var db: Connection? = {
-        let path = NSSearchPathForDirectoriesInDomains(
+actor PasteSQLManager {
+    // MARK: - Column Definitions
+
+    private let col_id = Expression<Int>("id")
+    private let col_hashKey = Expression<Int>("hashKey")
+    private let col_type = Expression<String>("type")
+    private let col_data = Expression<Data>("data")
+    private let col_showData = Expression<Data?>("showData")
+    private let col_date = Expression<Date>("date")
+    private let col_appPath = Expression<String>("appPath")
+    private let col_appName = Expression<String>("appName")
+    private let col_dataString = Expression<String>("dataString")
+    private let col_length = Expression<Int>("length")
+
+    // MARK: - DB
+
+    private let dbPath: String
+    private var db: Connection?
+    private var table: Table
+
+    init() {
+        let docDir = NSSearchPathForDirectoriesInDomains(
             .documentDirectory, .userDomainMask, true
-        ).first!.appending("/paste")
+        ).first ?? NSTemporaryDirectory()
+        let path = docDir.appending("/paste/paste.sqlite3")
+        let dirPath = (path as NSString).deletingLastPathComponent
         var isDir = ObjCBool(false)
-        let filExist = FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
+        let filExist = FileManager.default.fileExists(atPath: dirPath, isDirectory: &isDir)
         if !filExist || !isDir.boolValue {
-            do {
-                try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
-            } catch {
-                Log(error.localizedDescription)
-            }
+            try? FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true)
         }
+        self.dbPath = path
+
         do {
-            let db = try Connection("\(path)/paste.sqlite3")
-            db.busyTimeout = 5.0
-            return db
+            let conn = try Connection(path)
+            conn.busyTimeout = 5.0
+            self.db = conn
         } catch {
             Log("Connection Error\(error)")
+            self.db = nil
         }
-        return nil
-    }()
+        self.table = Table("pasteContent")
+    }
 
-    private lazy var table: Table = {
-        return createTable()
-    }()
+    /// 初始化表结构，需在首次使用前调用
+    func setup() {
+        createTable()
+    }
+
+    private func createTable() {
+        do {
+            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length] t in
+                t.column(col_id, primaryKey: true)
+                t.column(col_hashKey); t.column(col_type); t.column(col_data)
+                t.column(col_showData); t.column(col_date); t.column(col_appPath)
+                t.column(col_appName); t.column(col_dataString); t.column(col_length)
+            })
+            try db?.run(table.createIndex(col_date, ifNotExists: true))
+            try db?.run(table.createIndex(col_appName, ifNotExists: true))
+            try db?.run(table.createIndex(col_type, ifNotExists: true))
+            try db?.run(table.createIndex(col_hashKey, ifNotExists: true))
+            Log("Create Table Success")
+        } catch {
+            Log("Create Table Error: \(error)")
+        }
+    }
 }
 
-// MARK: - 数据库操作 对外接口
+// MARK: - 对外接口
 
 extension PasteSQLManager {
     var totalCount: Int {
-        count(filter: nil)
+        countRows(filter: nil)
     }
 
-    func count(filter: Expression<Bool>?) -> Int {
+    var databaseSize: Int {
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: dbPath),
+              let fileSize = attributes[.size] as? Int else { return 0 }
+        return fileSize
+    }
+
+    func countRows(filter: Expression<Bool>?) -> Int {
         do {
             var query = table
             if let f = filter { query = query.filter(f) }
@@ -66,31 +102,31 @@ extension PasteSQLManager {
         }
     }
 
-    // 增
-    func insert(item: PasteboardModel) async {
-        let query = table
-        await delete(filter: hashKey == item.hashValue)
-        let insert = query.insert(
-            hashKey <- item.hashValue,
-            type <- item.pasteboardType.rawValue,
-            data <- item.data,
-            showData <- item.showData,
-            date <- item.date,
-            appPath <- item.appPath,
-            appName <- item.appName,
-            dataString <- item.dataString,
-            length <- item.length
+    func insert(item: PasteboardModel) {
+        // 先删除同 hash 的旧记录
+        let deleteQuery = table.filter(col_hashKey == item.hashValue)
+        _ = try? db?.run(deleteQuery.delete())
+
+        let insertQuery = table.insert(
+            col_hashKey <- item.hashValue,
+            col_type <- item.pasteboardType.rawValue,
+            col_data <- item.data,
+            col_showData <- item.showData,
+            col_date <- item.date,
+            col_appPath <- item.appPath,
+            col_appName <- item.appName,
+            col_dataString <- item.dataString,
+            col_length <- item.length
         )
         do {
-            let rowId = try db?.run(insert)
+            let rowId = try db?.run(insertQuery)
             Log("插入成功：\(String(describing: rowId))")
         } catch {
             Log("插入失败：\(error)")
         }
     }
 
-    // 根据条件删除
-    func delete(filter: Expression<Bool>) async {
+    func delete(filter: Expression<Bool>) {
         let query = table.filter(filter)
         do {
             let count = try db?.run(query.delete())
@@ -100,69 +136,37 @@ extension PasteSQLManager {
         }
     }
 
+    func deleteByHash(_ hashValue: Int) {
+        delete(filter: col_hashKey == hashValue)
+    }
+
+    func deleteBeforeDate(_ deadline: Date) {
+        delete(filter: col_date < deadline)
+    }
+
     func clearAllData() {
         do {
-           let d = try db?.run(table.drop())
-            Log("删除所有\(String(describing: d?.columnCount))")
-            table = createTable()
+            _ = try db?.run(table.drop())
+            try db?.execute("VACUUM")
+            createTable()
+            Log("删除所有数据")
         } catch {
             Log("删除失败：\(error)")
         }
     }
-        
-    func createTable() -> Table {
-        let tab = Table("pasteContent")
-        let stateMent = tab.create(ifNotExists: true, withoutRowid: false) { t in
-            t.column(id, primaryKey: true)
-            t.column(hashKey)
-            t.column(type)
-            t.column(data)
-            t.column(showData)
-            t.column(date)
-            t.column(appPath)
-            t.column(appName)
-            t.column(dataString)
-            t.column(length)
-        }
-        do {
-            try db?.run(stateMent)
-            // 为高频查询字段创建索引
-            try db?.run(tab.createIndex(date, ifNotExists: true))
-            try db?.run(tab.createIndex(appName, ifNotExists: true))
-            try db?.run(tab.createIndex(type, ifNotExists: true))
-            try db?.run(tab.createIndex(hashKey, ifNotExists: true))
-        } catch {
-            Log("Create Table Error: \(error)")
-        }
-        return tab
-    }
 
-//    //改
-//    func update(id: Int64, item: PasteboardModel) {
-//        guard var query = table else { return }
-//        let update = getTable().filter(rowid == id)
-//        if let count = try? getDB().run(update.update(value_column <- item["value"].doubleValue, tag_column <- item["tag"].stringValue , detail_column <- item["detail"].stringValue)) {
-//            Log("修改的结果为：\(count == 1)")
-//        } else {
-//            Log("修改失败")
-//        }
-//
-//    }
-
-    /// 查询去重的应用列表，按出现次数降序
     func distinctApps(limit count: Int = 5) -> [(name: String, path: String)] {
-        // SELECT appName, appPath, COUNT(*) as cnt FROM pasteContent GROUP BY appName ORDER BY cnt DESC LIMIT count
         do {
-            let cnt = appName.count
+            let cnt = col_appName.count
             let query = table
-                .select(appName, appPath, cnt)
-                .group(appName)
+                .select(col_appName, col_appPath, cnt)
+                .group(col_appName)
                 .order(cnt.desc)
                 .limit(count)
             guard let rows = try db?.prepare(query) else { return [] }
             return rows.compactMap { row in
-                guard let name = try? row.get(appName),
-                      let path = try? row.get(appPath) else { return nil }
+                guard let name = try? row.get(col_appName),
+                      let path = try? row.get(col_appPath) else { return nil }
                 return (name: name, path: path)
             }
         } catch {
@@ -171,18 +175,19 @@ extension PasteSQLManager {
         }
     }
 
-    /// 查询所有去重应用
     func allDistinctApps() -> [(name: String, path: String)] {
         distinctApps(limit: 1000)
     }
 
-    // 查
-    func search(filter: Expression<Bool>? = nil, select: [Expressible] = [rowid, id, hashKey, type, data, date, appPath, appName, dataString, showData, length], order: [Expressible] = [date.desc], limit: Int? = nil, offset: Int? = nil) async -> [Row] {
+    /// 搜索并直接返回 [PasteboardModel]，Row 解析在 actor 内完成
+    func search(filter: Expression<Bool>? = nil, limit: Int? = nil, offset: Int? = nil) -> [PasteboardModel] {
         guard !Task.isCancelled else {
             Log("Task is cancelled")
             return []
         }
-        var query = table.select(select).order(order)
+        var query = table
+            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length)
+            .order(col_date.desc)
         if let f = filter {
             query = query.filter(f)
         }
@@ -193,15 +198,83 @@ extension PasteSQLManager {
                 query = query.limit(l)
             }
         }
-        
+
         do {
-            if let result = try db?.prepare(query) {
-                return Array(result)
+            guard let result = try db?.prepare(query) else { return [] }
+            return result.compactMap { row in
+                guard let typeStr = try? row.get(col_type),
+                      let data = try? row.get(col_data),
+                      let hashV = try? row.get(col_hashKey),
+                      let date = try? row.get(col_date) else { return nil }
+                return PasteboardModel(
+                    pasteboardType: PasteboardType(typeStr),
+                    data: data,
+                    showData: (try? row.get(col_showData) ?? data) ?? data,
+                    hashValue: hashV,
+                    date: date,
+                    appPath: (try? row.get(col_appPath)) ?? "",
+                    appName: (try? row.get(col_appName)) ?? "",
+                    dataString: (try? row.get(col_dataString)) ?? "",
+                    length: (try? row.get(col_length)) ?? 0
+                )
             }
-            return []
         } catch {
             Log("查询失败：\(error)")
             return []
         }
+    }
+
+    // MARK: - Private Filter Builders
+
+    private func makeSearchFilter(keyword: String) -> Expression<Bool> {
+        col_appName.like("%\(keyword)%") || col_dataString.like("%\(keyword)%")
+    }
+
+    private func makeAppFilter(_ app: String) -> Expression<Bool> {
+        col_appName == app
+    }
+
+    private func makeTypeFilter(_ types: [String]) -> Expression<Bool> {
+        types.dropFirst().reduce(col_type == types[0]) { $0 || col_type == $1 }
+    }
+
+    private func makeDateRangeFilter(start: Date, end: Date) -> Expression<Bool> {
+        col_date >= start && col_date < end
+    }
+
+    /// 组合搜索：接受 Sendable 参数，内部构建 filter 并执行搜索
+    func searchWithParams(keyword: String, state: FilterState, limit: Int?, offset: Int?) -> [PasteboardModel] {
+        let filter = buildFilterInternal(keyword: keyword, state: state)
+        return search(filter: filter, limit: limit, offset: offset)
+    }
+
+    private func buildFilterInternal(keyword: String, state: FilterState) -> Expression<Bool>? {
+        var conditions: [Expression<Bool>] = []
+
+        if !keyword.isEmpty {
+            conditions.append(makeSearchFilter(keyword: keyword))
+        }
+        if let app = state.selectedApp {
+            conditions.append(makeAppFilter(app))
+        }
+        if let selectedType = state.selectedType {
+            switch selectedType {
+            case .string:
+                conditions.append(makeTypeFilter([PasteboardType.rtf.rawValue, PasteboardType.rtfd.rawValue, PasteboardType.string.rawValue]))
+            case .image:
+                conditions.append(makeTypeFilter([PasteboardType.png.rawValue, PasteboardType.tiff.rawValue]))
+            case .color:
+                conditions.append(makeTypeFilter([PasteboardType.rtf.rawValue, PasteboardType.rtfd.rawValue, PasteboardType.string.rawValue]))
+            case .none:
+                break
+            }
+        }
+        if let dateRange = state.selectedDateRange {
+            let interval = dateRange.dateInterval
+            conditions.append(makeDateRangeFilter(start: interval.start, end: interval.end))
+        }
+
+        guard !conditions.isEmpty else { return nil }
+        return conditions.dropFirst().reduce(conditions[0]) { $0 && $1 }
     }
 }

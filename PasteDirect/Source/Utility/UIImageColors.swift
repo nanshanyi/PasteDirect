@@ -230,8 +230,10 @@ extension UIImage {
         let threshold = Int(CGFloat(height)*0.01)
         var proposed: [Double] = [-1,-1,-1,-1]
         
-        guard let data = CFDataGetBytePtr(cgImage.dataProvider!.data) else {
-            fatalError("UIImageColors.getColors failed: could not get cgImage data.")
+        guard let dataProvider = cgImage.dataProvider,
+              let cfData = dataProvider.data,
+              let data = CFDataGetBytePtr(cfData) else {
+            return nil
         }
         
         let imageColors = NSCountedSet(capacity: width*height)

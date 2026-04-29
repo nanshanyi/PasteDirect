@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import Carbon
 import Cocoa
 import Combine
 import SnapKit
@@ -14,6 +15,7 @@ final class PasteMainViewController: NSViewController {
     private let viewModel = PasteMainViewModel()
     private var cancellables = Set<AnyCancellable>()
     private var previewPopover: PastePreviewPopover?
+    private var keyEventMonitor: Any?
     private var contentView: NSView!
 
     // MARK: - lazy property
@@ -108,19 +110,11 @@ extension PasteMainViewController {
         super.viewDidLoad()
         initSubviews()
         bindViewModel()
-        // 仅用于：焦点在 collectionView 时按字母键自动聚焦搜索框
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard let self,
-                  !searchBar.isFirstResponder,
-                  KeyHelper.numberCharacters.contains(Int(event.keyCode)) else {
-                return event
-            }
-            view.window?.makeFirstResponder(searchBar)
-            return event
-        }
+        setupKeyEventMonitor()
     }
 
     override func viewDidAppear() {
+        super.viewDidAppear()
         view.window?.makeFirstResponder(collectionView)
         viewModel.handleViewDidAppear()
     }
@@ -223,7 +217,10 @@ extension PasteMainViewController {
                 guard let self else { return }
                 self.viewModel.updateFilter(state)
                 self.updateFilterButtonAppearance()
-                self.searchBar.updateTags(state.activeTags)
+                self.searchBar.updateTags(self.activeTags(for: state))
+                if state.isActive {
+                    self.view.window?.makeFirstResponder(self.searchBar)
+                }
                 self.viewModel.performSearch(keyword: self.searchBar.text)
             }
             .store(in: &cancellables)
@@ -233,18 +230,60 @@ extension PasteMainViewController {
 // MARK: - 私有方法
 
 extension PasteMainViewController {
+    private func setupKeyEventMonitor() {
+        keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self else { return event }
+            if self.previewPopover?.isShown == true {
+                switch Int(event.keyCode) {
+                case kVK_Space, kVK_Escape:
+                    self.closePreviewPopover()
+                    return nil
+                case kVK_LeftArrow, kVK_RightArrow:
+                    self.closePreviewPopover()
+                    return event
+                default:
+                    return event
+                }
+            }
+            if !self.searchBar.isFirstResponder,
+               KeyHelper.numberCharacters.contains(Int(event.keyCode)) {
+                self.view.window?.makeFirstResponder(self.searchBar)
+            }
+            return event
+        }
+    }
+
     private func showFilterPopover() {
         if filterPopover.isShown {
             filterPopover.close()
             return
         }
-        filterView.configure(apps: viewModel.topApps(), allApps: viewModel.allApps())
-        let btn = searchBar.filterButton
-        filterPopover.show(relativeTo: btn.bounds, of: btn, preferredEdge: .maxY)
+        Task {
+            let apps = await viewModel.topApps()
+            let allApps = await viewModel.allApps()
+            filterView.configure(apps: apps, allApps: allApps)
+            let btn = searchBar.filterButton
+            filterPopover.show(relativeTo: btn.bounds, of: btn, preferredEdge: .maxY)
+        }
     }
 
     private func updateFilterButtonAppearance() {
         searchBar.filterButton.contentTintColor = viewModel.filterIsActive ? .controlAccentColor : .secondaryLabelColor
+    }
+
+    private func activeTags(for state: FilterState) -> [(text: String, icon: NSImage?)] {
+        var tags: [(String, NSImage?)] = []
+        if let app = state.selectedApp {
+            var appIcon: NSImage?
+            if let path = state.selectedAppPath {
+                appIcon = NSWorkspace.shared.icon(forFile: path)
+                appIcon?.size = NSSize(width: 14, height: 14)
+            }
+            tags.append((app, appIcon))
+        }
+        if let t = state.selectedType { tags.append((t.string, nil)) }
+        if let d = state.selectedDateRange { tags.append((d.title, nil)) }
+        return tags
     }
 
     private func settingAction() {
@@ -312,13 +351,9 @@ extension PasteMainViewController: PasteCollectionViewKeyDelegate {
     }
 
     func collectionViewDidPressSpace() {
-        if previewPopover?.isShown == true {
-            closePreviewPopover()
-        } else {
-            guard let model = viewModel.item(at: viewModel.selectedIndexPath),
-                  let itemView = collectionView.item(at: viewModel.selectedIndexPath)?.view else { return }
-            showPreviewPopover(for: model, relativeTo: itemView)
-        }
+        guard let model = viewModel.item(at: viewModel.selectedIndexPath),
+              let itemView = collectionView.item(at: viewModel.selectedIndexPath)?.view else { return }
+        showPreviewPopover(for: model, relativeTo: itemView)
     }
 }
 

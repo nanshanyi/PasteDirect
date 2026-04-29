@@ -15,7 +15,7 @@ struct SettingCategory: Identifiable, Hashable {
     let icon: String
     let sections: [SettingSection]
 
-    static let general = SettingCategory(
+    @MainActor static let general = SettingCategory(
         type: .common,
         title: "General",
         icon: "gearshape",
@@ -29,14 +29,15 @@ struct SettingCategory: Identifiable, Hashable {
                 .toggle("Always paste as plain text", key: .pasteOnlyText),
             ]),
             SettingSection(title: "Paste history", items: [
-                .slider("", key: .historyTime, range: 0 ... 100, step: 33),
-                .text("Total number of items", value: PasteDataStore.main.totalCount.description),
+                .slider("", key: .historyTime, range: 0 ... 99, step: 33),
+                .text("Total number of items", storeKeyPath: \.totalCountString),
+                .text("Storage size", storeKeyPath: \.storageSizeString),
                 .button("Clear all clipboard history"),
             ]),
         ]
     )
 
-    static let shortcuts = SettingCategory(
+    @MainActor static let shortcuts = SettingCategory(
         type: .common,
         title: "Shortcuts",
         icon: "command",
@@ -46,14 +47,14 @@ struct SettingCategory: Identifiable, Hashable {
             ]),
         ]
     )
-    static let ignore = SettingCategory(
+    @MainActor static let ignore = SettingCategory(
         type: .custom,
         title: "Rules",
         icon: "list.bullet",
         sections: []
     )
 
-    static let allCategories = [general, shortcuts, ignore]
+    @MainActor static let allCategories = [general, shortcuts, ignore]
 
     static func == (lhs: SettingCategory, rhs: SettingCategory) -> Bool {
         return lhs.id == rhs.id
@@ -72,7 +73,7 @@ struct SettingSection: Identifiable {
 
 enum SettingItem: Identifiable {
     case toggle(LocalizedStringKey, key: PrefKey)
-    case text(LocalizedStringKey, value: String)
+    case text(LocalizedStringKey, storeKeyPath: KeyPath<SettingsStore, String>)
     case slider(LocalizedStringKey, key: PrefKey, range: ClosedRange<Double>, step: Double)
     case button(LocalizedStringKey)
     case shortCut(LocalizedStringKey, key: KeyboardShortcuts.Name)

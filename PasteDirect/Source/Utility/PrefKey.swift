@@ -33,5 +33,5 @@ enum HistoryTime: Int {
     case day = 0
     case week = 33
     case month = 66
-    case forever = 100
+    case forever = 99
 }

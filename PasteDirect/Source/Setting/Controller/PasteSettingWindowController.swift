@@ -28,6 +28,7 @@ class PasteSettingWindowController: NSWindowController {
     }
 
     public func show() {
+        Task { await PasteDataStore.main.updateStorageSize() }
         if #available(macOS 14, *) {
             NSApp.activate()
         } else {

@@ -61,12 +61,13 @@ final class PasteMainWindowController: NSWindowController {
         var endFrame = window.frame
         endFrame.origin.y -= endFrame.height
 
-        NSAnimationContext.runAnimationGroup({ context in
-            context.duration = 0.25
-            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
-            window.animator().setFrame(endFrame, display: true)
-        }) { [weak self] in
-            self?.window?.orderOut(nil)
+        Task {
+            await NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                window.animator().setFrame(endFrame, display: true)
+            }
+            self.window?.orderOut(nil)
             completionHandler?()
         }
     }

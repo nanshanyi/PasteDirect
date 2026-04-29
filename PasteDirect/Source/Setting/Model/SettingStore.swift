@@ -12,6 +12,7 @@ final class SettingsStore: ObservableObject {
     static let shared = SettingsStore()
     @Published var settings: [PrefKey: Any] = [:]
     @Published var totalCountString: String = ""
+    @Published var storageSizeString: String = ""
     init() {
         loadDefaultSettings()
     }

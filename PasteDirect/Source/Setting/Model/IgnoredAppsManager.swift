@@ -7,12 +7,13 @@
 
 import Cocoa
 
+@MainActor
 class IgnoredAppsManager: ObservableObject {
     static let shared = IgnoredAppsManager()
     @Published var ignoredApps: [AppInfo] = []
-    var ingoredAppItems: [AppItem] = []
+    var ignoredAppItems: [AppItem] = []
     var defaultApps:[AppItem] = [
-        AppItem(bundleID: "com.apple.Passwords", path: "/Applications/PasteDirect.app"),
+        AppItem(bundleID: "com.apple.Passwords", path: "/Applications/Passwords.app"),
         AppItem(bundleID: "com.apple.keychainaccess", path: "/System/Library/CoreServices/Applications/Keychain Access.app")
     ]
     
@@ -22,13 +23,13 @@ class IgnoredAppsManager: ObservableObject {
     
     private func loadIgnoredApps() {
         if PasteUserDefaults.appAlreadyLaunched {
-            ingoredAppItems = load()
-            ignoredApps = ingoredAppItems
+            ignoredAppItems = load()
+            ignoredApps = ignoredAppItems
                 .lazy.map{URL.init(fileURLWithPath: $0.path)}
                 .compactMap(getAppFromURL)
         } else {
-            ingoredAppItems = defaultApps
-            ignoredApps = ingoredAppItems
+            ignoredAppItems = defaultApps
+            ignoredApps = ignoredAppItems
                 .lazy.map{URL.init(fileURLWithPath: $0.path)}
                 .compactMap(getAppFromURL)
         }
@@ -67,22 +68,22 @@ class IgnoredAppsManager: ObservableObject {
     private func addAppInfoFromURL(_ url: URL) {
         guard let appInfo = getAppFromURL(url) else { return }
         ignoredApps.append(appInfo)
-        ingoredAppItems.append(AppItem(bundleID: appInfo.bundleID, path: appInfo.path))
+        ignoredAppItems.append(AppItem(bundleID: appInfo.bundleID, path: appInfo.path))
         save()
-        PasteUserDefaults.ignoreList = ingoredAppItems.map { $0.bundleID }
+        PasteUserDefaults.ignoreList = ignoredAppItems.map { $0.bundleID }
     }
     
     private func save() {
         let targetURL = defaultStorageURL
-        let data = try? JSONEncoder().encode(ingoredAppItems)
+        let data = try? JSONEncoder().encode(ignoredAppItems)
         try? data?.write(to: targetURL)
     }
     
     func removeApp(_ app: AppInfo) {
         ignoredApps.removeAll { $0.bundleID == app.bundleID }
-        ingoredAppItems.removeAll { $0.bundleID == app.bundleID }
+        ignoredAppItems.removeAll { $0.bundleID == app.bundleID }
         save()
-        PasteUserDefaults.ignoreList = ingoredAppItems.map { $0.bundleID }
+        PasteUserDefaults.ignoreList = ignoredAppItems.map { $0.bundleID }
     }
     
     func addAppFromFileChooser() {

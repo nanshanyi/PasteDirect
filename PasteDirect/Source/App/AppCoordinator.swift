@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 protocol AppCoordinator: AnyObject {
     var frontAppName: String? { get }
     func activateFrontApp()
@@ -20,5 +21,15 @@ extension AppCoordinator {
 }
 
 enum AppContext {
-    static var coordinator: AppCoordinator!
+    @MainActor private static var _coordinator: AppCoordinator?
+
+    @MainActor static var coordinator: AppCoordinator {
+        get {
+            guard let c = _coordinator else {
+                fatalError("AppContext.coordinator accessed before applicationDidFinishLaunching")
+            }
+            return c
+        }
+        set { _coordinator = newValue }
+    }
 }
