@@ -9,41 +9,34 @@ import Cocoa
 import Combine
 import SnapKit
 
-// MARK: - Custom Cell
+final class PasteSearchField: NSView {
 
-final class PasteSearchFieldCell: NSSearchFieldCell {
+    // MARK: - Public API
 
-    /// 标签占用的左侧宽度
-    var extraLeadingOffset: CGFloat = 0
-    /// 右侧 filterButton 占用的宽度
-    var extraTrailingOffset: CGFloat = 28
-
-    override func searchTextRect(forBounds rect: NSRect) -> NSRect {
-        var r = super.searchTextRect(forBounds: rect)
-        if extraLeadingOffset > 0 {
-            r.origin.x += extraLeadingOffset
-            r.size.width -= extraLeadingOffset
-        }
-        r.size.width -= extraTrailingOffset
-        return r
-    }
-
-    override func cancelButtonRect(forBounds rect: NSRect) -> NSRect {
-        var r = super.cancelButtonRect(forBounds: rect)
-        r.origin.x = rect.width - extraTrailingOffset - r.width
-        return r
-    }
-}
-
-// MARK: - PasteSearchField
-
-final class PasteSearchField: NSSearchField {
-    var isEditing = false
-    var isFirstResponder: Bool {
-        currentEditor() != nil && currentEditor() == window?.firstResponder
-    }
+    weak var delegate: NSSearchFieldDelegate?
 
     @Published private(set) var text: String = ""
+
+    var stringValue: String {
+        get { textField.stringValue }
+        set {
+            textField.stringValue = newValue
+            if text != newValue { text = newValue }
+            updateCancelButton()
+        }
+    }
+
+    var placeholderString: String? {
+        get { textField.placeholderString }
+        set { textField.placeholderString = newValue }
+    }
+
+    var isFirstResponder: Bool {
+        guard let editor = textField.currentEditor() else { return false }
+        return editor === window?.firstResponder
+    }
+
+    var hasTags: Bool { !tagViews.isEmpty }
 
     let filterButton = NSButton().then {
         $0.isBordered = false
@@ -54,56 +47,180 @@ final class PasteSearchField: NSSearchField {
         $0.contentTintColor = .secondaryLabelColor
     }
 
+    // MARK: - Subviews
+
+    private let searchIcon = NSImageView().then {
+        let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .regular)
+        let icon = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: nil)
+        $0.image = icon?.withSymbolConfiguration(config)
+        $0.contentTintColor = .secondaryLabelColor
+        $0.imageScaling = .scaleProportionallyDown
+    }
+
     private let tagContainer = NSStackView().then {
         $0.orientation = .horizontal
         $0.spacing = 4
         $0.alignment = .centerY
     }
 
+    private lazy var textField = NSTextField().then {
+        $0.isBordered = false
+        $0.drawsBackground = false
+        $0.focusRingType = .none
+        $0.font = .systemFont(ofSize: 13)
+        $0.textColor = .labelColor
+        $0.isEditable = true
+        $0.isSelectable = true
+        $0.cell?.usesSingleLineMode = true
+        $0.cell?.lineBreakMode = .byTruncatingTail
+        $0.cell?.wraps = false
+        $0.cell?.isScrollable = true
+        $0.delegate = self
+    }
+
+    private lazy var cancelButton = NSButton().then {
+        $0.isBordered = false
+        $0.refusesFirstResponder = true
+        $0.bezelStyle = .regularSquare
+        let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .regular)
+        let icon = NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: nil)
+        $0.image = icon?.withSymbolConfiguration(config)
+        $0.contentTintColor = .secondaryLabelColor
+        $0.isHidden = true
+        $0.target = self
+        $0.action = #selector(clearText)
+    }
+
     private var tagViews: [NSView] = []
-    var hasTags: Bool { !tagViews.isEmpty }
+    private var isFocused = false { didSet { updateBorderAppearance() } }
 
-    private var customCell: PasteSearchFieldCell? {
-        cell as? PasteSearchFieldCell
-    }
-
-    override class var cellClass: AnyClass? {
-        get { PasteSearchFieldCell.self }
-        set {}
-    }
+    // MARK: - Init
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        setupAccessories()
+        setupUI()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupAccessories()
+        setupUI()
     }
 
-    private func setupAccessories() {
+    private func setupUI() {
+        wantsLayer = true
+        layer?.masksToBounds = true
+        updateBorderAppearance()
+        updateBackgroundColor()
+
+        addSubview(searchIcon)
         addSubview(tagContainer)
+        addSubview(textField)
+        addSubview(cancelButton)
         addSubview(filterButton)
 
-        tagContainer.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(34)
+        searchIcon.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(10)
             make.centerY.equalToSuperview()
-            make.height.equalTo(20)
-            make.trailing.lessThanOrEqualTo(filterButton.snp.leading).offset(-4)
+            make.width.height.equalTo(14)
+        }
+
+        tagContainer.snp.makeConstraints { make in
+            make.leading.equalTo(searchIcon.snp.trailing).offset(6)
+            make.centerY.equalToSuperview()
+            make.height.equalTo(18)
         }
 
         filterButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().offset(-2)
+            make.trailing.equalToSuperview().offset(-6)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(26)
+            make.width.height.equalTo(22)
+        }
+
+        cancelButton.snp.makeConstraints { make in
+            make.trailing.equalTo(filterButton.snp.leading).offset(-2)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(14)
+        }
+
+        textField.snp.makeConstraints { make in
+            make.leading.equalTo(tagContainer.snp.trailing).offset(4)
+            make.trailing.equalTo(cancelButton.snp.leading).offset(-4)
+            make.centerY.equalToSuperview()
+        }
+
+        textField.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        tagContainer.setContentHuggingPriority(.required, for: .horizontal)
+        tagContainer.setContentCompressionResistancePriority(.required, for: .horizontal)
+    }
+
+    // MARK: - First Responder
+
+    override var acceptsFirstResponder: Bool { true }
+    override var canBecomeKeyView: Bool { true }
+
+    override func becomeFirstResponder() -> Bool {
+        window?.makeFirstResponder(textField) ?? false
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        let point = convert(event.locationInWindow, from: nil)
+        let leading = searchIcon.frame.maxX
+        let trailing = cancelButton.isHidden ? filterButton.frame.minX : cancelButton.frame.minX
+        guard point.x >= leading, point.x <= trailing else {
+            super.mouseDown(with: event)
+            return
+        }
+        if window?.firstResponder !== textField.currentEditor() {
+            window?.makeFirstResponder(textField)
         }
     }
+
+    override func resetCursorRects() {
+        let leading = searchIcon.frame.maxX
+        let trailing = cancelButton.isHidden ? filterButton.frame.minX : cancelButton.frame.minX
+        let rect = NSRect(x: leading, y: 0, width: max(0, trailing - leading), height: bounds.height)
+        addCursorRect(rect, cursor: .iBeam)
+    }
+
+    override func layout() {
+        super.layout()
+        layer?.cornerRadius = bounds.height / 2
+        window?.invalidateCursorRects(for: self)
+    }
+
+    // MARK: - Appearance
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateBorderAppearance()
+        updateBackgroundColor()
+    }
+
+    private func updateBorderAppearance() {
+        layer?.borderWidth = isFocused ? 2 : 1
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.borderColor = isFocused
+                ? NSColor.controlAccentColor.cgColor
+                : NSColor.separatorColor.cgColor
+        }
+    }
+
+    private func updateBackgroundColor() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = NSColor.textBackgroundColor.withAlphaComponent(0.5).cgColor
+        }
+    }
+
+    // MARK: - Tags
 
     func updateTags(_ tags: [(text: String, icon: NSImage?)]) {
         tagViews.forEach { $0.removeFromSuperview() }
         tagViews.removeAll()
-        tagContainer.arrangedSubviews.forEach { tagContainer.removeArrangedSubview($0); $0.removeFromSuperview() }
+        tagContainer.arrangedSubviews.forEach {
+            tagContainer.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
 
         for tag in tags {
             let pill = makeTagPill(tag.text, icon: tag.icon)
@@ -111,48 +228,29 @@ final class PasteSearchField: NSSearchField {
             tagViews.append(pill)
         }
 
-        tagContainer.layoutSubtreeIfNeeded()
-        let tagsWidth = tags.isEmpty ? 0 : tagContainer.frame.width + 2
-        customCell?.extraLeadingOffset = tagsWidth
-
+        placeholderString = tags.isEmpty ? String(localized: "Search") : ""
         needsLayout = true
-        needsDisplay = true
     }
 
-    override func layout() {
-        super.layout()
-        if let editor = currentEditor() as? NSTextView {
-            let textRect = customCell?.searchTextRect(forBounds: bounds) ?? bounds
-            if editor.frame != textRect {
-                editor.frame = textRect
-                editor.needsDisplay = true
-            }
-        }
+    // MARK: - Actions
+
+    @objc private func clearText() {
+        stringValue = ""
+        window?.makeFirstResponder(textField)
     }
 
-    override var stringValue: String {
-        didSet {
-            if stringValue != text {
-                text = stringValue
-            }
-        }
+    private func updateCancelButton() {
+        cancelButton.isHidden = text.isEmpty
+        window?.invalidateCursorRects(for: self)
     }
-
-    override func textDidChange(_ notification: Notification) {
-        super.textDidChange(notification)
-        text = stringValue
-    }
-
-    override var canBecomeKeyView: Bool { true }
-    override var acceptsFirstResponder: Bool { true }
 
     // MARK: - Tag Pill
 
     private func makeTagPill(_ text: String, icon: NSImage?) -> NSView {
-        let pill = NSView()
+        let pill = TagPillView()
         pill.wantsLayer = true
         pill.layer?.cornerRadius = 4
-        pill.layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
+        pill.updateBackground()
 
         let stack = NSStackView()
         stack.orientation = .horizontal
@@ -180,9 +278,46 @@ final class PasteSearchField: NSSearchField {
         }
 
         pill.snp.makeConstraints { make in
-            make.height.equalTo(20)
+            make.height.equalTo(18)
         }
 
         return pill
+    }
+}
+
+// MARK: - TagPillView
+
+private final class TagPillView: NSView {
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateBackground()
+    }
+
+    func updateBackground() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
+        }
+    }
+}
+
+// MARK: - NSTextFieldDelegate
+
+extension PasteSearchField: NSTextFieldDelegate {
+    func controlTextDidBeginEditing(_ obj: Notification) {
+        isFocused = true
+    }
+
+    func controlTextDidChange(_ obj: Notification) {
+        text = textField.stringValue
+        updateCancelButton()
+    }
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        isFocused = false
+        delegate?.controlTextDidEndEditing?(obj)
+    }
+
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        delegate?.control?(control, textView: textView, doCommandBy: commandSelector) ?? false
     }
 }

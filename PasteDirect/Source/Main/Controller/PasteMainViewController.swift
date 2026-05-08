@@ -51,9 +51,6 @@ final class PasteMainViewController: NSViewController {
     }
 
     private lazy var searchBar = PasteSearchField().then {
-        $0.cell?.controlSize = .large
-        $0.focusRingType = .none
-        $0.refusesFirstResponder = true
         $0.placeholderString = String(localized: "Search")
         $0.delegate = self
     }
@@ -76,6 +73,10 @@ final class PasteMainViewController: NSViewController {
         let vc = NSViewController()
         vc.view = filterView
         $0.contentViewController = vc
+    }
+
+    private lazy var emptyStateView = PasteEmptyStateView().then {
+        $0.isHidden = true
     }
 }
 
@@ -111,6 +112,7 @@ extension PasteMainViewController {
         initSubviews()
         bindViewModel()
         setupKeyEventMonitor()
+        updateEmptyState()
     }
 
     override func viewDidAppear() {
@@ -123,7 +125,7 @@ extension PasteMainViewController {
         super.viewDidDisappear()
         closePreviewPopover()
         let hadSearchOrFilter = !searchBar.text.isEmpty || viewModel.filterIsActive
-        searchBar.objectValue = nil
+        searchBar.stringValue = ""
         filterView.resetFilter()
         viewModel.handleViewDidDisappear(needsReset: hadSearchOrFilter)
         updateFilterButtonAppearance()
@@ -136,6 +138,7 @@ extension PasteMainViewController {
 extension PasteMainViewController {
     private func initSubviews() {
         contentView.addSubview(scrollView)
+        contentView.addSubview(emptyStateView)
         contentView.addSubview(searchBar)
         contentView.addSubview(settingButton)
 
@@ -143,6 +146,10 @@ extension PasteMainViewController {
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview().offset(-Layout.scrollViewBottom)
             make.top.equalTo(searchBar.snp.bottom).offset(Layout.scrollViewTop)
+        }
+
+        emptyStateView.snp.makeConstraints { make in
+            make.edges.equalTo(scrollView)
         }
 
         searchBar.snp.makeConstraints { make in
@@ -185,6 +192,7 @@ extension PasteMainViewController {
                     self.collectionView.animator().deleteItems(at: [indexPath])
                     self.resetSelectIndex(indexPath)
                 }
+                self.updateEmptyState()
             }
             .store(in: &cancellables)
 
@@ -269,6 +277,16 @@ extension PasteMainViewController {
 
     private func updateFilterButtonAppearance() {
         searchBar.filterButton.contentTintColor = viewModel.filterIsActive ? .controlAccentColor : .secondaryLabelColor
+    }
+
+    private func updateEmptyState() {
+        let isEmpty = viewModel.items.isEmpty
+        emptyStateView.isHidden = !isEmpty
+        scrollView.isHidden = isEmpty
+        if isEmpty {
+            let hasQuery = !searchBar.text.isEmpty || viewModel.filterIsActive
+            emptyStateView.configure(hasQuery ? .noResults : .noHistory)
+        }
     }
 
     private func activeTags(for state: FilterState) -> [(text: String, icon: NSImage?)] {
@@ -452,8 +470,12 @@ extension PasteMainViewController: NSSearchFieldDelegate {
 
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
+            if filterPopover.isShown {
+                filterPopover.close()
+                return true
+            }
             let needRefresh = !searchBar.text.isEmpty || viewModel.filterIsActive
-            searchBar.objectValue = nil
+            searchBar.stringValue = ""
             filterView.resetFilter()
             viewModel.updateFilter(.empty)
             updateFilterButtonAppearance()

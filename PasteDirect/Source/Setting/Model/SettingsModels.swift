@@ -21,7 +21,7 @@ struct SettingCategory: Identifiable, Hashable {
         title: "General",
         icon: "gearshape",
         sections: [
-            SettingSection(title: "", items: [
+            SettingSection(items: [
                 .toggle("Launch at Login", key: .onStart),
                 .toggle("Displayed on the status bar", key: .statusDisplay),
             ]),
@@ -43,7 +43,7 @@ struct SettingCategory: Identifiable, Hashable {
         title: "Shortcuts",
         icon: "command",
         sections: [
-            SettingSection(title: "", items: [
+            SettingSection(items: [
                 .shortCut("Launch PasteDirect", key: .pasteKey),
             ]),
         ]
@@ -75,8 +75,13 @@ struct SettingCategory: Identifiable, Hashable {
 
 struct SettingSection: Identifiable {
     let id = UUID()
-    let title: LocalizedStringKey
+    let title: LocalizedStringKey?
     let items: [SettingItem]
+
+    init(title: LocalizedStringKey? = nil, items: [SettingItem]) {
+        self.title = title
+        self.items = items
+    }
 }
 
 enum SettingItem: Identifiable {
