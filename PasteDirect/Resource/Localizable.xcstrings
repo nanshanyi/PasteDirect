@@ -489,6 +489,46 @@
         }
       }
     },
+    "No clipboard history yet" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无剪贴板历史"
+          }
+        }
+      }
+    },
+    "Copy anything to get started" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制任意内容即可开始"
+          }
+        }
+      }
+    },
+    "No results" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有结果"
+          }
+        }
+      }
+    },
+    "Try a different keyword or filter" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "换个关键词或筛选条件试试"
+          }
+        }
+      }
+    },
     "Select a category from the sidebar" : {
       "localizations" : {
         "zh-Hans" : {

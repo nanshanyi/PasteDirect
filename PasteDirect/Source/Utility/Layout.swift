@@ -13,7 +13,7 @@ enum Layout {
     static let cornerRadius: CGFloat = 32
 
     // MARK: - 搜索框
-    static let searchBarHeight: CGFloat = 30
+    static let searchBarHeight: CGFloat = 26
     static let searchBarWidth: CGFloat = 400
     static let searchBarTop: CGFloat = 16
 

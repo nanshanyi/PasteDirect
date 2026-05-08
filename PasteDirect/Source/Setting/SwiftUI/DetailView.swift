@@ -50,9 +50,11 @@ struct SettingSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(section.title)
-                .font(.headline)
-                .foregroundColor(.primary)
+            if let title = section.title {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
 
             VStack(spacing: 1) {
                 ForEach(Array(section.items.enumerated()), id: \.element.id) { index, item in
