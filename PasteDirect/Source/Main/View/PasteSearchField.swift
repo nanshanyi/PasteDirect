@@ -115,12 +115,19 @@ final class PasteSearchField: NSSearchField {
         let tagsWidth = tags.isEmpty ? 0 : tagContainer.frame.width + 2
         customCell?.extraLeadingOffset = tagsWidth
 
-        // 强制 field editor 重新布局
-        if let editor = currentEditor() as? NSTextView {
-            editor.frame = customCell?.searchTextRect(forBounds: bounds) ?? bounds
-            editor.needsDisplay = true
-        }
+        needsLayout = true
         needsDisplay = true
+    }
+
+    override func layout() {
+        super.layout()
+        if let editor = currentEditor() as? NSTextView {
+            let textRect = customCell?.searchTextRect(forBounds: bounds) ?? bounds
+            if editor.frame != textRect {
+                editor.frame = textRect
+                editor.needsDisplay = true
+            }
+        }
     }
 
     override var stringValue: String {

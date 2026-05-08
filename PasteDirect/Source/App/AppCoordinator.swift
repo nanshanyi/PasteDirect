@@ -12,12 +12,13 @@ protocol AppCoordinator: AnyObject {
     var frontAppName: String? { get }
     func activateFrontApp()
     func dismissWindow(_ completionHandler: (() -> Void)?)
-    func showSettings()
+    func showSettings(category: SettingCategory?)
     func setStatusItemVisible(_ isVisible: Bool)
 }
 
 extension AppCoordinator {
     func dismissWindow() { dismissWindow(nil) }
+    func showSettings() { showSettings(category: nil) }
 }
 
 enum AppContext {

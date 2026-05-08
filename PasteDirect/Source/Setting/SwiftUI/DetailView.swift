@@ -14,6 +14,8 @@ struct DetailView: View {
                     commonCategoryView(category)
                 case .custom:
                     RulesDetailView(category: category)
+                case .about:
+                    AboutView()
                 }
             } else {
                 emptyView

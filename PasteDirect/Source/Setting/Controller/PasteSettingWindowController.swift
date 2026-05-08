@@ -9,16 +9,20 @@ import Cocoa
 import SwiftUI
 
 class PasteSettingWindowController: NSWindowController {
-    private let hostingController = NSHostingController(rootView: SettingsView()).then {
+    private let settingsViewModel = SettingsNavigationModel()
+
+    private lazy var hostingController = NSHostingController(
+        rootView: SettingsView(navigationModel: settingsViewModel)
+    ).then {
         $0.sizingOptions = [.preferredContentSize]
     }
-    
+
     init() {
         let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: false)
         window.titleVisibility = .visible
         window.titlebarSeparatorStyle = .automatic
-        window.contentViewController = hostingController
         super.init(window: window)
+        window.contentViewController = hostingController
         showWindow(self)
     }
 
@@ -27,7 +31,7 @@ class PasteSettingWindowController: NSWindowController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public func show() {
+    public func show(category: SettingCategory? = nil) {
         Task { await PasteDataStore.main.updateStorageSize() }
         if #available(macOS 14, *) {
             NSApp.activate()
@@ -36,5 +40,8 @@ class PasteSettingWindowController: NSWindowController {
         }
         showWindow(self)
         window?.center()
+        if let category {
+            settingsViewModel.selectedCategory = category
+        }
     }
 }

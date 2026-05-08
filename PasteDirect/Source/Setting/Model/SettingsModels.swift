@@ -6,6 +6,7 @@ import SwiftUI
 enum SettingContentType {
     case common
     case custom
+    case about
 }
 
 struct SettingCategory: Identifiable, Hashable {
@@ -54,7 +55,14 @@ struct SettingCategory: Identifiable, Hashable {
         sections: []
     )
 
-    @MainActor static let allCategories = [general, shortcuts, ignore]
+    @MainActor static let about = SettingCategory(
+        type: .about,
+        title: "About",
+        icon: "info.circle",
+        sections: []
+    )
+
+    @MainActor static let allCategories = [general, shortcuts, ignore, about]
 
     static func == (lhs: SettingCategory, rhs: SettingCategory) -> Bool {
         return lhs.id == rhs.id

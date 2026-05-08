@@ -14,6 +14,10 @@ import KeyboardShortcuts
 final class PasteAppDelegate: NSObject {
     private let menuBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private lazy var rMenu = NSMenu(title: "").then {
+        let aboutItem = NSMenuItem(title: String(localized: "About PasteDirect"), action: #selector(aboutAction), keyEquivalent: "")
+        aboutItem.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
+        $0.addItem(aboutItem)
+        $0.addItem(NSMenuItem.separator())
         let item1 = NSMenuItem(title: String(localized: "Settings..."), action: #selector(settingsAction), keyEquivalent: ",")
         item1.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         $0.addItem(item1)
@@ -133,6 +137,11 @@ extension PasteAppDelegate {
     private func settingsAction() {
         showSettings()
     }
+
+    @objc
+    private func aboutAction() {
+        showSettings(category: .about)
+    }
 }
 
 // MARK: - AppCoordinator
@@ -150,8 +159,8 @@ extension PasteAppDelegate: AppCoordinator {
         mainWindowController.dismissWindow(completionHandler)
     }
 
-    func showSettings() {
-        settingsWindowController.show()
+    func showSettings(category: SettingCategory? = nil) {
+        settingsWindowController.show(category: category)
     }
 
     func setStatusItemVisible(_ isVisible: Bool) {

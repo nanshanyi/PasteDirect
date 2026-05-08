@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB0AB0022F10A00000ABOUT2 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0AB0012F10A00000ABOUT1 /* AboutView.swift */; };
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
 		CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */; };
 		CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */; };
@@ -98,6 +99,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CB0AB0012F10A00000ABOUT1 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		CB2CDEEA2924E8D500E81836 /* PasteDirect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PasteDirect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB2CDEFB2924E8D900E81836 /* PasteDirectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PasteDirectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectTests.swift; sourceTree = "<group>"; };
@@ -320,6 +322,7 @@
 		CBD1CAA72F87B2A6003ACBD7 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				CBD1CAAA2F87B2A6003ACBD7 /* SettingsModels.swift */,
 				CBD1CAA52F87B2A6003ACBD7 /* IgnoredAppsManager.swift */,
 				CBD1CAA62F87B2A6003ACBD7 /* SettingStore.swift */,
 			);
@@ -331,9 +334,9 @@
 			children = (
 				CBD1CAA82F87B2A6003ACBD7 /* DetailView.swift */,
 				CBD1CAA92F87B2A6003ACBD7 /* RulesDetailView.swift */,
-				CBD1CAAA2F87B2A6003ACBD7 /* SettingsModels.swift */,
 				CBD1CAAB2F87B2A6003ACBD7 /* SettingsView.swift */,
 				CBD1CAAC2F87B2A6003ACBD7 /* SidebarView.swift */,
+				CB0AB0012F10A00000ABOUT1 /* AboutView.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -574,6 +577,7 @@
 				CBD1CACF2F87B2A6003ACBD7 /* NSAttributeString+Extension.swift in Sources */,
 				CBD1CAD02F87B2A6003ACBD7 /* HexColorValidator.swift in Sources */,
 				CBD1CAD12F87B2A6003ACBD7 /* SidebarView.swift in Sources */,
+				CB0AB0022F10A00000ABOUT2 /* AboutView.swift in Sources */,
 				CBD1CAD22F87B2A6003ACBD7 /* PasteboardModel.swift in Sources */,
 				CBD1CAD32F87B2A6003ACBD7 /* Then.swift in Sources */,
 				CBD1CAD42F87B2A6003ACBD7 /* PasteSQLManager.swift in Sources */,
