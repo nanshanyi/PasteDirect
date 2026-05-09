@@ -23,7 +23,6 @@ class PasteSettingWindowController: NSWindowController {
         window.titlebarSeparatorStyle = .automatic
         super.init(window: window)
         window.contentViewController = hostingController
-        showWindow(self)
     }
 
     @available(*, unavailable)
@@ -38,10 +37,16 @@ class PasteSettingWindowController: NSWindowController {
         } else {
             NSApp.activate(ignoringOtherApps: true)
         }
-        showWindow(self)
-        window?.center()
         if let category {
             settingsViewModel.selectedCategory = category
         }
+        let isFirstShow = window?.isVisible == false
+        if isFirstShow {
+            hostingController.view.layoutSubtreeIfNeeded()
+            let fitted = hostingController.sizeThatFits(in: NSSize(width: 600, height: 500))
+            window?.setContentSize(fitted)
+            window?.center()
+        }
+        showWindow(self)
     }
 }

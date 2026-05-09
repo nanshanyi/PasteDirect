@@ -57,6 +57,16 @@
         }
       }
     },
+    "A new version is available" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发现新版本"
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "zh-Hans" : {
@@ -113,6 +123,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "个字符"
+          }
+        }
+      }
+    },
+    "Check for updates on launch" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动时自动检查更新"
+          }
+        }
+      }
+    },
+    "Check for Updates..." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查更新..."
           }
         }
       }
@@ -184,6 +214,16 @@
         }
       }
     },
+    "Copy anything to get started" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制任意内容即可开始"
+          }
+        }
+      }
+    },
     "Date" : {
       "localizations" : {
         "zh-Hans" : {
@@ -230,6 +270,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不要保存从以下应用程序复制的内容。"
+          }
+        }
+      }
+    },
+    "Download" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载"
           }
         }
       }
@@ -314,6 +364,16 @@
         }
       }
     },
+    "Later" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以后"
+          }
+        }
+      }
+    },
     "Launch at Login" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -351,6 +411,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更多"
+          }
+        }
+      }
+    },
+    "No clipboard history yet" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无剪贴板历史"
+          }
+        }
+      }
+    },
+    "No results" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有结果"
           }
         }
       }
@@ -429,6 +509,37 @@
     "PasteDirect" : {
 
     },
+    "PasteDirect %@ is available — you have %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "PasteDirect %1$@ is available — you have %2$@."
+          }
+        }
+      }
+    },
+    "PasteDirect %@ is the latest version." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PasteDirect %@ 已经是最新版本。"
+          }
+        }
+      }
+    },
+    "PasteDirect %1$@ is available — you have %2$@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PasteDirect %1$@ 已发布 — 你当前版本为 %2$@。"
+          }
+        }
+      }
+    },
     "PasteDirect requires accessibility permissions" : {
       "localizations" : {
         "zh-Hans" : {
@@ -445,6 +556,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "像素"
+          }
+        }
+      }
+    },
+    "Please check your network connection and try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请检查网络连接后重试。"
           }
         }
       }
@@ -485,46 +606,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜索"
-          }
-        }
-      }
-    },
-    "No clipboard history yet" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "暂无剪贴板历史"
-          }
-        }
-      }
-    },
-    "Copy anything to get started" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "复制任意内容即可开始"
-          }
-        }
-      }
-    },
-    "No results" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有结果"
-          }
-        }
-      }
-    },
-    "Try a different keyword or filter" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "换个关键词或筛选条件试试"
           }
         }
       }
@@ -575,6 +656,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "快捷键"
+          }
+        }
+      }
+    },
+    "Skip this version" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳过此版本"
+          }
+        }
+      }
+    },
+    "Storage size" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "存储大小"
           }
         }
       }
@@ -639,12 +740,12 @@
         }
       }
     },
-    "Storage size" : {
+    "Try a different keyword or filter" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "存储大小"
+            "value" : "换个关键词或筛选条件试试"
           }
         }
       }
@@ -655,6 +756,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "类型"
+          }
+        }
+      }
+    },
+    "Unable to check for updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法检查更新"
           }
         }
       }
@@ -706,6 +817,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您有比新的历史限制更旧的项目。是否要删除这些较旧的项目并应用新的限制？"
+          }
+        }
+      }
+    },
+    "You're up to date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已是最新版本"
           }
         }
       }

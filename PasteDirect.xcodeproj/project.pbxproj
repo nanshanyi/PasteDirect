@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1980B54B25F34F2EB1781FA9 /* PasteEmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */; };
+		BB1A5E47239B42BC8043DA79 /* UpdateCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */; };
 		CB0AB0022F10A00000ABOUT2 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0AB0012F10A00000ABOUT1 /* AboutView.swift */; };
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
 		CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */; };
@@ -34,7 +36,6 @@
 		CBD1CADB2F87B2A6003ACBD7 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAB62F87B2A6003ACBD7 /* View+Extension.swift */; };
 		CBD1CADC2F87B2A6003ACBD7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAC72F87B2A6003ACBD7 /* main.swift */; };
 		CBD1CADD2F87B2A6003ACBD7 /* PasteSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA992F87B2A6003ACBD7 /* PasteSearchField.swift */; };
-		1980B54B25F34F2EB1781FA9 /* PasteEmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */; };
 		CBD1CADE2F87B2A6003ACBD7 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA82F87B2A6003ACBD7 /* DetailView.swift */; };
 		CBD1CADF2F87B2A6003ACBD7 /* KeyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CABD2F87B2A6003ACBD7 /* KeyHelper.swift */; };
 		CBD1CAE02F87B2A6003ACBD7 /* PasteUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */; };
@@ -68,6 +69,7 @@
 		CBD1CAFC2F87B2A6003ACBD7 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBD1CAC62F87B2A6003ACBD7 /* Info.plist */; };
 		CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */; };
 		CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */; };
+		D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,6 +102,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
+		7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCoordinator.swift; sourceTree = "<group>"; };
+		BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEmptyStateView.swift; sourceTree = "<group>"; };
 		CB0AB0012F10A00000ABOUT1 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		CB2CDEEA2924E8D500E81836 /* PasteDirect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PasteDirect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB2CDEFB2924E8D900E81836 /* PasteDirectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PasteDirectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,7 +130,6 @@
 		CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastePreviewPanel.swift; sourceTree = "<group>"; };
 		CBD1CA982F87B2A6003ACBD7 /* PasteScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteScrollView.swift; sourceTree = "<group>"; };
 		CBD1CA992F87B2A6003ACBD7 /* PasteSearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteSearchField.swift; sourceTree = "<group>"; };
-		BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEmptyStateView.swift; sourceTree = "<group>"; };
 		CBD1CA9B2F87B2A6003ACBD7 /* PasteMainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteMainViewModel.swift; sourceTree = "<group>"; };
 		CBD1CA9E2F87B2A6003ACBD7 /* ColorCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorCache.swift; sourceTree = "<group>"; };
 		CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteBoard.swift; sourceTree = "<group>"; };
@@ -310,6 +314,8 @@
 				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
 				CBD1CAA02F87B2A6003ACBD7 /* PasteDataStore.swift */,
 				CBD1CAA12F87B2A6003ACBD7 /* PasteSQLManager.swift */,
+				21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */,
+				7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -498,7 +504,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1410;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					CB2CDEE92924E8D500E81836 = {
 						CreatedOnToolsVersion = 14.1;
@@ -584,6 +590,8 @@
 				CBD1CAD22F87B2A6003ACBD7 /* PasteboardModel.swift in Sources */,
 				CBD1CAD32F87B2A6003ACBD7 /* Then.swift in Sources */,
 				CBD1CAD42F87B2A6003ACBD7 /* PasteSQLManager.swift in Sources */,
+				D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */,
+				BB1A5E47239B42BC8043DA79 /* UpdateCoordinator.swift in Sources */,
 				CBD1CAD52F87B2A6003ACBD7 /* PasteFilterView.swift in Sources */,
 				CBD1CAD62F87B2A6003ACBD7 /* Date+Extension.swift in Sources */,
 				CBD1CAD72F87B2A6003ACBD7 /* Log.swift in Sources */,
@@ -790,6 +798,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = PasteDirect;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
 				CODE_SIGN_IDENTITY = "PasteDirect Code Signing Certificate";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "PasteDirect Code Signing Certificate";
@@ -799,7 +808,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				INFOPLIST_FILE = "$(SRCROOT)/PasteDirect/info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = PasteDirect;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -811,7 +820,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.1.2;
+				MARKETING_VERSION = 3.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -827,6 +836,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = PasteDirect;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
 				CODE_SIGN_IDENTITY = "PasteDirect Code Signing Certificate";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "PasteDirect Code Signing Certificate";
@@ -846,7 +856,7 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
 				ENABLE_RESOURCE_ACCESS_USB = NO;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				INFOPLIST_FILE = "$(SRCROOT)/PasteDirect/info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = PasteDirect;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -858,7 +868,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.1.2;
+				MARKETING_VERSION = 3.1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

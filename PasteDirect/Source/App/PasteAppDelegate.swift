@@ -18,6 +18,9 @@ final class PasteAppDelegate: NSObject {
         aboutItem.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: nil)
         $0.addItem(aboutItem)
         $0.addItem(NSMenuItem.separator())
+        let updateItem = NSMenuItem(title: String(localized: "Check for Updates..."), action: #selector(checkForUpdatesAction), keyEquivalent: "")
+        updateItem.image = NSImage(systemSymbolName: "arrow.down.circle", accessibilityDescription: nil)
+        $0.addItem(updateItem)
         let item1 = NSMenuItem(title: String(localized: "Settings..."), action: #selector(settingsAction), keyEquivalent: ",")
         item1.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         $0.addItem(item1)
@@ -75,6 +78,12 @@ extension PasteAppDelegate {
         KeyboardShortcuts.onKeyDown(for: .pasteKey) { [self] in
             let curFrame = NSScreen.main?.frame
             showOrDismissWindow(curFrame)
+        }
+
+        /// 启动后延迟检查更新
+        Task {
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            UpdateCoordinator.shared.checkSilently()
         }
     }
 
@@ -141,6 +150,11 @@ extension PasteAppDelegate {
     @objc
     private func aboutAction() {
         showSettings(category: .about)
+    }
+
+    @objc
+    private func checkForUpdatesAction() {
+        UpdateCoordinator.shared.checkManually()
     }
 }
 

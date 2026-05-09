@@ -13,6 +13,8 @@ struct AboutView: View {
         return "\(version)"
     }()
 
+    @AppStorage(PrefKey.autoCheckUpdate.rawValue) private var autoCheckUpdate: Bool = true
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -32,6 +34,22 @@ struct AboutView: View {
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+
+            VStack(spacing: 10) {
+                Button {
+                    UpdateCoordinator.shared.checkManually()
+                } label: {
+                    Text("Check for Updates...")
+                        .font(.system(size: 13))
+                }
+
+                Toggle(isOn: $autoCheckUpdate) {
+                    Text("Check for updates on launch")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                .toggleStyle(.checkbox)
+            }
 
             VStack(spacing: 12) {
                 Link(destination: URL(string: "https://github.com/nanshanyi/PasteDirect")!) {
