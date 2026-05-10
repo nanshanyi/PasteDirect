@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.1.2-green" alt="Version 3.1.2">
+  <img src="https://img.shields.io/badge/version-3.1.3-green" alt="Version 3.1.3">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -37,7 +37,7 @@
 
 ### 下载
 
-从 [Releases](https://github.com/nanshanyi/PasteDirect/releases) 下载最新版本的 `.app` 文件，拖入 `/Applications` 目录即可。
+从 [Releases](https://github.com/nanshanyi/PasteDirect/releases) 下载最新版本的 `.dmg` 文件，打开后将 `PasteDirect.app` 拖入 `/Applications` 目录即可。
 
 ### 首次运行
 
@@ -60,6 +60,8 @@ open /Applications/PasteDirect.app
 ### 更新无忧
 
 从 v2.2.0 起，应用采用自签名证书机制，更新时辅助功能权限自动保留，无需重新授权。
+
+从 v3.1.3 起，应用内支持手动检查更新，也可在设置中开启启动时自动检查更新。
 
 ## 使用方式
 
@@ -87,6 +89,7 @@ open /Applications/PasteDirect.app
 - **历史保留时长** — 1 天 / 1 周 / 1 月 / 永久
 - **忽略应用** — 配置不记录剪贴板的应用列表
 - **快捷键** — 自定义全局呼出快捷键
+- **检查更新** — 支持手动检查更新与启动时自动检查
 
 ## 从源码构建
 
