@@ -25,6 +25,10 @@ enum PasteUserDefaults {
     static var lastClearDate
     @UserDefaultsWrapper(.ignoreList, defaultValue: [String]())
     static var ignoreList
+    @UserDefaultsWrapper(.autoCheckUpdate, defaultValue: true)
+    static var autoCheckUpdate
+    @UserDefaultsWrapper(.ignoredUpdateVersion, defaultValue: "")
+    static var ignoredUpdateVersion
 
     static func setValue<T>(for key: PrefKey, value: T) {
         UserDefaults.standard.set(value, forKey: key.rawValue)
