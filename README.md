@@ -5,6 +5,10 @@
 <h1 align="center">PasteDirect</h1>
 
 <p align="center">
+  简体中文 | <a href="README_EN.md">English</a>
+</p>
+
+<p align="center">
   轻量、安全、纯本地的 macOS 剪贴板历史管理工具
 </p>
 
