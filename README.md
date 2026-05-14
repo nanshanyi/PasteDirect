@@ -5,11 +5,11 @@
 <h1 align="center">PasteDirect</h1>
 
 <p align="center">
-  简体中文 | <a href="README_EN.md">English</a>
+  English | <a href="README_CN.md">简体中文</a>
 </p>
 
 <p align="center">
-  轻量、安全、纯本地的 macOS 剪贴板历史管理工具
+  A lightweight, secure, fully local clipboard history manager for macOS
 </p>
 
 <p align="center">
@@ -19,91 +19,94 @@
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
-## 特性
+## Features
 
-- 🔒 **纯本地运行** — 所有数据存储在本地 SQLite 数据库，零网络请求，隐私无忧
-- 📋 **多格式支持** — 文本、图片、HTML、RTF、富文本、代码片段，通通记录
-- 🎨 **颜色识别** — 自动检测剪贴板中的 Hex 颜色值并可视化展示
-- ⌨️ **快捷键呼出** — 默认 `⌘⇧V`，支持自定义快捷键
-- 🔍 **快速搜索** — 直接键入关键词即时过滤历史记录，搜索框使用 pill 风格
-- 🏷️ **多维筛选** — 按类型（文本/图片/颜色）、来源应用、时间范围组合筛选，筛选条件以 tag 形式贴合展示
-- 👁️ **空格预览** — 按空格键快速预览选中内容，支持文本、图片、颜色详情
-- 🖱️ **多种粘贴方式** — 双击粘贴、回车粘贴、拖拽到目标位置
-- 📝 **纯文本模式** — 一键去除富文本格式，粘贴为纯文本
-- 🧹 **自动清理** — 可设置保留时长：1 天 / 1 周 / 1 月 / 永久
-- 🚫 **应用过滤** — 可忽略特定应用（如钥匙串、密码管理器）的剪贴板内容
-- 🪟 **适配 macOS 26** — 全面支持液态玻璃（Liquid Glass）效果
+- 🔒 **Fully local** — All data is stored in a local SQLite database, with zero network requests for better privacy
+- 📋 **Multiple formats** — Records text, images, HTML, RTF, rich text, and code snippets
+- 🎨 **Color detection** — Automatically detects Hex color values from the clipboard and displays visual previews
+- ⌨️ **Global shortcut** — Default shortcut is `⌘⇧V`; custom shortcuts are supported
+- 🔍 **Fast search** — Type keywords to instantly filter clipboard history; the search field uses a pill-style design
+- 🏷️ **Multi-dimensional filters** — Combine filters by type (text/image/color), source app, and time range; active filters are shown as tags
+- 👁️ **Space preview** — Press Space to quickly preview the selected item, including text, images, and color details
+- 🖱️ **Multiple paste methods** — Paste by double-clicking, pressing Enter, or dragging an item to the target location
+- 📝 **Plain text mode** — Remove rich-text formatting with one click and paste as plain text
+- 🧹 **Auto cleanup** — Configure retention duration: 1 day / 1 week / 1 month / forever
+- 🚫 **App filtering** — Ignore clipboard content from specific apps, such as Keychain or password managers
+- 🪟 **macOS 26 ready** — Full support for the Liquid Glass visual effect
+
 <img width="2704" height="958" alt="2026_04_27_10_40_37" src="https://github.com/user-attachments/assets/27c5215e-8603-4f63-8413-42eb5f08329d" />
 <img width="2706" height="1404" alt="2026_04_27_10_41_07" src="https://github.com/user-attachments/assets/1cf3e03c-c9c5-442b-b909-ac82c2773ccc" />
 <img width="2704" height="1514" alt="2026_04_27_10_41_27" src="https://github.com/user-attachments/assets/ef2999b6-c240-4c3a-94a4-1849e1c5b42d" />
 
-## 安装
+## Installation
 
-### 下载
+### Download
 
-从 [Releases](https://github.com/nanshanyi/PasteDirect/releases) 下载最新版本的 `.dmg` 文件，打开后将 `PasteDirect.app` 拖入 `/Applications` 目录即可。
+Download the latest `.dmg` file from [Releases](https://github.com/nanshanyi/PasteDirect/releases), open it, and drag `PasteDirect.app` into the `/Applications` folder.
 
-### 首次运行
+### First launch
 
-由于使用自签名证书，首次运行需要手动授权：
+Because the app uses a self-signed certificate, macOS requires manual authorization on the first launch:
 
-1. 右键点击 `PasteDirect.app` → 选择「打开」
-2. 在弹出的对话框中点击「打开」
+1. Right-click `PasteDirect.app` and choose **Open**
+2. Click **Open** in the dialog that appears
 
-或通过终端：
+Or use Terminal:
 
 ```bash
 xattr -cr /Applications/PasteDirect.app
 open /Applications/PasteDirect.app
 ```
 
-首次启动后，系统会提示授予「辅助功能」权限，这是监听剪贴板和模拟粘贴操作所必需的。
+After the first launch, macOS will ask you to grant **Accessibility** permission. This is required for clipboard monitoring and simulated paste operations.
+
 <img width="530" height="494" alt="image" src="https://github.com/user-attachments/assets/cf00f162-b4ff-4ddc-8c7c-974d5bc2caca" />
-自签名证书系统会有安全提示，系统设置->隐私与安全性->仍然打开即可
 
-### 更新无忧
+If macOS shows a security warning for the self-signed certificate, go to **System Settings → Privacy & Security** and choose **Open Anyway**.
 
-从 v2.2.0 起，应用采用自签名证书机制，更新时辅助功能权限自动保留，无需重新授权。
+### Smooth updates
 
-从 v3.1.3 起，应用内支持手动检查更新，也可在设置中开启启动时自动检查更新。
+Starting from v2.2.0, PasteDirect uses a self-signed certificate mechanism so Accessibility permission is preserved during updates and does not need to be granted again.
 
-## 使用方式
+Starting from v3.1.3, the app supports manually checking for updates in-app. You can also enable automatic update checks on launch in Settings.
 
-| 操作 | 说明 |
+## Usage
+
+| Action | Description |
 |------|------|
-| `⌘⇧V` | 呼出 / 隐藏剪贴板面板（可自定义） |
-| 双击 | 粘贴选中项 |
-| `Enter` | 粘贴选中项 |
-| `Space` | 预览选中项 |
-| `Delete` | 删除选中项 |
-| `Esc` | 依次关闭预览 / 筛选弹窗 / 清空搜索筛选 / 关闭面板 |
-| 拖拽 | 将条目拖拽到目标位置直接粘贴 |
-| 输入文字 | 搜索过滤历史记录，`Backspace` 可逐个移除筛选条件 |
+| `⌘⇧V` | Show / hide the clipboard panel (customizable) |
+| Double-click | Paste the selected item |
+| `Enter` | Paste the selected item |
+| `Space` | Preview the selected item |
+| `Delete` | Delete the selected item |
+| `Esc` | Close preview / filter popover / clear search and filters / close panel in sequence |
+| Drag | Drag an item to the target location to paste directly |
+| Type text | Search and filter history; `Backspace` removes filters one by one |
 
 <p align="center">
-  <img width="629" alt="PasteDirect 设置" src="https://github.com/user-attachments/assets/a315da78-25d5-4382-8d93-4d827ec14a62" />
+  <img width="629" alt="PasteDirect Settings" src="https://github.com/user-attachments/assets/a315da78-25d5-4382-8d93-4d827ec14a62" />
 </p>
 
-## 设置选项
+## Settings
 
-- **开机启动** — 登录时自动运行
-- **状态栏图标** — 显示 / 隐藏菜单栏图标
-- **直接粘贴** — 选中后自动粘贴到当前应用
-- **纯文本粘贴** — 去除格式，仅粘贴纯文本
-- **历史保留时长** — 1 天 / 1 周 / 1 月 / 永久
-- **忽略应用** — 配置不记录剪贴板的应用列表
-- **快捷键** — 自定义全局呼出快捷键
-- **检查更新** — 支持手动检查更新与启动时自动检查
+- **Launch at login** — Run automatically when you log in
+- **Menu bar icon** — Show / hide the menu bar icon
+- **Direct paste** — Automatically paste the selected item into the current app
+- **Plain text paste** — Remove formatting and paste plain text only
+- **History retention** — 1 day / 1 week / 1 month / forever
+- **Ignored apps** — Configure apps whose clipboard content should not be recorded
+- **Shortcut** — Customize the global shortcut for opening the panel
+- **Check for updates** — Supports manual update checks and checking automatically on launch
 
-## 从源码构建
+## Build from source
 
-### 环境要求
+### Requirements
 
 - macOS 13.0+
 - Xcode 16+
 - Swift 6
 
-### 构建步骤
+### Build steps
 
 ```bash
 git clone https://github.com/nanshanyi/PasteDirect.git
@@ -111,14 +114,14 @@ cd PasteDirect
 open PasteDirect.xcodeproj
 ```
 
-在 Xcode 中选择 `PasteDirect` scheme，点击运行即可。依赖通过 Swift Package Manager 自动拉取。
+Select the `PasteDirect` scheme in Xcode and click Run. Dependencies are fetched automatically through Swift Package Manager.
 
-### 依赖项
+### Dependencies
 
-| 库 | 用途 |
+| Library | Purpose |
 |----|------|
-| [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) | 全局快捷键 |
-| [SQLite.swift](https://github.com/nicklama/SQLite.swift) | 本地数据库 |
+| [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) | Global shortcuts |
+| [SQLite.swift](https://github.com/nicklama/SQLite.swift) | Local database |
 | [SnapKit](https://github.com/SnapKit/SnapKit) | Auto Layout |
 
 ## License
