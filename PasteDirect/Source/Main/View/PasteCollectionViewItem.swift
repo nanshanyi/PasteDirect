@@ -26,6 +26,13 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
     private var pModel: PasteboardModel?
     private var isAttribute: Bool = true
     private var appearanceCancellable: AnyCancellable?
+    private var topViewHeightConstraint: NSLayoutConstraint?
+    private(set) var isCompact: Bool = false
+
+    // compact 模式约束
+    private var compactConstraints: [NSLayoutConstraint] = []
+    // normal 模式约束
+    private var normalConstraints: [NSLayoutConstraint] = []
 
     private lazy var contentView = NSView().then {
         $0.wantsLayer = true
@@ -117,6 +124,39 @@ extension PasteCollectionViewItem {
         }
     }
 
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        let itemHeight = view.bounds.height
+        let topHeight = isCompact ? 36.0 : Layout.dynamicTopViewHeight(for: itemHeight)
+        topViewHeightConstraint?.constant = topHeight
+    }
+
+    func updateLayout(compact: Bool, itemHeight: CGFloat) {
+        if compact != isCompact {
+            isCompact = compact
+            applyLayoutMode(compact: compact, itemHeight: itemHeight)
+        } else if !compact {
+            typeLabel.font = .systemFont(ofSize: Layout.dynamicTypeFontSize(for: itemHeight), weight: .medium)
+        }
+    }
+
+    private func applyLayoutMode(compact: Bool, itemHeight: CGFloat) {
+        if compact {
+            NSLayoutConstraint.deactivate(normalConstraints)
+            NSLayoutConstraint.activate(compactConstraints)
+            typeLabel.font = .systemFont(ofSize: 14, weight: .medium)
+            timeLabel.font = .systemFont(ofSize: 11)
+        } else {
+            NSLayoutConstraint.deactivate(compactConstraints)
+            NSLayoutConstraint.activate(normalConstraints)
+            typeLabel.font = .systemFont(ofSize: Layout.dynamicTypeFontSize(for: itemHeight), weight: .medium)
+            timeLabel.font = .systemFont(ofSize: 12)
+        }
+
+        let topHeight = compact ? 36.0 : Layout.dynamicTopViewHeight(for: itemHeight)
+        topViewHeightConstraint?.constant = topHeight
+    }
+
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         if event.type == .leftMouseDown, event.clickCount == 2 {
@@ -157,25 +197,38 @@ extension PasteCollectionViewItem {
         topView.addSubview(typeLabel)
         topView.addSubview(timeLabel)
         topView.addSubview(iconImageView)
-        
+
+        typeLabel.translatesAutoresizingMaskIntoConstraints = false
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+
         topMask.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
-        typeLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(Layout.spacing)
-            make.bottom.equalTo(timeLabel.snp.top).offset(-4)
-        }
-
-        timeLabel.snp.makeConstraints { make in
-            make.leading.equalTo(typeLabel)
-            make.bottom.equalToSuperview().offset(-Layout.spacing)
-        }
 
         iconImageView.snp.makeConstraints { make in
-            make.top.bottom.trailing.equalToSuperview()
-            make.width.equalTo(topView.snp.height)
+            make.top.equalToSuperview().offset(4)
+            make.bottom.trailing.equalToSuperview().offset(-4)
+            make.width.equalTo(iconImageView.snp.height)
         }
+
+        // normal 模式约束（两行，icon 贴底）
+        normalConstraints = [
+            typeLabel.leadingAnchor.constraint(equalTo: topView.leadingAnchor, constant: Layout.spacing),
+            typeLabel.bottomAnchor.constraint(equalTo: timeLabel.topAnchor, constant: -4),
+            timeLabel.leadingAnchor.constraint(equalTo: typeLabel.leadingAnchor),
+            timeLabel.bottomAnchor.constraint(equalTo: topView.bottomAnchor, constant: -Layout.spacing),
+        ]
+
+        // compact 模式约束（单行，icon 小）
+        compactConstraints = [
+            typeLabel.leadingAnchor.constraint(equalTo: topView.leadingAnchor, constant: Layout.spacing),
+            typeLabel.centerYAnchor.constraint(equalTo: topView.centerYAnchor),
+            timeLabel.leadingAnchor.constraint(equalTo: typeLabel.trailingAnchor, constant: 2),
+            timeLabel.centerYAnchor.constraint(equalTo: topView.centerYAnchor),
+        ]
+
+        NSLayoutConstraint.activate(normalConstraints)
     }
 
     private func initContentView() {
@@ -191,7 +244,7 @@ extension PasteCollectionViewItem {
 
         topView.snp.makeConstraints { make in
             make.leading.trailing.top.equalToSuperview()
-            make.height.equalTo(Layout.itemTopViewHeight)
+            self.topViewHeightConstraint = make.height.equalTo(Layout.itemTopViewHeight).constraint.layoutConstraints.first
         }
 
         imageContentView.snp.makeConstraints { make in

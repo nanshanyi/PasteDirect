@@ -13,6 +13,10 @@ final class SettingsStore: ObservableObject {
     @Published var settings: [PrefKey: Any] = [:]
     @Published var totalCountString: String = ""
     @Published var storageSizeString: String = ""
+
+    var panelHeightString: String {
+        String(localized: "Current height") + String(localized: "colon") + "\(Int(Layout.viewHeight))"
+    }
     init() {
         loadDefaultSettings()
     }

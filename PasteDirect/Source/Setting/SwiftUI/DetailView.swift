@@ -124,8 +124,8 @@ struct SettingItemView: View {
             textItem(title: title, keyPath: keyPath)
         case let .slider(_, key, range, step):
             sliderItem(key: key, range: range, step: step)
-        case let .button(title):
-            buttonItem(title: title)
+        case let .button(title, label):
+            buttonItem(title: title, label: label)
         case let .shortCut(title, name):
             shortcutItem(title: title, name: name)
         }
@@ -192,11 +192,16 @@ struct SettingItemView: View {
         .padding(.trailing, -2)
     }
 
-    private func buttonItem(title: LocalizedStringKey) -> some View {
+    private func buttonItem(title: LocalizedStringKey, label: KeyPath<SettingsStore, String>?) -> some View {
         Group {
+            if let label {
+                Text(settingsStore[keyPath: label])
+                    .font(.system(size: 13))
+                    .foregroundColor(.primary)
+            }
             Spacer()
             Button(title) {
-                showClearAlert = true
+                handleButtonAction(title: title)
             }
         }
     }
@@ -245,6 +250,15 @@ struct SettingItemView: View {
 
     private func handleClearAll() {
         PasteDataStore.main.clearAllData()
+    }
+
+    private func handleButtonAction(title: LocalizedStringKey) {
+        if title == "Clear all clipboard history" {
+            showClearAlert = true
+        } else if title == "Reset panel height" {
+            PasteUserDefaults.panelHeight = 0
+            settingsStore.objectWillChange.send()
+        }
     }
 }
 

@@ -224,6 +224,16 @@
         }
       }
     },
+    "Current height" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前高度"
+          }
+        }
+      }
+    },
     "Date" : {
       "localizations" : {
         "zh-Hans" : {
@@ -445,6 +455,16 @@
         }
       }
     },
+    "Panel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面板"
+          }
+        }
+      }
+    },
     "Paste as #RRGGBB" : {
       "localizations" : {
         "zh-Hans" : {
@@ -586,6 +606,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "退出"
+          }
+        }
+      }
+    },
+    "Reset panel height" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复默认高度"
           }
         }
       }

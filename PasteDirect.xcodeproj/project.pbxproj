@@ -68,6 +68,7 @@
 		CBD1CAFB2F87B2A6003ACBD7 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CBD1CA872F87B2A6003ACBD7 /* Localizable.xcstrings */; };
 		CBD1CAFC2F87B2A6003ACBD7 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBD1CAC62F87B2A6003ACBD7 /* Info.plist */; };
 		CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */; };
+		CBD1CB022F87BC00003ACBD7 /* PanelResizeHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB032F87BC00003ACBD7 /* PanelResizeHandle.swift */; };
 		CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */; };
 		D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
@@ -166,6 +167,7 @@
 		CBD1CAC72F87B2A6003ACBD7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		CBD1CAC82F87B2A6003ACBD7 /* PasteDirect.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PasteDirect.entitlements; sourceTree = "<group>"; };
 		CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		CBD1CB032F87BC00003ACBD7 /* PanelResizeHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelResizeHandle.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,6 +286,7 @@
 				CBD1CA982F87B2A6003ACBD7 /* PasteScrollView.swift */,
 				CBD1CA992F87B2A6003ACBD7 /* PasteSearchField.swift */,
 				BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */,
+				CBD1CB032F87BC00003ACBD7 /* PanelResizeHandle.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -611,6 +614,7 @@
 				CBD1CAE42F87B2A6003ACBD7 /* ImageColorExtractor.swift in Sources */,
 				CBD1CAE52F87B2A6003ACBD7 /* NSLabel.swift in Sources */,
 				CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */,
+				CBD1CB022F87BC00003ACBD7 /* PanelResizeHandle.swift in Sources */,
 				CBD1CAE62F87B2A6003ACBD7 /* PasteScrollView.swift in Sources */,
 				CBD1CAE72F87B2A6003ACBD7 /* PasteDataStore.swift in Sources */,
 				CBD1CAE82F87B2A6003ACBD7 /* PasteFilterItem.swift in Sources */,
@@ -820,7 +824,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.1.3;
+				MARKETING_VERSION = 3.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -868,7 +872,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.1.3;
+				MARKETING_VERSION = 3.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

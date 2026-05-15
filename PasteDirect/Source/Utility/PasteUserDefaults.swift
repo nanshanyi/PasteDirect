@@ -29,6 +29,8 @@ enum PasteUserDefaults {
     static var autoCheckUpdate
     @UserDefaultsWrapper(.ignoredUpdateVersion, defaultValue: "")
     static var ignoredUpdateVersion
+    @UserDefaultsWrapper(.panelHeight, defaultValue: Double(0))
+    static var panelHeight: Double
 
     static func setValue<T>(for key: PrefKey, value: T) {
         UserDefaults.standard.set(value, forKey: key.rawValue)

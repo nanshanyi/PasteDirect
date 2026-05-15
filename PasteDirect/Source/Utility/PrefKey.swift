@@ -30,6 +30,8 @@ enum PrefKey: String, CaseIterable {
     case autoCheckUpdate
     /// 用户选择忽略的版本号
     case ignoredUpdateVersion
+    /// 面板高度
+    case panelHeight
 }
 
 enum HistoryTime: Int {
