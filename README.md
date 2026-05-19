@@ -30,6 +30,7 @@
 - 👁️ **Space preview** — Press Space to quickly preview the selected item, including text, images, and color details
 - 🖱️ **Multiple paste methods** — Paste by double-clicking, pressing Enter, or dragging an item to the target location
 - 📝 **Plain text mode** — Remove rich-text formatting with one click and paste as plain text
+- 📐 **Resizable panel** — Drag the top edge to adjust panel height; items scale proportionally
 - 🧹 **Auto cleanup** — Configure retention duration: 1 day / 1 week / 1 month / forever
 - 🚫 **App filtering** — Ignore clipboard content from specific apps, such as Keychain or password managers
 - 🪟 **macOS 26 ready** — Full support for the Liquid Glass visual effect

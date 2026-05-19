@@ -17,6 +17,7 @@ final class PasteMainViewController: NSViewController {
     private var previewPopover: PastePreviewPopover?
     private var keyEventMonitor: Any?
     private var contentView: NSView!
+    private var isBouncingBack = false
 
     // MARK: - lazy property
 
@@ -58,7 +59,7 @@ final class PasteMainViewController: NSViewController {
     private lazy var settingButton = NSButton().then {
         $0.isBordered = false
         $0.refusesFirstResponder = true
-        let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .regular)
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .regular)
         let icon = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         $0.image = icon?.withSymbolConfiguration(config)
         $0.contentTintColor = .labelColor
@@ -78,6 +79,8 @@ final class PasteMainViewController: NSViewController {
     private lazy var emptyStateView = PasteEmptyStateView().then {
         $0.isHidden = true
     }
+
+    private lazy var resizeHandle = PanelResizeHandle()
 }
 
 // MARK: - 生命周期
@@ -115,10 +118,18 @@ extension PasteMainViewController {
         updateEmptyState()
     }
 
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        if isBouncingBack, let window = view.window {
+            updateItemSize(for: window.frame.height)
+        }
+    }
+
     override func viewDidAppear() {
         super.viewDidAppear()
         view.window?.makeFirstResponder(collectionView)
         viewModel.handleViewDidAppear()
+        updateItemSize(for: Layout.viewHeight)
     }
 
     override func viewDidDisappear() {
@@ -141,6 +152,12 @@ extension PasteMainViewController {
         contentView.addSubview(emptyStateView)
         contentView.addSubview(searchBar)
         contentView.addSubview(settingButton)
+        contentView.addSubview(resizeHandle)
+
+        resizeHandle.snp.makeConstraints { make in
+            make.leading.trailing.top.equalToSuperview()
+            make.height.equalTo(Layout.resizeHandleHeight)
+        }
 
         scrollView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
@@ -164,6 +181,9 @@ extension PasteMainViewController {
             make.centerY.equalTo(searchBar)
             make.width.height.equalTo(Layout.settingButtonSize)
         }
+
+        setupResizeHandle()
+        updateItemSize(for: Layout.viewHeight)
     }
 
     private func bindViewModel() {
@@ -308,6 +328,62 @@ extension PasteMainViewController {
         AppContext.coordinator.showSettings()
     }
 
+    private func setupResizeHandle() {
+        resizeHandle.onResize = { [weak self] targetHeight in
+            guard let self, let window = self.view.window else { return }
+            var frame = window.frame
+
+            let newHeight: CGFloat
+            if targetHeight > Layout.maxViewHeight {
+                let overflow = (targetHeight - Layout.maxViewHeight) * 0.05
+                newHeight = Layout.maxViewHeight + overflow
+            } else if targetHeight < Layout.minViewHeight {
+                let overflow = (Layout.minViewHeight - targetHeight) * 0.05
+                newHeight = Layout.minViewHeight - overflow
+            } else {
+                newHeight = targetHeight
+            }
+
+            frame.size.height = newHeight
+            window.setFrame(frame, display: true)
+            self.updateItemSize(for: newHeight)
+            Log("Panel height: \(newHeight)")
+        }
+        resizeHandle.onResizeEnd = { [weak self] in
+            guard let self, let window = self.view.window else { return }
+            let currentHeight = window.frame.height
+            let clampedHeight = min(max(currentHeight, Layout.minViewHeight), Layout.maxViewHeight)
+            if currentHeight != clampedHeight {
+                self.isBouncingBack = true
+                var frame = window.frame
+                frame.size.height = clampedHeight
+                Task {
+                    await NSAnimationContext.runAnimationGroup { context in
+                        context.duration = 0.15
+                        context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+                        window.animator().setFrame(frame, display: true)
+                    }
+                    self.isBouncingBack = false
+                }
+            }
+            PasteUserDefaults.panelHeight = Double(clampedHeight)
+        }
+    }
+
+    private func updateItemSize(for height: CGFloat) {
+        guard let flowLayout = collectionView.collectionViewLayout as? NSCollectionViewFlowLayout else { return }
+        let newSize = Layout.dynamicItemSize(for: height)
+        flowLayout.itemSize = newSize
+        flowLayout.invalidateLayout()
+
+        let compact = newSize.height < Layout.compactItemHeight
+        for indexPath in collectionView.indexPathsForVisibleItems() {
+            if let item = collectionView.item(at: indexPath) as? PasteCollectionViewItem {
+                item.updateLayout(compact: compact, itemHeight: newSize.height)
+            }
+        }
+    }
+
     private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
         let old = viewModel.selectedIndexPath
         collectionView.item(at: old)?.isSelected = false
@@ -418,6 +494,10 @@ extension PasteMainViewController: NSCollectionViewDataSource {
         cItem.delegate = self
         if let model = viewModel.item(at: indexPath) {
             cItem.updateItem(model: model)
+        }
+        if let flowLayout = collectionView.collectionViewLayout as? NSCollectionViewFlowLayout {
+            let currentItemHeight = flowLayout.itemSize.height
+            cItem.updateLayout(compact: currentItemHeight < Layout.compactItemHeight, itemHeight: currentItemHeight)
         }
         if viewModel.selectedIndexPath == indexPath {
             cItem.isSelected = true

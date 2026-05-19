@@ -35,6 +35,9 @@ struct SettingCategory: Identifiable, Hashable {
                 .text("Storage size", storeKeyPath: \.storageSizeString),
                 .button("Clear all clipboard history"),
             ]),
+            SettingSection(title: "Panel", items: [
+                .button("Reset panel height", label: \.panelHeightString),
+            ]),
         ]
     )
 
@@ -88,7 +91,7 @@ enum SettingItem: Identifiable {
     case toggle(LocalizedStringKey, key: PrefKey)
     case text(LocalizedStringKey, storeKeyPath: KeyPath<SettingsStore, String>)
     case slider(LocalizedStringKey, key: PrefKey, range: ClosedRange<Double>, step: Double)
-    case button(LocalizedStringKey)
+    case button(LocalizedStringKey, label: KeyPath<SettingsStore, String>? = nil)
     case shortCut(LocalizedStringKey, key: KeyboardShortcuts.Name)
     var id: String {
         switch self {
@@ -98,7 +101,7 @@ enum SettingItem: Identifiable {
             return "text_\(title)"
         case .slider(let title, let key, _, _):
             return "slider_\(key)_\(title)"
-        case .button(let title):
+        case .button(let title, _):
             return "button_\(title)"
         case .shortCut(let title, let key):
             return "shortcut_\(key)_\(title)"
@@ -107,7 +110,7 @@ enum SettingItem: Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .toggle(let title, _), .text(let title, _), .slider(let title, _, _, _), .button(let title), .shortCut(let title, _):
+        case .toggle(let title, _), .text(let title, _), .slider(let title, _, _, _), .button(let title, _), .shortCut(let title, _):
             return title
         }
     }
