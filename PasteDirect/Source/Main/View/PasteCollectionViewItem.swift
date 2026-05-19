@@ -215,9 +215,9 @@ extension PasteCollectionViewItem {
         // normal 模式约束（两行，icon 贴底）
         normalConstraints = [
             typeLabel.leadingAnchor.constraint(equalTo: topView.leadingAnchor, constant: Layout.spacing),
-            typeLabel.bottomAnchor.constraint(equalTo: timeLabel.topAnchor, constant: -4),
+            typeLabel.bottomAnchor.constraint(equalTo: iconImageView.centerYAnchor),
             timeLabel.leadingAnchor.constraint(equalTo: typeLabel.leadingAnchor),
-            timeLabel.bottomAnchor.constraint(equalTo: topView.bottomAnchor, constant: -Layout.spacing),
+            timeLabel.topAnchor.constraint(equalTo: iconImageView.centerYAnchor, constant: 4),
         ]
 
         // compact 模式约束（单行，icon 小）
