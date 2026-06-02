@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.2.0-green" alt="Version 3.2.0">
+  <img src="https://img.shields.io/badge/version-3.3.0-green" alt="Version 3.3.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -24,6 +24,7 @@
 - 🔒 **纯本地运行** — 所有数据存储在本地 SQLite 数据库，零网络请求，隐私无忧
 - 📋 **多格式支持** — 文本、图片、HTML、RTF、富文本、代码片段，通通记录
 - 🎨 **颜色识别** — 自动检测剪贴板中的 Hex 颜色值并可视化展示
+- 🖼️ **图片文字识别（OCR）** — 本地识别复制图片中的文字（基于 Vision 框架，零网络请求），让图片可通过搜索图中文字找到；也可在图片右键菜单中直接复制或粘贴识别出的文字
 - ⌨️ **快捷键呼出** — 默认 `⌘⇧V`，支持自定义快捷键
 - 🔍 **快速搜索** — 直接键入关键词即时过滤历史记录，搜索框使用 pill 风格
 - 🏷️ **多维筛选** — 按类型（文本/图片/颜色）、来源应用、时间范围组合筛选，筛选条件以 tag 形式贴合展示
@@ -91,6 +92,7 @@ open /Applications/PasteDirect.app
 - **状态栏图标** — 显示 / 隐藏菜单栏图标
 - **直接粘贴** — 选中后自动粘贴到当前应用
 - **纯文本粘贴** — 去除格式，仅粘贴纯文本
+- **自动识别图片中的文字** — 对复制的图片做 OCR，使其可通过搜索图中文字找到；可关闭（关闭后仍可在图片右键菜单中手动取用文字）
 - **历史保留时长** — 1 天 / 1 周 / 1 月 / 永久
 - **忽略应用** — 配置不记录剪贴板的应用列表
 - **快捷键** — 自定义全局呼出快捷键
