@@ -32,6 +32,8 @@ enum PrefKey: String, CaseIterable {
     case ignoredUpdateVersion
     /// 面板高度
     case panelHeight
+    /// 自动识别图片中的文字
+    case autoOCRImages
 }
 
 enum HistoryTime: Int {

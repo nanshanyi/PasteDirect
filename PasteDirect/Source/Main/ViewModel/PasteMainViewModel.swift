@@ -161,6 +161,33 @@ final class PasteMainViewModel {
         AppContext.coordinator.activateFrontApp()
     }
 
+    // MARK: - OCR
+
+    /// 取得图片的 OCR 文字:已识别过直接返回,未识别则当场识别。
+    /// 图中确无文字时返回 nil。
+    private func resolveOCRText(for model: PasteboardModel) async -> String? {
+        if let text = model.ocrText, !text.isEmpty { return text }
+        return await PasteDataStore.main.extractOCRText(from: model)
+    }
+
+    /// 复制图片中的文字到剪贴板(并进入历史)
+    func copyOCRText(from model: PasteboardModel) {
+        Task {
+            guard let text = await resolveOCRText(for: model) else { return }
+            let textModel = PasteboardModel.makeText(text, from: model)
+            copyModel(textModel)
+        }
+    }
+
+    /// 把图片中的文字以纯文本粘贴到前台 App
+    func pasteOCRText(from model: PasteboardModel) {
+        Task {
+            guard let text = await resolveOCRText(for: model) else { return }
+            let textModel = PasteboardModel.makeText(text, from: model)
+            pasteModel(textModel, isOriginal: false)
+        }
+    }
+
     // MARK: - 生命周期
 
     func handleViewDidAppear() {

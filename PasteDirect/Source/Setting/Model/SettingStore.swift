@@ -31,6 +31,7 @@ final class SettingsStore: ObservableObject {
             .appAlreadyLaunched: PasteUserDefaults.appAlreadyLaunched,
             .lastClearDate: PasteUserDefaults.lastClearDate,
             .ignoreList: PasteUserDefaults.ignoreList,
+            .autoOCRImages: PasteUserDefaults.autoOCRImages,
         ]
     }
     
