@@ -23,6 +23,7 @@ actor PasteSQLManager {
     private let col_appName = Expression<String>("appName")
     private let col_dataString = Expression<String>("dataString")
     private let col_length = Expression<Int>("length")
+    private let col_ocrText = Expression<String?>("ocrText")
 
     // MARK: - DB
 
@@ -30,11 +31,18 @@ actor PasteSQLManager {
     private var db: Connection?
     private var table: Table
 
-    init() {
-        let docDir = NSSearchPathForDirectoriesInDomains(
-            .documentDirectory, .userDomainMask, true
-        ).first ?? NSTemporaryDirectory()
-        let path = docDir.appending("/paste/paste.sqlite3")
+    /// - Parameter dbPath: 数据库文件路径。默认 nil 走生产路径(Documents/paste/paste.sqlite3);
+    ///   测试可传入临时路径,避免污染用户的真实剪贴板历史库。
+    init(dbPath: String? = nil) {
+        let path: String
+        if let dbPath {
+            path = dbPath
+        } else {
+            let docDir = NSSearchPathForDirectoriesInDomains(
+                .documentDirectory, .userDomainMask, true
+            ).first ?? NSTemporaryDirectory()
+            path = docDir.appending("/paste/paste.sqlite3")
+        }
         let dirPath = (path as NSString).deletingLastPathComponent
         var isDir = ObjCBool(false)
         let filExist = FileManager.default.fileExists(atPath: dirPath, isDirectory: &isDir)
@@ -61,12 +69,14 @@ actor PasteSQLManager {
 
     private func createTable() {
         do {
-            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length] t in
+            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length, col_ocrText] t in
                 t.column(col_id, primaryKey: true)
                 t.column(col_hashKey); t.column(col_type); t.column(col_data)
                 t.column(col_showData); t.column(col_date); t.column(col_appPath)
                 t.column(col_appName); t.column(col_dataString); t.column(col_length)
+                t.column(col_ocrText)
             })
+            migrateAddOCRTextColumn()
             try db?.run(table.createIndex(col_date, ifNotExists: true))
             try db?.run(table.createIndex(col_appName, ifNotExists: true))
             try db?.run(table.createIndex(col_type, ifNotExists: true))
@@ -74,6 +84,16 @@ actor PasteSQLManager {
             Log("Create Table Success")
         } catch {
             Log("Create Table Error: \(error)")
+        }
+    }
+
+    /// 旧库可能没有 ocrText 列,显式 ALTER TABLE;已存在则忽略
+    private func migrateAddOCRTextColumn() {
+        do {
+            try db?.run(table.addColumn(col_ocrText))
+            Log("Migrated: added ocrText column")
+        } catch {
+            // 列已存在,符合预期
         }
     }
 }
@@ -116,7 +136,8 @@ extension PasteSQLManager {
             col_appPath <- item.appPath,
             col_appName <- item.appName,
             col_dataString <- item.dataString,
-            col_length <- item.length
+            col_length <- item.length,
+            col_ocrText <- item.ocrText
         )
         do {
             let rowId = try db?.run(insertQuery)
@@ -138,6 +159,17 @@ extension PasteSQLManager {
 
     func deleteByHash(_ hashValue: Int) {
         delete(filter: col_hashKey == hashValue)
+    }
+
+    /// 按 hash 回写图片的 OCR 文本(识别异步完成后调用)
+    func updateOCRText(_ text: String, forHash hashValue: Int) {
+        let query = table.filter(col_hashKey == hashValue)
+        do {
+            let count = try db?.run(query.update(col_ocrText <- text))
+            Log("更新 OCR 文本的条数为：\(String(describing: count))")
+        } catch {
+            Log("更新 OCR 文本失败：\(error)")
+        }
     }
 
     func deleteBeforeDate(_ deadline: Date) {
@@ -186,7 +218,7 @@ extension PasteSQLManager {
             return []
         }
         var query = table
-            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length)
+            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length, col_ocrText)
             .order(col_date.desc)
         if let f = filter {
             query = query.filter(f)
@@ -215,7 +247,8 @@ extension PasteSQLManager {
                     appPath: (try? row.get(col_appPath)) ?? "",
                     appName: (try? row.get(col_appName)) ?? "",
                     dataString: (try? row.get(col_dataString)) ?? "",
-                    length: (try? row.get(col_length)) ?? 0
+                    length: (try? row.get(col_length)) ?? 0,
+                    ocrText: (try? row.get(col_ocrText)) ?? nil
                 )
             }
         } catch {
@@ -227,7 +260,10 @@ extension PasteSQLManager {
     // MARK: - Private Filter Builders
 
     private func makeSearchFilter(keyword: String) -> Expression<Bool> {
-        col_appName.like("%\(keyword)%") || col_dataString.like("%\(keyword)%")
+        // 关键字匹配 应用名 / 文本内容 / 图片 OCR 文本(让图里的字也能被搜到)
+        col_appName.like("%\(keyword)%")
+            || col_dataString.like("%\(keyword)%")
+            || (col_ocrText ?? "").like("%\(keyword)%")
     }
 
     private func makeAppFilter(_ app: String) -> Expression<Bool> {

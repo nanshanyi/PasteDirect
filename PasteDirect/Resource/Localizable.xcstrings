@@ -107,6 +107,26 @@
         }
       }
     },
+    "Auto-extract text from images" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动识别图片中的文字"
+          }
+        }
+      }
+    },
+    "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后,复制的图片可通过搜索图中文字找到。关闭后不可搜索,但仍可在图片右键菜单中手动取用文字。"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -270,6 +290,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在状态栏显示"
+          }
+        }
+      }
+    },
+    "Copy Text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制文字"
           }
         }
       }
@@ -502,6 +532,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "粘贴设置"
+          }
+        }
+      }
+    },
+    "Paste Text to %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴文字到%@"
           }
         }
       }

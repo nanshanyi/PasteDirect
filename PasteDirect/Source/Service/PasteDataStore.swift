@@ -28,6 +28,7 @@ final class PasteDataStore {
     private var searchTask: Task<Void, Error>?
     private var loadTask: Task<Void, Error>?
     private var colorCache = ColorCache()
+    private var ocrCache = OCRCache()
 
     /// 当前生效的筛选参数（Sendable，用于分页加载时复用）
     private var currentKeyword: String = ""
@@ -160,6 +161,12 @@ extension PasteDataStore {
         Task {
             await extractColor(from: model)
         }
+        // 仅图片触发 OCR,且受设置开关控制
+        if PasteUserDefaults.autoOCRImages, model.type == .image {
+            Task {
+                await extractOCRText(from: model)
+            }
+        }
     }
 
     /// 插入数据
@@ -187,7 +194,18 @@ extension PasteDataStore {
                 await sqlManager.deleteByHash(item.hashValue)
             }
             await updateTotalCount()
+            // 删除后列表可能不足一屏,导致横向列表无法滚动、再也触发不了分页加载;
+            // 这里主动补加载,把可见列表补回至少一页(DB 仍有数据时)。
+            refillIfNeeded()
         }
+    }
+
+    /// 当前展示条数不足一页且仍可加载时,主动加载下一页补满。
+    /// loadNextPage 内部会在 DB 耗尽时置 .noMore,故无需在此预判总数。
+    private func refillIfNeeded() {
+        guard loadState == .idle else { return }
+        guard dataList.value.count < pageSize else { return }
+        loadNextPage()
     }
 
     /// 删除过期数据
@@ -258,5 +276,32 @@ extension PasteDataStore {
     func extractColor(from model: PasteboardModel) async -> NSColor? {
         let icon = NSWorkspace.shared.icon(forFile: model.appPath)
         return await colorCache.getOrExtract(for: model, icon: icon)
+    }
+}
+
+// MARK: - OCR 处理
+
+extension PasteDataStore {
+    /// 对图片做 OCR,识别成功后把文本写回该图片 model 的 ocrText 字段(内存 + DB),
+    /// 让图片内容可被搜索;不产生新的列表条目。
+    @discardableResult
+    func extractOCRText(from model: PasteboardModel) async -> String? {
+        // 已识别过则跳过(手动入口重复触发时省去一次 Vision 调用)
+        guard model.ocrText == nil else { return model.ocrText }
+
+        let text = await ocrCache.getOrExtract(for: model)
+        guard let text else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        // 回写内存列表中对应的图片项(若仍在当前列表中)
+        var list = dataList.value
+        if let idx = list.firstIndex(where: { $0.hashValue == model.hashValue }) {
+            list[idx] = list[idx].withOCRText(trimmed)
+            dataList.send(list)
+        }
+        // 回写数据库
+        await sqlManager.updateOCRText(trimmed, forHash: model.hashValue)
+        return trimmed
     }
 }

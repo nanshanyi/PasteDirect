@@ -17,6 +17,8 @@ protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func previewItem(_ item: PasteboardModel, relativeTo view: NSView)
     func pasteItem(_ item: PasteboardModel, isOriginal: Bool)
     func copyItem(_ item: PasteboardModel)
+    func copyOCRText(_ item: PasteboardModel)
+    func pasteOCRText(_ item: PasteboardModel)
 }
 
 let maxLength = 300
@@ -371,11 +373,22 @@ extension PasteCollectionViewItem {
             let item1 = NSMenuItem(title: String(localized: "Paste as Plain Text"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
-        
+
         if pModel?.type == .color {
             let itemColor = NSMenuItem(title: String(localized: "Paste as #RRGGBB"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(itemColor)
         }
+
+        // 图片:直接取用 OCR 文字(未识别则点击时当场识别)
+        if pModel?.type == .image {
+            if let name = AppContext.coordinator.frontAppName {
+                let pasteTextItem = NSMenuItem(title: String(localized: "Paste Text to \(name)"), action: #selector(pasteOCRTextClick), keyEquivalent: "")
+                menu.addItem(pasteTextItem)
+            }
+            let copyTextItem = NSMenuItem(title: String(localized: "Copy Text"), action: #selector(copyOCRTextClick), keyEquivalent: "")
+            menu.addItem(copyTextItem)
+        }
+
         let previewItem = NSMenuItem(title: String(localized: "Preview"), action: #selector(previewItemAction), keyEquivalent: " ")
         previewItem.keyEquivalentModifierMask = .init(rawValue: 0)
         menu.addItem(previewItem)
@@ -421,6 +434,18 @@ extension PasteCollectionViewItem {
     private func copyItemData() {
         guard let pModel else { return }
         delegate?.copyItem(pModel)
+    }
+
+    @objc
+    private func copyOCRTextClick() {
+        guard let pModel else { return }
+        delegate?.copyOCRText(pModel)
+    }
+
+    @objc
+    private func pasteOCRTextClick() {
+        guard let pModel else { return }
+        delegate?.pasteOCRText(pModel)
     }
 
     @objc

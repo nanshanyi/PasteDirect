@@ -35,6 +35,10 @@ struct SettingCategory: Identifiable, Hashable {
                 .text("Storage size", storeKeyPath: \.storageSizeString),
                 .button("Clear all clipboard history"),
             ]),
+            SettingSection(title: "Image", items: [
+                .toggle("Auto-extract text from images", key: .autoOCRImages,
+                        subtitle: "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu."),
+            ]),
             SettingSection(title: "Panel", items: [
                 .button("Reset panel height", label: \.panelHeightString),
             ]),
@@ -88,14 +92,14 @@ struct SettingSection: Identifiable {
 }
 
 enum SettingItem: Identifiable {
-    case toggle(LocalizedStringKey, key: PrefKey)
+    case toggle(LocalizedStringKey, key: PrefKey, subtitle: LocalizedStringKey? = nil)
     case text(LocalizedStringKey, storeKeyPath: KeyPath<SettingsStore, String>)
     case slider(LocalizedStringKey, key: PrefKey, range: ClosedRange<Double>, step: Double)
     case button(LocalizedStringKey, label: KeyPath<SettingsStore, String>? = nil)
     case shortCut(LocalizedStringKey, key: KeyboardShortcuts.Name)
     var id: String {
         switch self {
-        case .toggle(let title, let key):
+        case .toggle(let title, let key, _):
             return "toggle_\(key)_\(title)"
         case .text(let title, _):
             return "text_\(title)"
@@ -110,7 +114,9 @@ enum SettingItem: Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .toggle(let title, _), .text(let title, _), .slider(let title, _, _, _), .button(let title, _), .shortCut(let title, _):
+        case .toggle(let title, _, _):
+            return title
+        case .text(let title, _), .slider(let title, _, _, _), .button(let title, _), .shortCut(let title, _):
             return title
         }
     }

@@ -136,19 +136,16 @@ final class PasteDirectTests: XCTestCase {
     // MARK: - PasteSQLManager (actor)
 
     func testSQLManagerInsertAndSearch() async {
-        let manager = PasteSQLManager()
+        let manager = await makeTempManager()
         let model = makeTextModel(string: "unit test item \(UUID().uuidString)")
 
         await manager.insert(item: model)
         let results = await manager.search(limit: 1, offset: 0)
         XCTAssertFalse(results.isEmpty, "插入后应能搜索到数据")
-
-        // 清理
-        await manager.deleteByHash(model.hashValue)
     }
 
     func testSQLManagerDeleteByHash() async {
-        let manager = PasteSQLManager()
+        let manager = await makeTempManager()
         let model = makeTextModel(string: "to delete \(UUID().uuidString)")
 
         await manager.insert(item: model)
@@ -162,7 +159,7 @@ final class PasteDirectTests: XCTestCase {
     }
 
     func testSQLManagerSearchWithParams() async {
-        let manager = PasteSQLManager()
+        let manager = await makeTempManager()
         let unique = UUID().uuidString
         let model = makeTextModel(string: unique, appName: "TestApp")
 
@@ -181,13 +178,10 @@ final class PasteDirectTests: XCTestCase {
             keyword: "", state: state, limit: 10, offset: 0
         )
         XCTAssertTrue(byApp.contains(where: { $0.dataString == unique }))
-
-        // 清理
-        await manager.deleteByHash(model.hashValue)
     }
 
     func testSQLManagerDatabaseSize() async {
-        let manager = PasteSQLManager()
+        let manager = await makeTempManager()
         let size = await manager.databaseSize
         XCTAssertGreaterThan(size, 0)
     }
@@ -205,6 +199,16 @@ final class PasteDirectTests: XCTestCase {
 
     // MARK: - Helpers
 
+    /// 创建一个挂在独立临时路径上的 PasteSQLManager 并建表,
+    /// 避免测试读写用户真实的剪贴板历史库。临时文件随测试进程丢弃。
+    private func makeTempManager() async -> PasteSQLManager {
+        let path = NSTemporaryDirectory()
+            .appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+        return manager
+    }
+
     private func makeTextModel(string: String, appName: String = "Test") -> PasteboardModel {
         let data = string.data(using: .utf8)!
         return PasteboardModel(
@@ -213,5 +217,104 @@ final class PasteDirectTests: XCTestCase {
             appPath: "/Applications/Test.app", appName: appName,
             dataString: string, length: string.count
         )
+    }
+
+    // MARK: - OCR (图片文字识别,附属字段方案)
+
+    func testPasteboardModelOCRTextField() {
+        // 普通文本项不带 ocrText
+        let plain = makeTextModel(string: "纯文本")
+        XCTAssertNil(plain.ocrText)
+        XCTAssertEqual(plain.type, .string)
+
+        // 图片项识别前 ocrText 为 nil,识别后通过 withOCRText 写入
+        let imgData = Data([0x89, 0x50, 0x4E, 0x47])
+        let image = PasteboardModel(
+            pasteboardType: .png, data: imgData, showData: nil,
+            hashValue: imgData.hashValue, date: Date(),
+            appPath: "/Applications/Safari.app", appName: "Safari",
+            dataString: "", length: 0
+        )
+        XCTAssertNil(image.ocrText)
+        XCTAssertEqual(image.type, .image)
+
+        let recognized = image.withOCRText("图片里的文字")
+        // 识别后类型仍是图片(附属字段不改变展示类型)
+        XCTAssertEqual(recognized.type, .image)
+        XCTAssertEqual(recognized.ocrText, "图片里的文字")
+        // 关键字段不变,仍与源图相等(hashValue 一致)
+        XCTAssertEqual(recognized.hashValue, image.hashValue)
+        XCTAssertEqual(recognized, image)
+    }
+
+    @MainActor
+    func testMakeTextStableHash() {
+        let img = PasteboardModel(
+            pasteboardType: .png, data: Data([0x89]), showData: nil,
+            hashValue: 1, date: Date(),
+            appPath: "/A.app", appName: "A", dataString: "", length: 0
+        )
+
+        // makeText 由文本构造 .string 项,继承来源图片的 app 信息
+        let a = PasteboardModel.makeText("识别出的同一段文字", from: img)
+        XCTAssertEqual(a.type, .string)
+        XCTAssertEqual(a.dataString, "识别出的同一段文字")
+        XCTAssertEqual(a.appName, "A")
+        XCTAssertNil(a.ocrText)
+    }
+
+    func testSQLManagerOCRTextColumnRoundTrip() async {
+        let manager = await makeTempManager()
+        let unique = "ocr-col-\(UUID().uuidString)"
+        let model = PasteboardModel(
+            pasteboardType: .png, data: unique.data(using: .utf8)!, showData: nil,
+            hashValue: unique.hashValue, date: Date(),
+            appPath: "", appName: "", dataString: "", length: 0,
+            ocrText: unique
+        )
+        await manager.insert(item: model)
+
+        // 能把 ocrText 原样读回
+        let results = await manager.search(limit: 200, offset: 0)
+        let fetched = results.first(where: { $0.hashValue == unique.hashValue })
+        XCTAssertEqual(fetched?.ocrText, unique, "ocrText 应能持久化并读回")
+    }
+
+    func testSQLManagerUpdateOCRTextAndSearch() async {
+        let manager = await makeTempManager()
+        let hash = Int.random(in: 1_000_000...9_000_000)
+        let keyword = "ocrkw\(UUID().uuidString.prefix(8))"
+
+        // 先插入一张没有 OCR 文本的图片
+        let image = PasteboardModel(
+            pasteboardType: .png, data: Data([0x89, 0x50]), showData: nil,
+            hashValue: hash, date: Date(),
+            appPath: "", appName: "", dataString: "", length: 0
+        )
+        await manager.insert(item: image)
+
+        // 关键字此时搜不到(图片本身无文本)
+        var state = FilterState.empty
+        let before = await manager.searchWithParams(
+            keyword: String(keyword), state: state, limit: 100, offset: 0
+        )
+        XCTAssertFalse(before.contains(where: { $0.hashValue == hash }),
+                       "识别前不应被关键字命中")
+
+        // 回写 OCR 文本后,关键字应能命中这张图片
+        await manager.updateOCRText("含有关键字 \(keyword) 的内容", forHash: hash)
+        let after = await manager.searchWithParams(
+            keyword: String(keyword), state: state, limit: 100, offset: 0
+        )
+        let hit = after.first(where: { $0.hashValue == hash })
+        XCTAssertNotNil(hit, "识别后应能按 OCR 文本搜到图片")
+        XCTAssertEqual(hit?.type, .image, "命中项仍是图片类型")
+
+        // 图片筛选仍应包含它
+        state.selectedType = .image
+        let byImage = await manager.searchWithParams(
+            keyword: "", state: state, limit: 200, offset: 0
+        )
+        XCTAssertTrue(byImage.contains(where: { $0.hashValue == hash }))
     }
 }

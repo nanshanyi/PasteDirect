@@ -118,8 +118,8 @@ struct SettingItemView: View {
     @ViewBuilder
     private var itemContent: some View {
         switch item {
-        case let .toggle(title, key):
-            toggleItem(title: title, key: key)
+        case let .toggle(title, key, subtitle):
+            toggleItem(title: title, key: key, subtitle: subtitle)
         case let .text(title, keyPath):
             textItem(title: title, keyPath: keyPath)
         case let .slider(_, key, range, step):
@@ -133,9 +133,19 @@ struct SettingItemView: View {
 
     // MARK: - Item Components
 
-    private func toggleItem(title: LocalizedStringKey, key: PrefKey) -> some View {
+    private func toggleItem(title: LocalizedStringKey, key: PrefKey, subtitle: LocalizedStringKey? = nil) -> some View {
         Group {
-            textLabel(title)
+            if let subtitle {
+                VStack(alignment: .leading, spacing: 3) {
+                    textLabel(title)
+                    Text(subtitle)
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
+                textLabel(title)
+            }
             Spacer()
             Toggle("", isOn: Binding(
                 get: { settingsStore.getBool(key) },

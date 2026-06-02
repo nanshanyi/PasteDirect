@@ -539,6 +539,14 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
     func copyItem(_ item: PasteboardModel) {
         viewModel.copyModel(item)
     }
+
+    func copyOCRText(_ item: PasteboardModel) {
+        viewModel.copyOCRText(from: item)
+    }
+
+    func pasteOCRText(_ item: PasteboardModel) {
+        viewModel.pasteOCRText(from: item)
+    }
 }
 
 // MARK: - NSSearchFieldDelegate
