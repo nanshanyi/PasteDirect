@@ -48,6 +48,9 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
     let hexColorString: String?
     /// 图片经 OCR 识别出的文本;仅图片类型可能非 nil,用于让图片内容可被搜索。非图片项为 nil
     let ocrText: String?
+    /// 图片原图的像素尺寸。图片外置到文件后，不加载原图也能算预览尺寸和显示尺寸文案;非图片项为 nil
+    let imageWidth: Int?
+    let imageHeight: Int?
 
     var type: PasteModelType {
         if hexColorString != nil {
@@ -76,7 +79,9 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
          appName: String,
          dataString: String,
          length: Int,
-         ocrText: String? = nil)
+         ocrText: String? = nil,
+         imageWidth: Int? = nil,
+         imageHeight: Int? = nil)
     {
         self.pasteboardType = pasteboardType
         self.data = data
@@ -88,6 +93,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         self.dataString = dataString
         self.length = length
         self.ocrText = ocrText
+        self.imageWidth = imageWidth
+        self.imageHeight = imageHeight
 
         if pasteboardType.isText() {
             let trimmed = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -109,7 +116,9 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
             appName: appName,
             dataString: dataString,
             length: length,
-            ocrText: ocrText
+            ocrText: ocrText,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
         )
     }
 
@@ -125,7 +134,9 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
             appName: appName,
             dataString: dataString,
             length: length,
-            ocrText: text
+            ocrText: text,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
         )
     }
 
@@ -158,6 +169,10 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         case .none:
             return ""
         case .image:
+            // 优先用记录的原图像素尺寸(列表展示的是缩略图，其 size 不再代表原图)
+            if let w = imageWidth, let h = imageHeight, w > 0, h > 0 {
+                return "\(w) × \(h) \(String(localized: "pixels"))"
+            }
             guard let image else { return "" }
             return "\(Int(image.size.width)) × \(Int(image.size.height)) \(String(localized: "pixels"))"
         case .string:
@@ -186,12 +201,19 @@ extension PasteboardModel {
         guard let data = item.data(forType: type) else { return nil }
         var showData: Data?
         var att = NSAttributedString()
+        var imgW: Int?
+        var imgH: Int?
 
         if type.isText() {
             att = NSAttributedString(with: data, type: type) ?? NSAttributedString()
             guard !att.string.allSatisfy({ $0.isWhitespace }) else { return nil }
             let showAtt = att.length > maxLength ? att.attributedSubstring(from: NSMakeRange(0, maxLength)) : att
             showData = showAtt.toData(with: type)
+        } else if let size = ImageThumbnail.pixelSize(of: data) {
+            // 图片：记录原图像素尺寸。此处 data 仍是原图(用于算 hash、并稍后由 DataStore 外置)，
+            // 缩略图替换在 DataStore.addNewItem 中完成。
+            imgW = Int(size.width)
+            imgH = Int(size.height)
         }
         self.init(pasteboardType: type,
                   data: data,
@@ -201,6 +223,28 @@ extension PasteboardModel {
                   appPath: app.path,
                   appName: app.name,
                   dataString: att.string,
-                  length: att.length)
+                  length: att.length,
+                  imageWidth: imgW,
+                  imageHeight: imgH)
+    }
+
+    /// 替换 data 字段(其余不变)的新实例。
+    /// 入库时用来把原图换成缩略图;OCR 时用来临时换回原图。
+    /// `hashValue` 不变(仍是原图内容哈希)，故去重/主键/OCR cache key 不受影响。
+    func replacingData(_ newData: Data) -> PasteboardModel {
+        PasteboardModel(
+            pasteboardType: pasteboardType,
+            data: newData,
+            showData: showData,
+            hashValue: hashValue,
+            date: date,
+            appPath: appPath,
+            appName: appName,
+            dataString: dataString,
+            length: length,
+            ocrText: ocrText,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight
+        )
     }
 }
