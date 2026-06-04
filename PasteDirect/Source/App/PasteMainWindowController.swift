@@ -42,7 +42,6 @@ final class PasteMainWindowController: NSWindowController {
         startFrame.origin.y -= height
         window.setFrame(startFrame, display: true)
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
 
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
