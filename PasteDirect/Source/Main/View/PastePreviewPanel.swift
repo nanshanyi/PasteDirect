@@ -43,12 +43,18 @@ final class PastePreviewPopover: NSPopover {
     private static func fitSize(for model: PasteboardModel) -> NSSize {
         switch model.type {
         case .image:
-            guard let image = NSImage(data: model.data) else {
+            // 优先用记录的原图像素尺寸算比例，避免解码(原图已外置，列表持有的是缩略图)
+            let pixelSize: CGSize
+            if let w = model.imageWidth, let h = model.imageHeight, w > 0, h > 0 {
+                pixelSize = CGSize(width: w, height: h)
+            } else if let image = NSImage(data: model.data) {
+                pixelSize = image.size
+            } else {
                 return NSSize(width: maxWidth, height: maxHeight)
             }
             let screenScale = NSScreen.main?.backingScaleFactor ?? 2.0
-            let w = image.size.width / screenScale
-            let h = image.size.height / screenScale
+            let w = pixelSize.width / screenScale
+            let h = pixelSize.height / screenScale
             return NSSize(width: min(w, Layout.previewMaxSize), height: min(h, Layout.previewMaxSize))
         case .string:
             return textFitSize(for: model)
@@ -264,8 +270,6 @@ final class PastePreviewViewController: NSViewController {
 
     private func showImage(_ model: PasteboardModel, size: NSSize) {
         imageView.isHidden = false
-        guard let image = NSImage(data: model.data) else { return }
-        imageView.image = image
 
         let imgW = size.width
         let imgH = size.height
@@ -274,9 +278,23 @@ final class PastePreviewViewController: NSViewController {
             make.height.equalTo(imgH)
         }
 
+        // 先用列表已持有的缩略图即时显示，再异步加载原图替换为清晰大图
+        if let thumb = NSImage(data: model.data) {
+            imageView.image = thumb
+        }
+        Task { [weak self] in
+            let originalData = await PasteDataStore.main.loadOriginalImageData(for: model)
+            guard let self, let image = NSImage(data: originalData) else { return }
+            self.imageView.image = image
+        }
+
         var infoParts: [String] = []
         if !model.appName.isEmpty { infoParts.append(model.appName) }
-        infoParts.append("\(Int(image.size.width)) × \(Int(image.size.height))")
+        if let w = model.imageWidth, let h = model.imageHeight, w > 0, h > 0 {
+            infoParts.append("\(w) × \(h)")
+        } else if let thumb = imageView.image {
+            infoParts.append("\(Int(thumb.size.width)) × \(Int(thumb.size.height))")
+        }
         infoLabel.stringValue = infoParts.joined(separator: "  ·  ")
     }
 

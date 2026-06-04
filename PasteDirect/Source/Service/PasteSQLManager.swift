@@ -24,6 +24,8 @@ actor PasteSQLManager {
     private let col_dataString = Expression<String>("dataString")
     private let col_length = Expression<Int>("length")
     private let col_ocrText = Expression<String?>("ocrText")
+    private let col_imgW = Expression<Int?>("imgW")
+    private let col_imgH = Expression<Int?>("imgH")
 
     // MARK: - DB
 
@@ -69,14 +71,15 @@ actor PasteSQLManager {
 
     private func createTable() {
         do {
-            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length, col_ocrText] t in
+            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length, col_ocrText, col_imgW, col_imgH] t in
                 t.column(col_id, primaryKey: true)
                 t.column(col_hashKey); t.column(col_type); t.column(col_data)
                 t.column(col_showData); t.column(col_date); t.column(col_appPath)
                 t.column(col_appName); t.column(col_dataString); t.column(col_length)
-                t.column(col_ocrText)
+                t.column(col_ocrText); t.column(col_imgW); t.column(col_imgH)
             })
             migrateAddOCRTextColumn()
+            migrateAddImageSizeColumns()
             try db?.run(table.createIndex(col_date, ifNotExists: true))
             try db?.run(table.createIndex(col_appName, ifNotExists: true))
             try db?.run(table.createIndex(col_type, ifNotExists: true))
@@ -92,6 +95,17 @@ actor PasteSQLManager {
         do {
             try db?.run(table.addColumn(col_ocrText))
             Log("Migrated: added ocrText column")
+        } catch {
+            // 列已存在,符合预期
+        }
+    }
+
+    /// 旧库可能没有 imgW/imgH 列(图片外置特性引入),显式 ALTER TABLE;已存在则忽略
+    private func migrateAddImageSizeColumns() {
+        do {
+            try db?.run(table.addColumn(col_imgW))
+            try db?.run(table.addColumn(col_imgH))
+            Log("Migrated: added imgW/imgH columns")
         } catch {
             // 列已存在,符合预期
         }
@@ -137,7 +151,9 @@ extension PasteSQLManager {
             col_appName <- item.appName,
             col_dataString <- item.dataString,
             col_length <- item.length,
-            col_ocrText <- item.ocrText
+            col_ocrText <- item.ocrText,
+            col_imgW <- item.imageWidth,
+            col_imgH <- item.imageHeight
         )
         do {
             let rowId = try db?.run(insertQuery)
@@ -172,8 +188,24 @@ extension PasteSQLManager {
         }
     }
 
+    // MARK: - 图片外置文件清理支持
+
     func deleteBeforeDate(_ deadline: Date) {
         delete(filter: col_date < deadline)
+    }
+
+    /// 查询某日期之前的图片行 hash(用于删除前先取得待清理的外置文件名)。
+    func imageHashesBeforeDate(_ deadline: Date) -> [Int] {
+        let imageTypes = [PasteboardType.png.rawValue, PasteboardType.tiff.rawValue]
+        let typeFilter = imageTypes.dropFirst().reduce(col_type == imageTypes[0]) { $0 || col_type == $1 }
+        let query = table.select(col_hashKey).filter(col_date < deadline && typeFilter)
+        do {
+            guard let rows = try db?.prepare(query) else { return [] }
+            return rows.compactMap { try? $0.get(col_hashKey) }
+        } catch {
+            Log("查询待清理图片 hash 失败：\(error)")
+            return []
+        }
     }
 
     func clearAllData() {
@@ -184,6 +216,18 @@ extension PasteSQLManager {
             Log("删除所有数据")
         } catch {
             Log("删除失败：\(error)")
+        }
+    }
+
+    /// 整理数据库文件，把删除留下的空闲页真正还给磁盘。
+    /// SQLite 删除只把页标记为空闲(freelist)、不缩小文件；VACUUM 重写整个文件挤掉空洞。
+    /// 开销较大(全程持写锁、重写文件)，只在低频时机调用(如每日过期清理后)。
+    func vacuum() {
+        do {
+            try db?.execute("VACUUM")
+            Log("VACUUM 完成")
+        } catch {
+            Log("VACUUM 失败：\(error)")
         }
     }
 
@@ -218,7 +262,7 @@ extension PasteSQLManager {
             return []
         }
         var query = table
-            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length, col_ocrText)
+            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length, col_ocrText, col_imgW, col_imgH)
             .order(col_date.desc)
         if let f = filter {
             query = query.filter(f)
@@ -248,7 +292,9 @@ extension PasteSQLManager {
                     appName: (try? row.get(col_appName)) ?? "",
                     dataString: (try? row.get(col_dataString)) ?? "",
                     length: (try? row.get(col_length)) ?? 0,
-                    ocrText: (try? row.get(col_ocrText)) ?? nil
+                    ocrText: (try? row.get(col_ocrText)) ?? nil,
+                    imageWidth: (try? row.get(col_imgW)) ?? nil,
+                    imageHeight: (try? row.get(col_imgH)) ?? nil
                 )
             }
         } catch {

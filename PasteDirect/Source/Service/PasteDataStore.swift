@@ -157,14 +157,34 @@ extension PasteDataStore {
     /// 增加新数据
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
-        insertModel(model)
-        Task {
-            await extractColor(from: model)
-        }
-        // 仅图片触发 OCR,且受设置开关控制
-        if PasteUserDefaults.autoOCRImages, model.type == .image {
+        if model.type == .image {
+            // 图片走外置流程：原图存文件、列表与 DB 只保留缩略图
+            addNewImageItem(model)
+        } else {
+            insertModel(model)
             Task {
-                await extractOCRText(from: model)
+                await extractColor(from: model)
+            }
+        }
+    }
+
+    /// 图片入库：把原图存到文件，生成缩略图后再以缩略图版本插入列表与 DB。
+    /// OCR 仍用原图识别(此时列表项已就位，结果能正确回写)。
+    private func addNewImageItem(_ original: PasteboardModel) {
+        Task {
+            let hash = original.hashValue
+            let originalData = original.data
+            await ImageBlobStore.shared.save(originalData, for: hash)
+            // 缩略图生成是 CPU 操作，放后台线程
+            let thumb = await Task.detached(priority: .userInitiated) {
+                ImageThumbnail.make(from: originalData)
+            }.value
+            // 缩略图生成失败则降级保留原图 data（仍可显示，只是 DB 略大）
+            let model = thumb.map { original.replacingData($0.thumbnail) } ?? original
+            insertModel(model)
+            await extractColor(from: model)
+            if PasteUserDefaults.autoOCRImages {
+                await extractOCRText(from: original)
             }
         }
     }
@@ -192,6 +212,10 @@ extension PasteDataStore {
         Task {
             for item in items {
                 await sqlManager.deleteByHash(item.hashValue)
+                // 图片连带删除外置的原图文件
+                if item.type == .image {
+                    await ImageBlobStore.shared.delete(for: item.hashValue)
+                }
             }
             await updateTotalCount()
             // 删除后列表可能不足一屏,导致横向列表无法滚动、再也触发不了分页加载;
@@ -242,8 +266,19 @@ extension PasteDataStore {
                 needRefresh = true
             }
             Task {
+                // 先取得将被删除的图片 hash，删 DB 后再清理对应的外置原图文件
+                let imageHashes = await sqlManager.imageHashesBeforeDate(deadDate)
                 await sqlManager.deleteBeforeDate(deadDate)
+                for hash in imageHashes {
+                    await ImageBlobStore.shared.delete(for: hash)
+                }
+                // 过期清理是低频时机(每天最多一次)，且常删掉大量数据，
+                // 顺手 VACUUM 把空闲页还给磁盘，避免库文件只增不减。
+                if hasExpired || !imageHashes.isEmpty {
+                    await sqlManager.vacuum()
+                }
                 await updateTotalCount()
+                await updateStorageSize()
             }
         }
     }
@@ -252,6 +287,7 @@ extension PasteDataStore {
     func clearAllData() {
         Task {
             await sqlManager.clearAllData()
+            await ImageBlobStore.shared.deleteAll()
             await updateTotalCount()
             await updateStorageSize()
             resetDefaultList()
@@ -279,6 +315,21 @@ extension PasteDataStore {
     }
 }
 
+// MARK: - 图片原图按需加载
+
+extension PasteDataStore {
+    /// 加载图片原图数据。原图已外置到文件，列表中 model 持有的是缩略图。
+    /// 文件缺失(迁移中/异常)时降级返回 model.data(可能是缩略图或旧的原图 BLOB)。
+    /// 非图片项直接返回 model.data。
+    func loadOriginalImageData(for model: PasteboardModel) async -> Data {
+        guard model.type == .image else { return model.data }
+        if let data = await ImageBlobStore.shared.load(for: model.hashValue) {
+            return data
+        }
+        return model.data
+    }
+}
+
 // MARK: - OCR 处理
 
 extension PasteDataStore {
@@ -289,7 +340,17 @@ extension PasteDataStore {
         // 已识别过则跳过(手动入口重复触发时省去一次 Vision 调用)
         guard model.ocrText == nil else { return model.ocrText }
 
-        let text = await ocrCache.getOrExtract(for: model)
+        // 列表中的 model 持有缩略图(512px),OCR 必须用原图否则会丢字;
+        // 按需加载原图,构造一个临时的原图版本交给 OCRCache(cache key 用 hashValue 不受影响)。
+        let modelForOCR: PasteboardModel
+        if model.type == .image {
+            let originalData = await loadOriginalImageData(for: model)
+            modelForOCR = originalData == model.data ? model : model.replacingData(originalData)
+        } else {
+            modelForOCR = model
+        }
+
+        let text = await ocrCache.getOrExtract(for: modelForOCR)
         guard let text else { return nil }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
