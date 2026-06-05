@@ -10,14 +10,26 @@ import Foundation
 /// OCR 识别结果缓存(actor),镜像 ColorCache 的合并并发模式
 /// key 用 PasteboardModel.hashValue(图片数据 hash),同一张图多次复制只识别一次
 actor OCRCache {
-    private var cache = [Int: String?]()
+    private enum CacheEntry {
+        case none
+        case text(String)
+    }
+
+    private var cache = [Int: CacheEntry]()
     private var ongoingTasks = [Int: Task<String?, Never>]()
 
     @discardableResult
     func getOrExtract(for model: PasteboardModel) async -> String? {
         let key = model.hashValue
 
-        if let cached = cache[key] { return cached }
+        if let cached = cache[key] {
+            switch cached {
+            case .none:
+                return nil
+            case .text(let text):
+                return text
+            }
+        }
 
         if let existing = ongoingTasks[key] {
             return await existing.value
@@ -33,7 +45,8 @@ actor OCRCache {
         ongoingTasks[key] = task
         let result = await task.value
         ongoingTasks.removeValue(forKey: key)
-        cache[key] = result
+        cache[key] = result.map(CacheEntry.text) ?? .none
         return result
+    }
     }
 }
