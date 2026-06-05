@@ -5,7 +5,7 @@
 //  Created by 南山忆 on 2026/05/30.
 //
 
-import AppKit
+import Foundation
 
 /// OCR 识别结果缓存(actor),镜像 ColorCache 的合并并发模式
 /// key 用 PasteboardModel.hashValue(图片数据 hash),同一张图多次复制只识别一次
