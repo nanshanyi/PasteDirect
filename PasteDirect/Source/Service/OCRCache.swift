@@ -45,8 +45,7 @@ actor OCRCache {
         ongoingTasks[key] = task
         let result = await task.value
         ongoingTasks.removeValue(forKey: key)
-        cache[key] = result.map(CacheEntry.text) ?? .none
+        cache[key] = result.map(CacheEntry.text) ?? CacheEntry.none
         return result
-    }
     }
 }
