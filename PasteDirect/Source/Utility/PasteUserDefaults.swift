@@ -31,6 +31,8 @@ enum PasteUserDefaults {
     static var ignoredUpdateVersion
     @UserDefaultsWrapper(.panelHeight, defaultValue: Double(0))
     static var panelHeight: Double
+    @UserDefaultsWrapper(.autoOCRImages, defaultValue: true)
+    static var autoOCRImages
 
     static func setValue<T>(for key: PrefKey, value: T) {
         UserDefaults.standard.set(value, forKey: key.rawValue)

@@ -148,17 +148,52 @@ final class PasteMainViewModel {
 
     func pasteModel(_ model: PasteboardModel, isOriginal: Bool) {
         Log("isOriginal: \(isOriginal) data: \(model.dataString)")
-        PasteBoard.main.pasteData(model, isOriginal)
-        guard PasteUserDefaults.pasteDirect else { return }
-        AppContext.coordinator.activateFrontApp()
-        AppContext.coordinator.dismissWindow()
-        KeyboardShortcuts.postCmdVEvent()
+        guard PasteUserDefaults.pasteDirect else {
+            PasteBoard.main.pasteData(model, isOriginal)
+            return
+        }
+        // 先播放关闭动画，待窗口隐藏后再写剪贴板、激活前台并粘贴。
+        // 这样既不会因提前 activateFrontApp 打断动画，也不会在窗口可见时触发列表跳动刷新。
+        AppContext.coordinator.dismissWindow {
+            PasteBoard.main.pasteData(model, isOriginal)
+            AppContext.coordinator.activateFrontApp()
+            KeyboardShortcuts.postCmdVEvent()
+        }
     }
 
     func copyModel(_ model: PasteboardModel) {
-        AppContext.coordinator.dismissWindow()
-        PasteBoard.main.pasteData(model)
-        AppContext.coordinator.activateFrontApp()
+        // 同 pasteModel：等关闭动画结束、窗口隐藏后再写剪贴板，避免列表在可见时跳动。
+        AppContext.coordinator.dismissWindow {
+            PasteBoard.main.pasteData(model)
+            AppContext.coordinator.activateFrontApp()
+        }
+    }
+
+    // MARK: - OCR
+
+    /// 取得图片的 OCR 文字:已识别过直接返回,未识别则当场识别。
+    /// 图中确无文字时返回 nil。
+    private func resolveOCRText(for model: PasteboardModel) async -> String? {
+        if let text = model.ocrText, !text.isEmpty { return text }
+        return await PasteDataStore.main.extractOCRText(from: model)
+    }
+
+    /// 复制图片中的文字到剪贴板(并进入历史)
+    func copyOCRText(from model: PasteboardModel) {
+        Task {
+            guard let text = await resolveOCRText(for: model) else { return }
+            let textModel = PasteboardModel.makeText(text, from: model)
+            copyModel(textModel)
+        }
+    }
+
+    /// 把图片中的文字以纯文本粘贴到前台 App
+    func pasteOCRText(from model: PasteboardModel) {
+        Task {
+            guard let text = await resolveOCRText(for: model) else { return }
+            let textModel = PasteboardModel.makeText(text, from: model)
+            pasteModel(textModel, isOriginal: false)
+        }
     }
 
     // MARK: - 生命周期

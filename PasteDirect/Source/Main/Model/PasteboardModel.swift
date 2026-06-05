@@ -46,6 +46,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
     let dataString: String
     let length: Int
     let hexColorString: String?
+    /// 图片经 OCR 识别出的文本;仅图片类型可能非 nil,用于让图片内容可被搜索。非图片项为 nil
+    let ocrText: String?
 
     var type: PasteModelType {
         if hexColorString != nil {
@@ -73,7 +75,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
          appPath: String,
          appName: String,
          dataString: String,
-         length: Int)
+         length: Int,
+         ocrText: String? = nil)
     {
         self.pasteboardType = pasteboardType
         self.data = data
@@ -84,6 +87,7 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         self.appName = appName
         self.dataString = dataString
         self.length = length
+        self.ocrText = ocrText
 
         if pasteboardType.isText() {
             let trimmed = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -104,7 +108,42 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
             appPath: appPath,
             appName: appName,
             dataString: dataString,
-            length: length
+            length: length,
+            ocrText: ocrText
+        )
+    }
+
+    /// 返回写入了 OCR 文本的新实例(图片专属)
+    func withOCRText(_ text: String) -> PasteboardModel {
+        PasteboardModel(
+            pasteboardType: pasteboardType,
+            data: data,
+            showData: showData,
+            hashValue: hashValue,
+            date: date,
+            appPath: appPath,
+            appName: appName,
+            dataString: dataString,
+            length: length,
+            ocrText: text
+        )
+    }
+
+    /// 用一段纯文本构造一条 `.string` model(用于把图片 OCR 出的文字当作文本复制/粘贴)。
+    /// 继承来源图片的 app 信息,日期取当前时间。
+    @MainActor
+    static func makeText(_ text: String, from source: PasteboardModel) -> PasteboardModel {
+        let data = Data(text.utf8)
+        return PasteboardModel(
+            pasteboardType: .string,
+            data: data,
+            showData: nil,
+            hashValue: data.hashValue,
+            date: Date(),
+            appPath: source.appPath,
+            appName: source.appName,
+            dataString: text,
+            length: text.count
         )
     }
 

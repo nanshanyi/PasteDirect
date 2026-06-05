@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.2.0-green" alt="Version 3.2.0">
+  <img src="https://img.shields.io/badge/version-3.3.0-green" alt="Version 3.3.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -24,6 +24,7 @@
 - 🔒 **Fully local** — All data is stored in a local SQLite database, with zero network requests for better privacy
 - 📋 **Multiple formats** — Records text, images, HTML, RTF, rich text, and code snippets
 - 🎨 **Color detection** — Automatically detects Hex color values from the clipboard and displays visual previews
+- 🖼️ **Image OCR** — Recognizes text inside copied images locally (via the Vision framework, no network), so images can be found by searching the text they contain; you can also copy or paste an image's text directly from its right-click menu
 - ⌨️ **Global shortcut** — Default shortcut is `⌘⇧V`; custom shortcuts are supported
 - 🔍 **Fast search** — Type keywords to instantly filter clipboard history; the search field uses a pill-style design
 - 🏷️ **Multi-dimensional filters** — Combine filters by type (text/image/color), source app, and time range; active filters are shown as tags
@@ -94,6 +95,7 @@ Starting from v3.1.3, the app supports manually checking for updates in-app. You
 - **Menu bar icon** — Show / hide the menu bar icon
 - **Direct paste** — Automatically paste the selected item into the current app
 - **Plain text paste** — Remove formatting and paste plain text only
+- **Auto-extract text from images** — Run OCR on copied images so they can be found by searching their text; can be turned off (you can still extract text manually from an image's right-click menu)
 - **History retention** — 1 day / 1 week / 1 month / forever
 - **Ignored apps** — Configure apps whose clipboard content should not be recorded
 - **Shortcut** — Customize the global shortcut for opening the panel
