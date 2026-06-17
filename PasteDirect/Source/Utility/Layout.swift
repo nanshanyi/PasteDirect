@@ -14,11 +14,10 @@ enum Layout {
     static let resizeHandleHeight: CGFloat = 8
 
     // MARK: - 面板高度限制
-    static let defaultViewHeight: CGFloat = 320
-    static let compactThreshold: CGFloat = 300
-    static let compactItemHeight: CGFloat = compactThreshold - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
-    static let minViewHeight: CGFloat = defaultViewHeight - 50
-    static let maxViewHeight: CGFloat = defaultViewHeight + 50
+    static let defaultViewHeight: CGFloat = 280
+    static let compactItemHeight: CGFloat = defaultViewHeight - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
+    static let minViewHeight: CGFloat = defaultViewHeight - 30
+    static let maxViewHeight: CGFloat = defaultViewHeight + 70
 
     // MARK: - 搜索框
     static let searchBarHeight: CGFloat = 26

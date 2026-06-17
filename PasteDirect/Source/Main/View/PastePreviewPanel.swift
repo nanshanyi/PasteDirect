@@ -55,7 +55,7 @@ final class PastePreviewPopover: NSPopover {
             let screenScale = NSScreen.main?.backingScaleFactor ?? 2.0
             let w = pixelSize.width / screenScale
             let h = pixelSize.height / screenScale
-            return NSSize(width: min(w, Layout.previewMaxSize), height: min(h, Layout.previewMaxSize))
+            return NSSize(width: max(minWidth, min(w, Layout.previewMaxSize)), height: max(miniHeight, min(h, Layout.previewMaxSize)))
         case .string:
             return textFitSize(for: model)
         default:
