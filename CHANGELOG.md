@@ -6,7 +6,7 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [3.4.0] - 2026-06-17
 
 ### 新增
 - 图片预览支持实况文本(Live Text)：预览图片时可直接用鼠标框选、复制图中的文字，体验与系统照片的「实况文本」一致；电话、网址等可点击识别跳转。与图片 OCR 互补——OCR 让图中文字可被搜索，实况文本让你在看图时随手选字。
@@ -183,7 +183,8 @@
 ### 优化
 - 代码优化。
 
-[未发布]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...HEAD
+[未发布]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.1.3...v3.2.0
 [3.1.3]: https://github.com/nanshanyi/PasteDirect/compare/v3.1.2...v3.1.3

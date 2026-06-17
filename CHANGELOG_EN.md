@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [3.4.0] - 2026-06-17
 
 ### Added
 - Live Text support in image preview: select and copy text directly from images while previewing, just like the system "Live Text" in Photos; phone numbers, URLs, and more are tappable. Complements image OCR — OCR makes in-image text searchable, while Live Text lets you grab text on the fly while viewing.
@@ -183,7 +183,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Code cleanup.
 
-[Unreleased]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.1.3...v3.2.0
 [3.1.3]: https://github.com/nanshanyi/PasteDirect/compare/v3.1.2...v3.1.3

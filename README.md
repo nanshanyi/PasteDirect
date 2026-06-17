@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.3.0-green" alt="Version 3.3.0">
+  <img src="https://img.shields.io/badge/version-3.4.0-green" alt="Version 3.4.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -25,10 +25,11 @@
 - 📋 **多格式支持** — 文本、图片、HTML、RTF、富文本、代码片段，通通记录
 - 🎨 **颜色识别** — 自动检测剪贴板中的 Hex 颜色值并可视化展示
 - 🖼️ **图片文字识别（OCR）** — 本地识别复制图片中的文字（基于 Vision 框架，零网络请求），让图片可通过搜索图中文字找到；也可在图片右键菜单中直接复制或粘贴识别出的文字
+- 📝 **实况文本（Live Text）** — 预览图片时可直接用鼠标框选、复制图中文字，体验与系统照片一致，电话、网址等还能点击识别
 - ⌨️ **快捷键呼出** — 默认 `⌘⇧V`，支持自定义快捷键
 - 🔍 **快速搜索** — 直接键入关键词即时过滤历史记录，搜索框使用 pill 风格
 - 🏷️ **多维筛选** — 按类型（文本/图片/颜色）、来源应用、时间范围组合筛选，筛选条件以 tag 形式贴合展示
-- 👁️ **空格预览** — 按空格键快速预览选中内容，支持文本、图片、颜色详情
+- 👁️ **空格预览** — 按空格键快速预览选中内容，支持文本、图片、颜色详情，图片预览中可直接选取文字
 - 🖱️ **多种粘贴方式** — 双击粘贴、回车粘贴、拖拽到目标位置
 - 📝 **纯文本模式** — 一键去除富文本格式，粘贴为纯文本
 - 📐 **面板高度可调** — 拖拽顶部边缘调整面板高度，内容等比缩放

@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.3.0-green" alt="Version 3.3.0">
+  <img src="https://img.shields.io/badge/version-3.4.0-green" alt="Version 3.4.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -25,10 +25,11 @@
 - 📋 **Multiple formats** — Records text, images, HTML, RTF, rich text, and code snippets
 - 🎨 **Color detection** — Automatically detects Hex color values from the clipboard and displays visual previews
 - 🖼️ **Image OCR** — Recognizes text inside copied images locally (via the Vision framework, no network), so images can be found by searching the text they contain; you can also copy or paste an image's text directly from its right-click menu
+- 📝 **Live Text** — Select and copy text directly from images while previewing, just like the system Photos app; phone numbers, URLs, and more are tappable
 - ⌨️ **Global shortcut** — Default shortcut is `⌘⇧V`; custom shortcuts are supported
 - 🔍 **Fast search** — Type keywords to instantly filter clipboard history; the search field uses a pill-style design
 - 🏷️ **Multi-dimensional filters** — Combine filters by type (text/image/color), source app, and time range; active filters are shown as tags
-- 👁️ **Space preview** — Press Space to quickly preview the selected item, including text, images, and color details
+- 👁️ **Space preview** — Press Space to quickly preview the selected item, including text, images, and color details; text can be selected directly in the image preview
 - 🖱️ **Multiple paste methods** — Paste by double-clicking, pressing Enter, or dragging an item to the target location
 - 📝 **Plain text mode** — Remove rich-text formatting with one click and paste as plain text
 - 📐 **Resizable panel** — Drag the top edge to adjust panel height; items scale proportionally
