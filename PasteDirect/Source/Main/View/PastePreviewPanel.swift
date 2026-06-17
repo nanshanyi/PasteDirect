@@ -8,6 +8,7 @@
 import AppKit
 import Carbon
 import SnapKit
+import VisionKit
 
 // MARK: - PastePreviewPopover
 
@@ -120,6 +121,16 @@ final class PastePreviewViewController: NSViewController {
         $0.imageAlignment = .alignCenter
     }
 
+    // 系统实况文本(Live Text)叠加层，让图片里的文字可直接选中/复制
+    private lazy var imageAnalysisOverlay = ImageAnalysisOverlayView().then {
+        $0.trackingImageView = imageView
+        $0.preferredInteractionTypes = .automatic
+    }
+
+    private let imageAnalyzer = ImageAnalyzer()
+    // 防止异步分析结果回写到已被复用于其它条目的 overlay
+    private var imageAnalysisToken = UUID()
+
     // MARK: - 颜色
 
     private lazy var colorContentView = NSView().then {
@@ -164,6 +175,7 @@ final class PastePreviewViewController: NSViewController {
 
         view.addSubview(scrollView)
         view.addSubview(imageView)
+        imageView.addSubview(imageAnalysisOverlay)
         view.addSubview(colorContentView)
         view.addSubview(typeLabel)
         view.addSubview(infoLabel)
@@ -182,6 +194,11 @@ final class PastePreviewViewController: NSViewController {
             make.centerY.equalToSuperview().offset(-Layout.previewCornerRadius)
             make.width.equalTo(0)
             make.height.equalTo(0)
+        }
+
+        // Live Text 叠加层贴合图片显示区域
+        imageAnalysisOverlay.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
 
         // 颜色区域：填满上方
@@ -234,6 +251,9 @@ final class PastePreviewViewController: NSViewController {
     private func hideAll() {
         scrollView.isHidden = true
         imageView.isHidden = true
+        imageAnalysisOverlay.analysis = nil
+        imageAnalysisOverlay.isHidden = true
+        imageAnalysisToken = UUID()
         colorContentView.isHidden = true
         typeLabel.isHidden = true
         infoLabel.isHidden = true
@@ -270,6 +290,7 @@ final class PastePreviewViewController: NSViewController {
 
     private func showImage(_ model: PasteboardModel, size: NSSize) {
         imageView.isHidden = false
+        imageAnalysisOverlay.isHidden = false
 
         let imgW = size.width
         let imgH = size.height
@@ -282,10 +303,14 @@ final class PastePreviewViewController: NSViewController {
         if let thumb = NSImage(data: model.data) {
             imageView.image = thumb
         }
+        let token = imageAnalysisToken
         Task { [weak self] in
             let originalData = await PasteDataStore.main.loadOriginalImageData(for: model)
-            guard let self, let image = NSImage(data: originalData) else { return }
+            guard let self, self.imageAnalysisToken == token,
+                  let image = NSImage(data: originalData) else { return }
             self.imageView.image = image
+            // 原图就绪后做系统级文字识别，使图片中的文字可被选中/复制
+            await self.analyzeImageForLiveText(image, token: token)
         }
 
         var infoParts: [String] = []
@@ -296,6 +321,20 @@ final class PastePreviewViewController: NSViewController {
             infoParts.append("\(Int(thumb.size.width)) × \(Int(thumb.size.height))")
         }
         infoLabel.stringValue = infoParts.joined(separator: "  ·  ")
+    }
+
+    /// 用系统 VisionKit 对原图做 Live Text 分析，结果叠加到 overlay 上，
+    /// 让用户像系统「实况文本」一样直接选中、复制图片中的文字。
+    private func analyzeImageForLiveText(_ image: NSImage, token: UUID) async {
+        let configuration = ImageAnalyzer.Configuration([.text])
+        do {
+            let analysis = try await imageAnalyzer.analyze(image, orientation: .up, configuration: configuration)
+            guard imageAnalysisToken == token else { return }
+            imageAnalysisOverlay.analysis = analysis
+        } catch {
+            guard imageAnalysisToken == token else { return }
+            imageAnalysisOverlay.analysis = nil
+        }
     }
 
     // MARK: - 颜色
