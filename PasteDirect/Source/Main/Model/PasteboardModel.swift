@@ -232,8 +232,15 @@ extension PasteboardModel {
     /// 入库时用来把原图换成缩略图;OCR 时用来临时换回原图。
     /// `hashValue` 不变(仍是原图内容哈希)，故去重/主键/OCR cache key 不受影响。
     func replacingData(_ newData: Data) -> PasteboardModel {
+        replacingData(newData, type: pasteboardType)
+    }
+
+    /// 同时替换 data 与 pasteboardType 的新实例。
+    /// 图片原图重编码(如 TIFF→PNG)后用，保证存盘字节、列表展示、粘贴回写的类型一致。
+    /// `hashValue` 仍沿用原图内容哈希，不随重编码改变(去重/主键/外置文件名不受影响)。
+    func replacingData(_ newData: Data, type: PasteboardType) -> PasteboardModel {
         PasteboardModel(
-            pasteboardType: pasteboardType,
+            pasteboardType: type,
             data: newData,
             showData: showData,
             hashValue: hashValue,

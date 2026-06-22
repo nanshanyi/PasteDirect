@@ -8,8 +8,8 @@
 import Foundation
 
 /// 图片原图的磁盘存储(actor)。
-/// 把图片二进制从 SQLite BLOB 外置到独立文件 `~/Documents/paste/images/<hash>.bin`，
-/// 数据库里只保留缩略图，原图按需从文件加载。
+/// 把图片二进制从 SQLite BLOB 外置到独立文件 `~/Documents/paste/images/<hash>.png`，
+/// 数据库里只保留缩略图，原图按需从文件加载。落盘前原图统一无损转码为 PNG。
 /// 文件名用原图内容哈希(PasteboardModel.hashValue)，与去重主键天然一致，同图只存一份。
 actor ImageBlobStore {
     static let shared = ImageBlobStore()
@@ -37,7 +37,7 @@ actor ImageBlobStore {
     }
 
     private func fileURL(for hash: Int) -> URL {
-        directory.appendingPathComponent("\(hash).bin", isDirectory: false)
+        directory.appendingPathComponent("\(hash).png", isDirectory: false)
     }
 
     /// 写入原图。已存在同 hash 文件则跳过(内容相同，省一次写)。
@@ -70,5 +70,17 @@ actor ImageBlobStore {
     func deleteAll() {
         try? FileManager.default.removeItem(at: directory)
         createDirectoryIfNeeded()
+    }
+
+    /// 外置图片文件占用的磁盘总字节数。目录不存在或读取失败返回 0。
+    func totalSize() -> Int {
+        guard let urls = try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.fileSizeKey],
+            options: [.skipsHiddenFiles]
+        ) else { return 0 }
+        return urls.reduce(0) { sum, url in
+            sum + ((try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
     }
 }

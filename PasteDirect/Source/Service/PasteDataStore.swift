@@ -67,8 +67,11 @@ extension PasteDataStore {
     }
 
     func updateStorageSize() async {
-        let size = await sqlManager.databaseSize
-        SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+        // 数据库 + 外置图片原图文件，两者相加才是实际占用
+        let dbSize = await sqlManager.databaseSize
+        let imageSize = await ImageBlobStore.shared.totalSize()
+        let total = Int64(dbSize) + Int64(imageSize)
+        SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: total, countStyle: .file)
     }
 }
 
@@ -168,22 +171,27 @@ extension PasteDataStore {
         }
     }
 
-    /// 图片入库：把原图存到文件，生成缩略图后再以缩略图版本插入列表与 DB。
-    /// OCR 仍用原图识别(此时列表项已就位，结果能正确回写)。
+    /// 图片入库：原图转 PNG 存文件，列表与 DB 只存缩略图。
+    /// 剪贴板常给未压缩 TIFF(可达数 MB)，转 PNG 后磁盘占用小一个数量级。
     private func addNewImageItem(_ original: PasteboardModel) {
         Task {
             let hash = original.hashValue
-            let originalData = original.data
-            await ImageBlobStore.shared.save(originalData, for: hash)
-            // 缩略图生成是 CPU 操作，放后台线程
-            let thumb = await Task.detached(priority: .userInitiated) {
-                ImageThumbnail.make(from: originalData)
+            let rawData = original.data
+            let rawType = original.pasteboardType
+            // 重编码 + 缩略图都是 CPU 操作，放后台线程；重编码失败则保留原始字节与类型
+            let processed = await Task.detached(priority: .userInitiated) { () -> (stored: Data, type: PasteboardType, thumb: Data?) in
+                let png = ImageThumbnail.reencodeAsPNG(from: rawData)
+                let thumb = ImageThumbnail.make(from: rawData)?.thumbnail
+                return (png ?? rawData, png != nil ? .png : rawType, thumb)
             }.value
-            // 缩略图生成失败则降级保留原图 data（仍可显示，只是 DB 略大）
-            let model = thumb.map { original.replacingData($0.thumbnail) } ?? original
+            // 文件名用原图 hash，去重/主键不受转码影响
+            await ImageBlobStore.shared.save(processed.stored, for: hash)
+            // type 同步为落盘类型，保证粘贴回写时类型与文件字节一致；缩略图失败则降级用转码后原图
+            let model = original.replacingData(processed.thumb ?? processed.stored, type: processed.type)
             insertModel(model)
             await extractColor(from: model)
             if PasteUserDefaults.autoOCRImages {
+                // OCR 用内存里的原图字节，结果按 hashValue 回写
                 await extractOCRText(from: original)
             }
         }

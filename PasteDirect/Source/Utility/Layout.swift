@@ -49,13 +49,13 @@ enum Layout {
     static let filterPopoverHeight: CGFloat = 300
 
     // MARK: - 预览
-    static let previewPadding: CGFloat = 24
-    static let previewInfoPadding: CGFloat = 56
+    static let previewPadding: CGFloat = 12
+    static let previewInfoPadding: CGFloat = 44
     static let previewCornerRadius: CGFloat = 16
-    static let previewMaxSize: CGFloat = 800
+    static let previewMaxWidth: CGFloat = 1100
     static let previewMinWidth: CGFloat = 400
     static let previewMinHeight: CGFloat = 240
-    static let previewMaxHeight: CGFloat = 400
+    static let previewMaxHeight: CGFloat = 800
     static let previewTextInset: CGFloat = 12
 
     // MARK: - 动态高度

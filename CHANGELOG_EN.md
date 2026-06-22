@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.5.0] - 2026-06-22
+
+### Changed
+- Much smaller image storage: copied images (especially screenshots, Preview, Finder, and other sources that only offer uncompressed TIFF) are now losslessly re-encoded to PNG before being saved, typically shrinking disk usage by an order of magnitude.
+- Image preview now scales to the original aspect ratio exactly, matching the system preview — no more stretching or letterboxing; preview images also get rounded corners.
+- Increased the preview panel's maximum size, while it now shrinks automatically to fit the current screen's visible area and the main panel height, so large images are clearer without going off-screen.
+- The storage size shown in Settings now includes the externally stored original image files, reflecting actual disk usage.
+
 ## [3.4.0] - 2026-06-17
 
 ### Added

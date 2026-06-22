@@ -36,6 +36,15 @@ enum ImageThumbnail {
         return (pngData, pixelSize)
     }
 
+    /// 把任意支持的图片 Data 以原始像素尺寸无损重编码为 PNG。
+    /// 剪贴板常给的是未压缩 TIFF(一张全屏图可达数 MB)，转成 PNG 后体积通常小一个数量级。
+    /// 解码失败返回 nil(调用方降级保留原始字节)。
+    static func reencodeAsPNG(from data: Data) -> Data? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
+        return encodePNG(cgImage)
+    }
+
     /// 仅读取原图像素尺寸，不生成缩略图(迁移时回填尺寸用)。
     static func pixelSize(of data: Data) -> CGSize? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }

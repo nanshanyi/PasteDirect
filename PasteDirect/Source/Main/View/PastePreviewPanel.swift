@@ -16,10 +16,24 @@ final class PastePreviewPopover: NSPopover {
 
     private let previewVC = PastePreviewViewController()
 
-    static let maxWidth: CGFloat = Layout.previewMaxSize
-    static let maxHeight: CGFloat = Layout.previewMaxHeight
     static let miniHeight: CGFloat = Layout.previewMinHeight
     static let minWidth: CGFloat = Layout.previewMinWidth
+
+    /// 预览最大宽度。取设计上限与屏幕可见宽度的较小值，保证面板不超出屏幕。
+    @MainActor
+    static var maxWidth: CGFloat {
+        let usable = (NSScreen.main?.visibleFrame.width ?? Layout.previewMaxWidth) - Layout.previewPadding - Layout.screenPadding * 2
+        return min(Layout.previewMaxWidth, max(minWidth, usable))
+    }
+
+    /// 预览最大高度。预览贴着主列表面板弹出，纵向要与之共享屏幕，
+    /// 故从可见高度里再扣掉主面板高度，避免大图预览在小屏上被挤压或溢出。
+    @MainActor
+    static var maxHeight: CGFloat {
+        let screenHeight = NSScreen.main?.visibleFrame.height ?? Layout.previewMaxHeight
+        let usable = screenHeight - Layout.viewHeight - Layout.previewInfoPadding - Layout.screenPadding * 2
+        return min(Layout.previewMaxHeight, max(miniHeight, usable))
+    }
     init(model: PasteboardModel) {
         super.init()
         behavior = .transient
@@ -35,7 +49,7 @@ final class PastePreviewPopover: NSPopover {
 
     func configure(with model: PasteboardModel) {
         let size = Self.fitSize(for: model)
-        previewVC.configure(with: model, contentSize: size)
+        previewVC.configure(with: model)
         contentSize = NSSize(width: size.width + Layout.previewPadding, height: size.height + Layout.previewInfoPadding)
     }
 
@@ -44,24 +58,34 @@ final class PastePreviewPopover: NSPopover {
     private static func fitSize(for model: PasteboardModel) -> NSSize {
         switch model.type {
         case .image:
-            // 优先用记录的原图像素尺寸算比例，避免解码(原图已外置，列表持有的是缩略图)
-            let pixelSize: CGSize
-            if let w = model.imageWidth, let h = model.imageHeight, w > 0, h > 0 {
-                pixelSize = CGSize(width: w, height: h)
-            } else if let image = NSImage(data: model.data) {
-                pixelSize = image.size
-            } else {
-                return NSSize(width: maxWidth, height: maxHeight)
-            }
-            let screenScale = NSScreen.main?.backingScaleFactor ?? 2.0
-            let w = pixelSize.width / screenScale
-            let h = pixelSize.height / screenScale
-            return NSSize(width: max(minWidth, min(w, Layout.previewMaxSize)), height: max(miniHeight, min(h, Layout.previewMaxSize)))
+            // 按真实比例显示(像系统预览)，imageView 用此尺寸即贴合图片
+            let display = imageDisplaySize(for: model)
+            return NSSize(width: display.width, height: display.height)
         case .string:
             return textFitSize(for: model)
         default:
-            return NSSize(width: Layout.previewMinWidth, height: Layout.previewMinWidth)
+            return NSSize(width: minWidth, height: miniHeight)
         }
+    }
+
+    /// 图片的真实等比显示尺寸(点)。保持宽高比，最大不超过 max 框，小图不放大。
+    @MainActor
+    fileprivate static func imageDisplaySize(for model: PasteboardModel) -> NSSize {
+        // 优先用记录的原图像素尺寸算比例，避免解码(原图已外置，列表持有的是缩略图)
+        let pixelSize: CGSize
+        if let w = model.imageWidth, let h = model.imageHeight, w > 0, h > 0 {
+            pixelSize = CGSize(width: w, height: h)
+        } else if let image = NSImage(data: model.data) {
+            pixelSize = image.size
+        } else {
+            return NSSize(width: maxWidth, height: maxHeight)
+        }
+        let screenScale = NSScreen.main?.backingScaleFactor ?? 2.0
+        let naturalW = pixelSize.width / screenScale
+        let naturalH = pixelSize.height / screenScale
+        // 等比缩到 max 框内，ratio 上限取 1 表示小图不放大
+        let ratio = min(maxWidth / naturalW, maxHeight / naturalH, 1)
+        return NSSize(width: naturalW * ratio, height: naturalH * ratio)
     }
 
     @MainActor
@@ -119,6 +143,12 @@ final class PastePreviewViewController: NSViewController {
 
     private lazy var imageView = NSImageView().then {
         $0.imageAlignment = .alignCenter
+        // 等比缩放，永不拉伸(像系统预览)
+        $0.imageScaling = .scaleProportionallyUpOrDown
+        // 圆角裁切，与颜色预览块一致
+        $0.wantsLayer = true
+        $0.layer?.cornerRadius = Layout.previewCornerRadius
+        $0.layer?.masksToBounds = true
     }
 
     // 系统实况文本(Live Text)叠加层，让图片里的文字可直接选中/复制
@@ -229,17 +259,16 @@ final class PastePreviewViewController: NSViewController {
         hideAll()
     }
 
-    func configure(with model: PasteboardModel, contentSize: NSSize) {
+    func configure(with model: PasteboardModel) {
         hideAll()
         typeLabel.stringValue = model.type.string
         switch model.type {
         case .string:
             showText(model)
         case .image:
-            showImage(model, size: contentSize)
+            showImage(model)
         case .color:
             showColor(model)
-             
         default:
             break
         }
@@ -288,15 +317,15 @@ final class PastePreviewViewController: NSViewController {
 
     // MARK: - 图片
 
-    private func showImage(_ model: PasteboardModel, size: NSSize) {
+    private func showImage(_ model: PasteboardModel) {
         imageView.isHidden = false
         imageAnalysisOverlay.isHidden = false
 
-        let imgW = size.width
-        let imgH = size.height
+        // imageView 用图片真实等比尺寸，圆角恰好裁在图片边缘
+        let display = PastePreviewPopover.imageDisplaySize(for: model)
         imageView.snp.updateConstraints { make in
-            make.width.equalTo(imgW)
-            make.height.equalTo(imgH)
+            make.width.equalTo(display.width)
+            make.height.equalTo(display.height)
         }
 
         // 先用列表已持有的缩略图即时显示，再异步加载原图替换为清晰大图
