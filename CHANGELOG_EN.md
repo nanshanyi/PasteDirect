@@ -6,20 +6,16 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [3.5.0] - 2026-06-22
+## [3.4.0] - 2026-06-22
+
+### Added
+- Live Text support in image preview: select and copy text directly from images while previewing, just like the system "Live Text" in Photos; phone numbers, URLs, and more are tappable. Complements image OCR — OCR makes in-image text searchable, while Live Text lets you grab text on the fly while viewing.
 
 ### Changed
 - Much smaller image storage: copied images (especially screenshots, Preview, Finder, and other sources that only offer uncompressed TIFF) are now losslessly re-encoded to PNG before being saved, typically shrinking disk usage by an order of magnitude.
 - Image preview now scales to the original aspect ratio exactly, matching the system preview — no more stretching or letterboxing; preview images also get rounded corners.
 - Increased the preview panel's maximum size, while it now shrinks automatically to fit the current screen's visible area and the main panel height, so large images are clearer without going off-screen.
 - The storage size shown in Settings now includes the externally stored original image files, reflecting actual disk usage.
-
-## [3.4.0] - 2026-06-17
-
-### Added
-- Live Text support in image preview: select and copy text directly from images while previewing, just like the system "Live Text" in Photos; phone numbers, URLs, and more are tappable. Complements image OCR — OCR makes in-image text searchable, while Live Text lets you grab text on the fly while viewing.
-
-### Changed
 - Reworked image storage to slim down the database: original images are now stored as standalone files while the database keeps only thumbnails, loading originals on demand. Database size, memory usage, and list load times all improved, and copying large images no longer slows down the history list. Deleting an image also removes its original file, and disk space is reclaimed automatically after expired-item cleanup.
 - Tuned the preview panel height and the minimum display size for small images, so small images are no longer shrunk too much and the overall panel is more compact.
 
