@@ -14,11 +14,10 @@ enum Layout {
     static let resizeHandleHeight: CGFloat = 8
 
     // MARK: - 面板高度限制
-    static let defaultViewHeight: CGFloat = 320
-    static let compactThreshold: CGFloat = 300
-    static let compactItemHeight: CGFloat = compactThreshold - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
-    static let minViewHeight: CGFloat = defaultViewHeight - 50
-    static let maxViewHeight: CGFloat = defaultViewHeight + 50
+    static let defaultViewHeight: CGFloat = 280
+    static let compactItemHeight: CGFloat = defaultViewHeight - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
+    static let minViewHeight: CGFloat = defaultViewHeight - 30
+    static let maxViewHeight: CGFloat = defaultViewHeight + 70
 
     // MARK: - 搜索框
     static let searchBarHeight: CGFloat = 26
@@ -50,13 +49,13 @@ enum Layout {
     static let filterPopoverHeight: CGFloat = 300
 
     // MARK: - 预览
-    static let previewPadding: CGFloat = 24
-    static let previewInfoPadding: CGFloat = 56
+    static let previewPadding: CGFloat = 12
+    static let previewInfoPadding: CGFloat = 44
     static let previewCornerRadius: CGFloat = 16
-    static let previewMaxSize: CGFloat = 800
+    static let previewMaxWidth: CGFloat = 1100
     static let previewMinWidth: CGFloat = 400
     static let previewMinHeight: CGFloat = 240
-    static let previewMaxHeight: CGFloat = 400
+    static let previewMaxHeight: CGFloat = 800
     static let previewTextInset: CGFloat = 12
 
     // MARK: - 动态高度

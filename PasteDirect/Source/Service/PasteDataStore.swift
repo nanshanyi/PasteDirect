@@ -67,8 +67,11 @@ extension PasteDataStore {
     }
 
     func updateStorageSize() async {
-        let size = await sqlManager.databaseSize
-        SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+        // 数据库 + 外置图片原图文件，两者相加才是实际占用
+        let dbSize = await sqlManager.databaseSize
+        let imageSize = await ImageBlobStore.shared.totalSize()
+        let total = Int64(dbSize) + Int64(imageSize)
+        SettingsStore.shared.storageSizeString = ByteCountFormatter.string(fromByteCount: total, countStyle: .file)
     }
 }
 
@@ -157,14 +160,39 @@ extension PasteDataStore {
     /// 增加新数据
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
-        insertModel(model)
-        Task {
-            await extractColor(from: model)
-        }
-        // 仅图片触发 OCR,且受设置开关控制
-        if PasteUserDefaults.autoOCRImages, model.type == .image {
+        if model.type == .image {
+            // 图片走外置流程：原图存文件、列表与 DB 只保留缩略图
+            addNewImageItem(model)
+        } else {
+            insertModel(model)
             Task {
-                await extractOCRText(from: model)
+                await extractColor(from: model)
+            }
+        }
+    }
+
+    /// 图片入库：原图转 PNG 存文件，列表与 DB 只存缩略图。
+    /// 剪贴板常给未压缩 TIFF(可达数 MB)，转 PNG 后磁盘占用小一个数量级。
+    private func addNewImageItem(_ original: PasteboardModel) {
+        Task {
+            let hash = original.hashValue
+            let rawData = original.data
+            let rawType = original.pasteboardType
+            // 重编码 + 缩略图都是 CPU 操作，放后台线程；重编码失败则保留原始字节与类型
+            let processed = await Task.detached(priority: .userInitiated) { () -> (stored: Data, type: PasteboardType, thumb: Data?) in
+                let png = ImageThumbnail.reencodeAsPNG(from: rawData)
+                let thumb = ImageThumbnail.make(from: rawData)?.thumbnail
+                return (png ?? rawData, png != nil ? .png : rawType, thumb)
+            }.value
+            // 文件名用原图 hash，去重/主键不受转码影响
+            await ImageBlobStore.shared.save(processed.stored, for: hash)
+            // type 同步为落盘类型，保证粘贴回写时类型与文件字节一致；缩略图失败则降级用转码后原图
+            let model = original.replacingData(processed.thumb ?? processed.stored, type: processed.type)
+            insertModel(model)
+            await extractColor(from: model)
+            if PasteUserDefaults.autoOCRImages {
+                // OCR 用内存里的原图字节，结果按 hashValue 回写
+                await extractOCRText(from: original)
             }
         }
     }
@@ -192,6 +220,10 @@ extension PasteDataStore {
         Task {
             for item in items {
                 await sqlManager.deleteByHash(item.hashValue)
+                // 图片连带删除外置的原图文件
+                if item.type == .image {
+                    await ImageBlobStore.shared.delete(for: item.hashValue)
+                }
             }
             await updateTotalCount()
             // 删除后列表可能不足一屏,导致横向列表无法滚动、再也触发不了分页加载;
@@ -242,8 +274,19 @@ extension PasteDataStore {
                 needRefresh = true
             }
             Task {
+                // 先取得将被删除的图片 hash，删 DB 后再清理对应的外置原图文件
+                let imageHashes = await sqlManager.imageHashesBeforeDate(deadDate)
                 await sqlManager.deleteBeforeDate(deadDate)
+                for hash in imageHashes {
+                    await ImageBlobStore.shared.delete(for: hash)
+                }
+                // 过期清理是低频时机(每天最多一次)，且常删掉大量数据，
+                // 顺手 VACUUM 把空闲页还给磁盘，避免库文件只增不减。
+                if hasExpired || !imageHashes.isEmpty {
+                    await sqlManager.vacuum()
+                }
                 await updateTotalCount()
+                await updateStorageSize()
             }
         }
     }
@@ -252,6 +295,7 @@ extension PasteDataStore {
     func clearAllData() {
         Task {
             await sqlManager.clearAllData()
+            await ImageBlobStore.shared.deleteAll()
             await updateTotalCount()
             await updateStorageSize()
             resetDefaultList()
@@ -279,6 +323,21 @@ extension PasteDataStore {
     }
 }
 
+// MARK: - 图片原图按需加载
+
+extension PasteDataStore {
+    /// 加载图片原图数据。原图已外置到文件，列表中 model 持有的是缩略图。
+    /// 文件缺失(迁移中/异常)时降级返回 model.data(可能是缩略图或旧的原图 BLOB)。
+    /// 非图片项直接返回 model.data。
+    func loadOriginalImageData(for model: PasteboardModel) async -> Data {
+        guard model.type == .image else { return model.data }
+        if let data = await ImageBlobStore.shared.load(for: model.hashValue) {
+            return data
+        }
+        return model.data
+    }
+}
+
 // MARK: - OCR 处理
 
 extension PasteDataStore {
@@ -289,7 +348,17 @@ extension PasteDataStore {
         // 已识别过则跳过(手动入口重复触发时省去一次 Vision 调用)
         guard model.ocrText == nil else { return model.ocrText }
 
-        let text = await ocrCache.getOrExtract(for: model)
+        // 列表中的 model 持有缩略图(512px),OCR 必须用原图否则会丢字;
+        // 按需加载原图,构造一个临时的原图版本交给 OCRCache(cache key 用 hashValue 不受影响)。
+        let modelForOCR: PasteboardModel
+        if model.type == .image {
+            let originalData = await loadOriginalImageData(for: model)
+            modelForOCR = originalData == model.data ? model : model.replacingData(originalData)
+        } else {
+            modelForOCR = model
+        }
+
+        let text = await ocrCache.getOrExtract(for: modelForOCR)
         guard let text else { return nil }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }

@@ -5,6 +5,7 @@
 //  Created by 南山忆 on 2022/11/16.
 //
 
+import AppKit
 import XCTest
 @testable import PasteDirect
 
@@ -316,5 +317,97 @@ final class PasteDirectTests: XCTestCase {
             keyword: "", state: state, limit: 200, offset: 0
         )
         XCTAssertTrue(byImage.contains(where: { $0.hashValue == hash }))
+    }
+
+    // MARK: - 图片外置 (ImageBlobStore / ImageThumbnail / 迁移)
+
+    /// 生成一张指定像素尺寸的纯色 PNG，用于图片相关测试
+    private func makePNGData(width: Int, height: Int) -> Data {
+        let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        )!
+        return rep.representation(using: .png, properties: [:])!
+    }
+
+    func testImageBlobStoreSaveLoadDelete() async {
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("pd-blob-\(UUID().uuidString)", isDirectory: true)
+        let store = ImageBlobStore(directory: dir)
+        let data = makePNGData(width: 8, height: 8)
+        let hash = Int.random(in: 1...9_000_000)
+
+        await store.save(data, for: hash)
+        let exists = await store.exists(for: hash)
+        XCTAssertTrue(exists, "保存后文件应存在")
+
+        let loaded = await store.load(for: hash)
+        XCTAssertEqual(loaded, data, "读回的数据应与写入一致")
+
+        await store.delete(for: hash)
+        let afterDelete = await store.load(for: hash)
+        XCTAssertNil(afterDelete, "删除后应读不到")
+    }
+
+    func testImageBlobStoreLoadMissingReturnsNil() async {
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("pd-blob-\(UUID().uuidString)", isDirectory: true)
+        let store = ImageBlobStore(directory: dir)
+        let missing = await store.load(for: 424242)
+        XCTAssertNil(missing, "不存在的 hash 应返回 nil 而非崩溃")
+    }
+
+    func testImageThumbnailMakeReturnsSizeAndData() {
+        let original = makePNGData(width: 1200, height: 600)
+        let result = ImageThumbnail.make(from: original)
+        XCTAssertNotNil(result, "应能生成缩略图")
+        guard let result else { return }
+        // 原图像素尺寸应被正确读出
+        XCTAssertEqual(Int(result.pixelSize.width), 1200)
+        XCTAssertEqual(Int(result.pixelSize.height), 600)
+        // 缩略图应是有效 PNG，且字节数远小于原图
+        XCTAssertNotNil(NSImage(data: result.thumbnail))
+        XCTAssertLessThan(result.thumbnail.count, original.count)
+    }
+
+    func testImageThumbnailPixelSizeOnly() {
+        let data = makePNGData(width: 333, height: 222)
+        let size = ImageThumbnail.pixelSize(of: data)
+        XCTAssertEqual(size?.width, 333)
+        XCTAssertEqual(size?.height, 222)
+    }
+
+    func testReplacingDataKeepsHashAndFields() {
+        let imgData = makePNGData(width: 10, height: 20)
+        let image = PasteboardModel(
+            pasteboardType: .png, data: imgData, showData: nil,
+            hashValue: imgData.hashValue, date: Date(),
+            appPath: "/A.app", appName: "A", dataString: "", length: 0,
+            imageWidth: 10, imageHeight: 20
+        )
+        let thumb = Data([0x01, 0x02, 0x03])
+        let replaced = image.replacingData(thumb)
+        XCTAssertEqual(replaced.data, thumb, "data 应被替换")
+        XCTAssertEqual(replaced.hashValue, image.hashValue, "hashValue 不变(仍是原图哈希)")
+        XCTAssertEqual(replaced.imageWidth, 10)
+        XCTAssertEqual(replaced.imageHeight, 20)
+        XCTAssertEqual(replaced, image, "相等性由 hashValue 决定，应相等")
+    }
+
+    func testSQLManagerImageSizeColumnRoundTrip() async {
+        let manager = await makeTempManager()
+        let hash = Int.random(in: 1_000_000...9_000_000)
+        let model = PasteboardModel(
+            pasteboardType: .png, data: Data([0x89, 0x50]), showData: nil,
+            hashValue: hash, date: Date(),
+            appPath: "", appName: "", dataString: "", length: 0,
+            imageWidth: 800, imageHeight: 450
+        )
+        await manager.insert(item: model)
+        let results = await manager.search(limit: 200, offset: 0)
+        let fetched = results.first(where: { $0.hashValue == hash })
+        XCTAssertEqual(fetched?.imageWidth, 800)
+        XCTAssertEqual(fetched?.imageHeight, 450)
     }
 }

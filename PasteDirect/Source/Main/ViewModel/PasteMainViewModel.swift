@@ -149,24 +149,41 @@ final class PasteMainViewModel {
     func pasteModel(_ model: PasteboardModel, isOriginal: Bool) {
         Log("isOriginal: \(isOriginal) data: \(model.dataString)")
         guard PasteUserDefaults.pasteDirect else {
-            PasteBoard.main.pasteData(model, isOriginal)
+            Task {
+                let ready = await resolvePasteModel(model)
+                PasteBoard.main.pasteData(ready, isOriginal)
+            }
             return
         }
-        // 先播放关闭动画，待窗口隐藏后再写剪贴板、激活前台并粘贴。
+        // 先加载好原图(图片已外置到文件)，再播放关闭动画，待窗口隐藏后写剪贴板、激活前台并粘贴。
         // 这样既不会因提前 activateFrontApp 打断动画，也不会在窗口可见时触发列表跳动刷新。
-        AppContext.coordinator.dismissWindow {
-            PasteBoard.main.pasteData(model, isOriginal)
-            AppContext.coordinator.activateFrontApp()
-            KeyboardShortcuts.postCmdVEvent()
+        Task {
+            let ready = await resolvePasteModel(model)
+            AppContext.coordinator.dismissWindow {
+                PasteBoard.main.pasteData(ready, isOriginal)
+                AppContext.coordinator.activateFrontApp()
+                KeyboardShortcuts.postCmdVEvent()
+            }
         }
     }
 
     func copyModel(_ model: PasteboardModel) {
-        // 同 pasteModel：等关闭动画结束、窗口隐藏后再写剪贴板，避免列表在可见时跳动。
-        AppContext.coordinator.dismissWindow {
-            PasteBoard.main.pasteData(model)
-            AppContext.coordinator.activateFrontApp()
+        // 同 pasteModel：先加载原图，再等关闭动画结束、窗口隐藏后写剪贴板，避免列表在可见时跳动。
+        Task {
+            let ready = await resolvePasteModel(model)
+            AppContext.coordinator.dismissWindow {
+                PasteBoard.main.pasteData(ready)
+                AppContext.coordinator.activateFrontApp()
+            }
         }
+    }
+
+    /// 把要粘贴/复制的 model 补全为可写入剪贴板的形态:
+    /// 图片的 data 在列表中是缩略图，需按需换回原图;非图片原样返回。
+    private func resolvePasteModel(_ model: PasteboardModel) async -> PasteboardModel {
+        guard model.type == .image else { return model }
+        let original = await store.loadOriginalImageData(for: model)
+        return original == model.data ? model : model.replacingData(original)
     }
 
     // MARK: - OCR
