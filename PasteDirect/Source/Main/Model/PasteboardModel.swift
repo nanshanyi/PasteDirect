@@ -51,6 +51,11 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
     /// 图片原图的像素尺寸。图片外置到文件后，不加载原图也能算预览尺寸和显示尺寸文案;非图片项为 nil
     let imageWidth: Int?
     let imageHeight: Int?
+    /// 置顶时间。nil 表示未置顶;非 nil 时该条恒排在未置顶项之前,多个置顶项按此时间倒序。
+    let pinnedDate: Date?
+
+    /// 是否已置顶
+    var isPinned: Bool { pinnedDate != nil }
 
     var type: PasteModelType {
         if hexColorString != nil {
@@ -81,7 +86,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
          length: Int,
          ocrText: String? = nil,
          imageWidth: Int? = nil,
-         imageHeight: Int? = nil)
+         imageHeight: Int? = nil,
+         pinnedDate: Date? = nil)
     {
         self.pasteboardType = pasteboardType
         self.data = data
@@ -95,6 +101,7 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         self.ocrText = ocrText
         self.imageWidth = imageWidth
         self.imageHeight = imageHeight
+        self.pinnedDate = pinnedDate
 
         if pasteboardType.isText() {
             let trimmed = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -118,7 +125,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
             length: length,
             ocrText: ocrText,
             imageWidth: imageWidth,
-            imageHeight: imageHeight
+            imageHeight: imageHeight,
+            pinnedDate: pinnedDate
         )
     }
 
@@ -136,7 +144,27 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
             length: length,
             ocrText: text,
             imageWidth: imageWidth,
-            imageHeight: imageHeight
+            imageHeight: imageHeight,
+            pinnedDate: pinnedDate
+        )
+    }
+
+    /// 返回更新了置顶状态的新实例。置顶传 `Date()`,取消置顶传 `nil`。
+    func withPinnedDate(_ date: Date?) -> PasteboardModel {
+        PasteboardModel(
+            pasteboardType: pasteboardType,
+            data: data,
+            showData: showData,
+            hashValue: hashValue,
+            date: self.date,
+            appPath: appPath,
+            appName: appName,
+            dataString: dataString,
+            length: length,
+            ocrText: ocrText,
+            imageWidth: imageWidth,
+            imageHeight: imageHeight,
+            pinnedDate: date
         )
     }
 
@@ -251,7 +279,8 @@ extension PasteboardModel {
             length: length,
             ocrText: ocrText,
             imageWidth: imageWidth,
-            imageHeight: imageHeight
+            imageHeight: imageHeight,
+            pinnedDate: pinnedDate
         )
     }
 }

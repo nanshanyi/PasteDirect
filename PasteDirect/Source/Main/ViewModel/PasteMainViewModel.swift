@@ -124,6 +124,11 @@ final class PasteMainViewModel {
         store.loadNextPage()
     }
 
+    /// 切换某条目的置顶状态(置顶↔取消置顶)
+    func togglePin(for model: PasteboardModel) {
+        store.setPinned(!model.isPinned, for: model)
+    }
+
     func item(at indexPath: IndexPath) -> PasteboardModel? {
         guard indexPath.item < items.count else { return nil }
         return items[indexPath.item]

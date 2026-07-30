@@ -26,6 +26,7 @@ actor PasteSQLManager {
     private let col_ocrText = Expression<String?>("ocrText")
     private let col_imgW = Expression<Int?>("imgW")
     private let col_imgH = Expression<Int?>("imgH")
+    private let col_pinnedDate = Expression<Date?>("pinnedDate")
 
     // MARK: - DB
 
@@ -71,19 +72,22 @@ actor PasteSQLManager {
 
     private func createTable() {
         do {
-            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length, col_ocrText, col_imgW, col_imgH] t in
+            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length, col_ocrText, col_imgW, col_imgH, col_pinnedDate] t in
                 t.column(col_id, primaryKey: true)
                 t.column(col_hashKey); t.column(col_type); t.column(col_data)
                 t.column(col_showData); t.column(col_date); t.column(col_appPath)
                 t.column(col_appName); t.column(col_dataString); t.column(col_length)
                 t.column(col_ocrText); t.column(col_imgW); t.column(col_imgH)
+                t.column(col_pinnedDate)
             })
             migrateAddOCRTextColumn()
             migrateAddImageSizeColumns()
+            migrateAddPinnedColumn()
             try db?.run(table.createIndex(col_date, ifNotExists: true))
             try db?.run(table.createIndex(col_appName, ifNotExists: true))
             try db?.run(table.createIndex(col_type, ifNotExists: true))
             try db?.run(table.createIndex(col_hashKey, ifNotExists: true))
+            try db?.run(table.createIndex(col_pinnedDate, ifNotExists: true))
             Log("Create Table Success")
         } catch {
             Log("Create Table Error: \(error)")
@@ -106,6 +110,16 @@ actor PasteSQLManager {
             try db?.run(table.addColumn(col_imgW))
             try db?.run(table.addColumn(col_imgH))
             Log("Migrated: added imgW/imgH columns")
+        } catch {
+            // 列已存在,符合预期
+        }
+    }
+
+    /// 旧库可能没有 pinnedDate 列(置顶特性引入),显式 ALTER TABLE;已存在则忽略
+    private func migrateAddPinnedColumn() {
+        do {
+            try db?.run(table.addColumn(col_pinnedDate))
+            Log("Migrated: added pinnedDate column")
         } catch {
             // 列已存在,符合预期
         }
@@ -153,7 +167,8 @@ extension PasteSQLManager {
             col_length <- item.length,
             col_ocrText <- item.ocrText,
             col_imgW <- item.imageWidth,
-            col_imgH <- item.imageHeight
+            col_imgH <- item.imageHeight,
+            col_pinnedDate <- item.pinnedDate
         )
         do {
             let rowId = try db?.run(insertQuery)
@@ -188,17 +203,30 @@ extension PasteSQLManager {
         }
     }
 
+    /// 按 hash 回写置顶状态。置顶传 Date(),取消置顶传 nil。
+    func updatePinned(_ date: Date?, forHash hashValue: Int) {
+        let query = table.filter(col_hashKey == hashValue)
+        do {
+            let count = try db?.run(query.update(col_pinnedDate <- date))
+            Log("更新置顶状态的条数为：\(String(describing: count))")
+        } catch {
+            Log("更新置顶状态失败：\(error)")
+        }
+    }
+
     // MARK: - 图片外置文件清理支持
 
     func deleteBeforeDate(_ deadline: Date) {
-        delete(filter: col_date < deadline)
+        // 置顶项豁免自动过期清理
+        // 置顶项(pinnedDate 非空)豁免过期清理;IS NULL 结果为 Bool?,?? false 收敛为 Bool
+        delete(filter: col_date < deadline && ((col_pinnedDate === Date?.none) ?? false))
     }
 
-    /// 查询某日期之前的图片行 hash(用于删除前先取得待清理的外置文件名)。
+    /// 查询某日期之前的图片行 hash(用于删除前先取得待清理的外置文件名)。置顶项豁免。
     func imageHashesBeforeDate(_ deadline: Date) -> [Int] {
         let imageTypes = [PasteboardType.png.rawValue, PasteboardType.tiff.rawValue]
         let typeFilter = imageTypes.dropFirst().reduce(col_type == imageTypes[0]) { $0 || col_type == $1 }
-        let query = table.select(col_hashKey).filter(col_date < deadline && typeFilter)
+        let query = table.select(col_hashKey).filter(col_date < deadline && typeFilter && ((col_pinnedDate === Date?.none) ?? false))
         do {
             guard let rows = try db?.prepare(query) else { return [] }
             return rows.compactMap { try? $0.get(col_hashKey) }
@@ -262,8 +290,9 @@ extension PasteSQLManager {
             return []
         }
         var query = table
-            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length, col_ocrText, col_imgW, col_imgH)
-            .order(col_date.desc)
+            .select(rowid, col_id, col_hashKey, col_type, col_data, col_date, col_appPath, col_appName, col_dataString, col_showData, col_length, col_ocrText, col_imgW, col_imgH, col_pinnedDate)
+            // 置顶项恒在前(pinnedDate 非空且倒序,NULL 在 DESC 下自动垫底),组内再按 date 倒序
+            .order(col_pinnedDate.desc, col_date.desc)
         if let f = filter {
             query = query.filter(f)
         }
@@ -294,7 +323,8 @@ extension PasteSQLManager {
                     length: (try? row.get(col_length)) ?? 0,
                     ocrText: (try? row.get(col_ocrText)) ?? nil,
                     imageWidth: (try? row.get(col_imgW)) ?? nil,
-                    imageHeight: (try? row.get(col_imgH)) ?? nil
+                    imageHeight: (try? row.get(col_imgH)) ?? nil,
+                    pinnedDate: (try? row.get(col_pinnedDate)) ?? nil
                 )
             }
         } catch {

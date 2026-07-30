@@ -161,8 +161,9 @@ extension PasteMainViewController {
 
         scrollView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
-            make.bottom.equalToSuperview().offset(-Layout.scrollViewBottom)
-            make.top.equalTo(searchBar.snp.bottom).offset(Layout.scrollViewTop)
+            // 上下各收 itemShadowMargin,抵消卡片内缩带来的额外间距,回到原视觉间距
+            make.bottom.equalToSuperview().offset(-Layout.scrollViewBottom + Layout.itemShadowMargin)
+            make.top.equalTo(searchBar.snp.bottom).offset(Layout.scrollViewTop - Layout.itemShadowMargin)
         }
 
         emptyStateView.snp.makeConstraints { make in
@@ -372,14 +373,32 @@ extension PasteMainViewController {
 
     private func updateItemSize(for height: CGFloat) {
         guard let flowLayout = collectionView.collectionViewLayout as? NSCollectionViewFlowLayout else { return }
+
+        // resize 会改变 item 宽度→内容总宽变化,记录当前横向滚动进度比例,重排后按比例还原,
+        // 避免拖动高度时列表横向跳动。
+        let clipView = scrollView.contentView
+        let oldScrollableWidth = collectionView.bounds.width - clipView.bounds.width
+        let scrollProgress = oldScrollableWidth > 0 ? clipView.bounds.origin.x / oldScrollableWidth : 0
+
         let newSize = Layout.dynamicItemSize(for: height)
         flowLayout.itemSize = newSize
         flowLayout.invalidateLayout()
+        collectionView.layoutSubtreeIfNeeded()
 
-        let compact = newSize.height < Layout.compactItemHeight
+        // 按原进度比例还原横向偏移
+        let newScrollableWidth = collectionView.bounds.width - clipView.bounds.width
+        if newScrollableWidth > 0 {
+            let restoredX = min(max(scrollProgress * newScrollableWidth, 0), newScrollableWidth)
+            clipView.scroll(to: NSPoint(x: restoredX, y: clipView.bounds.origin.y))
+            scrollView.reflectScrolledClipView(clipView)
+        }
+
+        // 卡片高度(扣除上下阴影留白),topView 比例/字号/compact 判断都按卡片高
+        let cardHeight = newSize.height - Layout.itemShadowMargin * 2
+        let compact = cardHeight < Layout.compactItemHeight
         for indexPath in collectionView.indexPathsForVisibleItems() {
             if let item = collectionView.item(at: indexPath) as? PasteCollectionViewItem {
-                item.updateLayout(compact: compact, itemHeight: newSize.height)
+                item.updateLayout(compact: compact, itemHeight: cardHeight)
             }
         }
     }
@@ -496,8 +515,9 @@ extension PasteMainViewController: NSCollectionViewDataSource {
             cItem.updateItem(model: model)
         }
         if let flowLayout = collectionView.collectionViewLayout as? NSCollectionViewFlowLayout {
-            let currentItemHeight = flowLayout.itemSize.height
-            cItem.updateLayout(compact: currentItemHeight < Layout.compactItemHeight, itemHeight: currentItemHeight)
+            // itemSize.height 含上下阴影留白,扣除后才是卡片高度
+            let cardHeight = flowLayout.itemSize.height - Layout.itemShadowMargin * 2
+            cItem.updateLayout(compact: cardHeight < Layout.compactItemHeight, itemHeight: cardHeight)
         }
         if viewModel.selectedIndexPath == indexPath {
             cItem.isSelected = true
@@ -546,6 +566,10 @@ extension PasteMainViewController: PasteCollectionViewItemDelegate {
 
     func pasteOCRText(_ item: PasteboardModel) {
         viewModel.pasteOCRText(from: item)
+    }
+
+    func togglePin(_ item: PasteboardModel) {
+        viewModel.togglePin(for: item)
     }
 }
 
