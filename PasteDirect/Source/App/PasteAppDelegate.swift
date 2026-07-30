@@ -54,6 +54,8 @@ extension PasteAppDelegate: NSApplicationDelegate {
 
 extension PasteAppDelegate {
     private func initPaste() {
+        /// 数据迁移：必须在任何存储组件初始化之前执行
+        DataMigration.migrateIfNeeded()
         /// 设置状态栏
         setStatusItem()
         /// 开启剪贴板监听

@@ -33,17 +33,17 @@ actor PasteSQLManager {
     private var db: Connection?
     private var table: Table
 
-    /// - Parameter dbPath: 数据库文件路径。默认 nil 走生产路径(Documents/paste/paste.sqlite3);
+    /// - Parameter dbPath: 数据库文件路径。默认 nil 走生产路径(Application Support/paste/paste.sqlite3);
     ///   测试可传入临时路径,避免污染用户的真实剪贴板历史库。
     init(dbPath: String? = nil) {
         let path: String
         if let dbPath {
             path = dbPath
         } else {
-            let docDir = NSSearchPathForDirectoriesInDomains(
-                .documentDirectory, .userDomainMask, true
+            let appSupportDir = NSSearchPathForDirectoriesInDomains(
+                .applicationSupportDirectory, .userDomainMask, true
             ).first ?? NSTemporaryDirectory()
-            path = docDir.appending("/paste/paste.sqlite3")
+            path = appSupportDir.appending("/paste/paste.sqlite3")
         }
         let dirPath = (path as NSString).deletingLastPathComponent
         var isDir = ObjCBool(false)

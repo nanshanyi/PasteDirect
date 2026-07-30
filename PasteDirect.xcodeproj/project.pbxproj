@@ -15,6 +15,7 @@
 		CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */; };
 		CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */; };
 		CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */; };
+		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
 		CB8423112FCD6DC100DCFDAA /* ImageOCRExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */; };
 		CBAAAA0000000000DCFDAA03 /* ImageThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
@@ -119,6 +120,7 @@
 		CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRCache.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlobStore.swift; sourceTree = "<group>"; };
+		CBAAAA0000000000DCFDAB02 /* DataMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigration.swift; sourceTree = "<group>"; };
 		CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOCRExtractor.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnail.swift; sourceTree = "<group>"; };
 		CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionView.swift; sourceTree = "<group>"; };
@@ -323,6 +325,7 @@
 			children = (
 				CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */,
 				CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */,
+				CBAAAA0000000000DCFDAB02 /* DataMigration.swift */,
 				CBD1CA9E2F87B2A6003ACBD7 /* ColorCache.swift */,
 				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
 				CBD1CAA02F87B2A6003ACBD7 /* PasteDataStore.swift */,
@@ -599,6 +602,7 @@
 				CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */,
 				CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */,
 				CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */,
+				CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */,
 				CBD1CACE2F87B2A6003ACBD7 /* PasteSettingWindowController.swift in Sources */,
 				CBD1CACF2F87B2A6003ACBD7 /* NSAttributeString+Extension.swift in Sources */,
 				CBD1CAD02F87B2A6003ACBD7 /* HexColorValidator.swift in Sources */,

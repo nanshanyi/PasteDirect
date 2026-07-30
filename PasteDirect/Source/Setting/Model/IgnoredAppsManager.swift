@@ -36,7 +36,7 @@ class IgnoredAppsManager: ObservableObject {
     }
     
     private var defaultStorageURL: URL {
-        let targetURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let targetURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         return targetURL.appendingPathComponent("appItems.json")
     }
     
