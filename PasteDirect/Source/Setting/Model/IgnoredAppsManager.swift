@@ -24,15 +24,23 @@ class IgnoredAppsManager: ObservableObject {
     private func loadIgnoredApps() {
         if PasteUserDefaults.appAlreadyLaunched {
             ignoredAppItems = load()
-            ignoredApps = ignoredAppItems
-                .lazy.map{URL.init(fileURLWithPath: $0.path)}
-                .compactMap(getAppFromURL)
+            if ignoredAppItems.isEmpty,
+               !FileManager.default.fileExists(atPath: defaultStorageURL.path) {
+                // 从未配置过忽略列表(或文件丢失):回退内置默认并落盘,
+                // 保证 Passwords/钥匙串等密码类应用始终被忽略。
+                // 文件存在但列表为空 = 用户主动清空,尊重用户选择,不回退。
+                ignoredAppItems = defaultApps
+                save()
+            }
         } else {
             ignoredAppItems = defaultApps
-            ignoredApps = ignoredAppItems
-                .lazy.map{URL.init(fileURLWithPath: $0.path)}
-                .compactMap(getAppFromURL)
+            // 首次启动把默认列表落盘。否则下次启动 appAlreadyLaunched 置位后
+            // load() 读不到文件会返回空,内置的密码类应用(Passwords/钥匙串)保护永久丢失。
+            save()
         }
+        ignoredApps = ignoredAppItems
+            .lazy.map{URL.init(fileURLWithPath: $0.path)}
+            .compactMap(getAppFromURL)
     }
     
     private var defaultStorageURL: URL {

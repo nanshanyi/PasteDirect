@@ -426,12 +426,22 @@ extension PasteCollectionViewItem {
     }
 
     private func setViewMenu() {
+        // 只挂一个空菜单并设 delegate;菜单项在每次右键弹出时由 menuNeedsUpdate 现构建,
+        // 保证 frontAppName、纯文本开关等运行时状态始终读到最新值(cell 复用后不会用旧菜单)。
         let menu = NSMenu()
+        menu.delegate = self
+        view.menu = menu
+    }
+
+    /// 每次右键弹出前重建菜单项,读取当时的前台应用名与纯文本开关。
+    private func rebuildMenu(_ menu: NSMenu) {
+        menu.removeAllItems()
         if let name = AppContext.coordinator.frontAppName {
             let item = NSMenuItem(title: String(localized: "Paste to \(name)"), action: #selector(pasteOriginalTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
-        if pModel?.type == .string {
+        // "始终以纯文本粘贴"开启时,默认粘贴已是纯文本,该菜单项冗余,隐藏之。
+        if pModel?.type == .string, !PasteUserDefaults.pasteOnlyText {
             let item1 = NSMenuItem(title: String(localized: "Paste as Plain Text"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
@@ -463,7 +473,14 @@ extension PasteCollectionViewItem {
         let item3 = NSMenuItem(title: String(localized: "Delete"), action: #selector(deleteItem), keyEquivalent: "d")
         item3.keyEquivalentModifierMask = .init(rawValue: 0)
         menu.addItem(item3)
-        view.menu = menu
+    }
+}
+
+// MARK: - NSMenuDelegate
+
+extension PasteCollectionViewItem: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        rebuildMenu(menu)
     }
 }
 
