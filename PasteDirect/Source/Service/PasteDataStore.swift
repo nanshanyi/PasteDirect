@@ -201,14 +201,21 @@ extension PasteDataStore {
     func insertModel(_ model: PasteboardModel) {
         needRefresh = true
         var list = dataList.value
+        // 同内容旧条目若已置顶,新捕获的条目继承置顶状态,避免去重替换时顶掉用户的置顶
+        // (与 PasteSQLManager.insert 的 DB 侧继承保持一致)。
+        var newModel = model
+        if let existing = list.first(where: { $0 == model }),
+           let pinned = existing.pinnedDate {
+            newModel = model.withPinnedDate(pinned)
+        }
         list.removeAll(where: { $0 == model })
-        list.insert(model, at: 0)
+        list.insert(newModel, at: 0)
         // 按置顶优先重排,保证新条目落在置顶区之后而非盖到置顶项上面
         list = sortedByPinThenDate(list)
         list = Array(list.prefix(pageSize))
         dataList.send(list)
         Task {
-            await sqlManager.insert(item: model)
+            await sqlManager.insert(item: newModel)
             await updateTotalCount()
         }
     }

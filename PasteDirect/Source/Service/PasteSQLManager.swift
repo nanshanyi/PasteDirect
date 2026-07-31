@@ -151,6 +151,14 @@ extension PasteSQLManager {
     }
 
     func insert(item: PasteboardModel) {
+        // 重新捕获相同内容时先删旧行再插新行;旧行若已置顶则继承置顶状态,
+        // 否则去重一旦命中,用户的置顶项会被无置顶的新行顶掉。
+        var pinnedDate = item.pinnedDate
+        if let oldRow = try? db?.pluck(table.filter(col_hashKey == item.hashValue).select(col_pinnedDate)),
+           let oldPinnedDate = try? oldRow.get(col_pinnedDate) {
+            pinnedDate = oldPinnedDate
+        }
+
         // 先删除同 hash 的旧记录
         let deleteQuery = table.filter(col_hashKey == item.hashValue)
         _ = try? db?.run(deleteQuery.delete())
@@ -168,7 +176,7 @@ extension PasteSQLManager {
             col_ocrText <- item.ocrText,
             col_imgW <- item.imageWidth,
             col_imgH <- item.imageHeight,
-            col_pinnedDate <- item.pinnedDate
+            col_pinnedDate <- pinnedDate
         )
         do {
             let rowId = try db?.run(insertQuery)

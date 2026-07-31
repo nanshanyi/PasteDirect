@@ -410,4 +410,54 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertEqual(fetched?.imageWidth, 800)
         XCTAssertEqual(fetched?.imageHeight, 450)
     }
+
+    // MARK: - ContentHash (稳定内容哈希)
+
+    func testContentHashDeterministic() {
+        let data = "同一段内容".data(using: .utf8)!
+        XCTAssertEqual(data.contentHash, data.contentHash)
+        let other = "另一段内容".data(using: .utf8)!
+        XCTAssertNotEqual(data.contentHash, other.contentHash)
+    }
+
+    func testContentHashStableAcrossInstances() {
+        // 模拟跨进程:独立构造的相同 Data 必须算出相同哈希(不依赖进程随机种子)
+        let a = Data("abc123".utf8).contentHash
+        let b = Data("abc123".utf8).contentHash
+        XCTAssertEqual(a, b)
+    }
+
+    func testContentHashNonNegative() {
+        let data = Data((0..<256).map { UInt8($0) })
+        XCTAssertGreaterThanOrEqual(data.contentHash, 0)
+    }
+
+    func testSQLManagerInsertInheritsPinnedDate() async {
+        let manager = await makeTempManager()
+        let data = "置顶内容-\(UUID().uuidString)".data(using: .utf8)!
+        let hash = data.contentHash
+
+        // 先插入一条并置顶
+        let pinned = PasteboardModel(
+            pasteboardType: .string, data: data, showData: nil,
+            hashValue: hash, date: Date(),
+            appPath: "", appName: "", dataString: "置顶内容", length: 4
+        )
+        await manager.insert(item: pinned)
+        await manager.updatePinned(Date(), forHash: hash)
+
+        // 重新捕获相同内容(新捕获恒无置顶),去重插入
+        let recaptured = PasteboardModel(
+            pasteboardType: .string, data: data, showData: nil,
+            hashValue: hash, date: Date(),
+            appPath: "", appName: "", dataString: "置顶内容", length: 4
+        )
+        await manager.insert(item: recaptured)
+
+        // 去重插入后应仍保持置顶,且只有一行
+        let results = await manager.search(limit: 100, offset: 0)
+        let fetched = results.filter { $0.hashValue == hash }
+        XCTAssertEqual(fetched.count, 1, "去重插入后应只有一行")
+        XCTAssertNotNil(fetched.first?.pinnedDate, "去重插入应继承旧行的置顶状态")
+    }
 }
