@@ -187,6 +187,43 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertGreaterThan(size, 0)
     }
 
+    /// LIKE 通配符转义:搜索关键字里的 % / _ 应按字面匹配,不当作通配符
+    func testSQLManagerSearchEscapesLikeWildcards() async {
+        let manager = await makeTempManager()
+        let tag = UUID().uuidString
+        // 一条含字面 "%" 的内容,一条不含 "%" 的普通内容(共享 tag 便于隔离本用例数据)
+        let withPercent = makeTextModel(string: "discount 50% off \(tag)")
+        let plain = makeTextModel(string: "plain text \(tag)")
+        await manager.insert(item: withPercent)
+        await manager.insert(item: plain)
+
+        // 搜 "50%":未转义时 % 会通配,plain 那条也可能被 "50" 前缀匹配到;
+        // 正确行为是只命中真正含 "50%" 字面的那条
+        let results = await manager.searchWithParams(
+            keyword: "50%", state: .empty, limit: 100, offset: 0
+        )
+        let hashes = Set(results.map { $0.hashValue })
+        XCTAssertTrue(hashes.contains(withPercent.hashValue), "应命中含字面 50% 的条目")
+        XCTAssertFalse(hashes.contains(plain.hashValue), "不应把 % 当通配符匹配到无关条目")
+    }
+
+    /// LIKE 通配符转义:单独搜 "_" 不应匹配任意单字符内容
+    func testSQLManagerSearchEscapesUnderscore() async {
+        let manager = await makeTempManager()
+        let tag = UUID().uuidString
+        let withUnderscore = makeTextModel(string: "file_name \(tag)")
+        let plain = makeTextModel(string: "filename \(tag)")
+        await manager.insert(item: withUnderscore)
+        await manager.insert(item: plain)
+
+        let results = await manager.searchWithParams(
+            keyword: "file_name", state: .empty, limit: 100, offset: 0
+        )
+        let hashes = Set(results.map { $0.hashValue })
+        XCTAssertTrue(hashes.contains(withUnderscore.hashValue), "应命中含字面下划线的条目")
+        XCTAssertFalse(hashes.contains(plain.hashValue), "不应把 _ 当作任意单字符通配符")
+    }
+
     // MARK: - LoadState
 
     func testLoadStateSendable() {

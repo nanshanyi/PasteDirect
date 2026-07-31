@@ -16,7 +16,7 @@ actor OCRCache {
     }
 
     private var cache = [Int: CacheEntry]()
-    private var ongoingTasks = [Int: Task<String?, Never>]()
+    private var ongoingTasks = [Int: Task<OCRResult, Never>]()
 
     @discardableResult
     func getOrExtract(for model: PasteboardModel) async -> String? {
@@ -32,11 +32,12 @@ actor OCRCache {
         }
 
         if let existing = ongoingTasks[key] {
-            return await existing.value
+            if case .text(let text) = await existing.value { return text }
+            return nil
         }
 
         // 直接把原始图片 Data 交给后台线程,在解码阶段降采样后识别(省一次全尺寸 NSImage 构造)
-        let task = Task<String?, Never> { [data = model.data] in
+        let task = Task<OCRResult, Never> { [data = model.data] in
             await Task.detached(priority: .userInitiated) {
                 ImageOCRExtractor.extractText(from: data)
             }.value
@@ -45,7 +46,17 @@ actor OCRCache {
         ongoingTasks[key] = task
         let result = await task.value
         ongoingTasks.removeValue(forKey: key)
-        cache[key] = result.map(CacheEntry.text) ?? CacheEntry.none
-        return result
+
+        switch result {
+        case .text(let text):
+            cache[key] = .text(text)
+            return text
+        case .empty:
+            cache[key] = CacheEntry.none
+            return nil
+        case .failed:
+            // 偶发失败不缓存,允许下次重试
+            return nil
+        }
     }
 }

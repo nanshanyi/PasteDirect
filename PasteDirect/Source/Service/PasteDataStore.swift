@@ -120,6 +120,8 @@ extension PasteDataStore {
         currentKeyword = ""
         currentFilterState = .empty
         isColorFilter = false
+        // 重置列表时同时取消进行中的搜索,避免旧搜索结果回来覆盖默认列表
+        searchTask?.cancel()
         loadTask?.cancel()
         loadState = .loading
         dbOffset = pageSize

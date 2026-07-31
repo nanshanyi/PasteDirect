@@ -343,11 +343,21 @@ extension PasteSQLManager {
 
     // MARK: - Private Filter Builders
 
+    /// 转义 LIKE 模式里的 % 和 _,使其按字面匹配。顺序要点:先转义 `\` 本身再转义 % 和 _。
+    /// 配合 like(escape: "\\") 使用。
+    private func escapeLikePattern(_ keyword: String) -> String {
+        keyword
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
+    }
+
     private func makeSearchFilter(keyword: String) -> Expression<Bool> {
         // 关键字匹配 应用名 / 文本内容 / 图片 OCR 文本(让图里的字也能被搜到)
-        col_appName.like("%\(keyword)%")
-            || col_dataString.like("%\(keyword)%")
-            || (col_ocrText ?? "").like("%\(keyword)%")
+        let pattern = "%\(escapeLikePattern(keyword))%"
+        return col_appName.like(pattern, escape: "\\")
+            || col_dataString.like(pattern, escape: "\\")
+            || (col_ocrText ?? "").like(pattern, escape: "\\")
     }
 
     private func makeAppFilter(_ app: String) -> Expression<Bool> {

@@ -9,6 +9,16 @@ import AppKit
 import ImageIO
 import Vision
 
+/// OCR 识别结果的三态,用于区分「稳定结果」与「偶发失败」,让缓存能正确决定是否允许重试。
+enum OCRResult: Sendable {
+    /// 识别到文字
+    case text(String)
+    /// 识别成功,但图中确无文字(稳定结果,可缓存,无需重试)
+    case empty
+    /// 解码或识别失败(偶发,不应缓存,应允许后续重试)
+    case failed
+}
+
 /// 用 Vision 框架对图片做文字识别(本地,无网络请求)
 enum ImageOCRExtractor {
     /// 识别用的最长边上限:解码阶段就降采样到这个尺寸,避免对超大截图做识别过慢。
@@ -20,20 +30,20 @@ enum ImageOCRExtractor {
 
     /// 同步阻塞 Vision 调用,放进 `Task.detached` / 自定义 actor 内部使用。
     /// 直接吃原始图片 `Data`,在解码阶段降采样(比先构造全尺寸 NSImage 再缩放更省内存、更快)。
-    static func extractText(from data: Data) -> String? {
-        guard let cgImage = downsampledCGImage(from: data) else { return nil }
+    static func extractText(from data: Data) -> OCRResult {
+        guard let cgImage = downsampledCGImage(from: data) else { return .failed }
         return recognizeText(in: cgImage)
     }
 
     /// 兜底:仅有 NSImage 时使用(无法走解码期降采样,按原始像素识别)
-    static func extractText(from image: NSImage) -> String? {
-        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
+    static func extractText(from image: NSImage) -> OCRResult {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return .failed }
         return recognizeText(in: cgImage)
     }
 
     // MARK: - Vision 识别核心
 
-    private static func recognizeText(in cgImage: CGImage) -> String? {
+    private static func recognizeText(in cgImage: CGImage) -> OCRResult {
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate
         request.usesLanguageCorrection = true
@@ -45,13 +55,13 @@ enum ImageOCRExtractor {
             try handler.perform([request])
         } catch {
             Log("OCR perform failed: \(error)")
-            return nil
+            return .failed
         }
 
-        guard let observations = request.results, !observations.isEmpty else { return nil }
+        guard let observations = request.results, !observations.isEmpty else { return .empty }
         let lines = observations.compactMap { $0.topCandidates(1).first?.string }
         let joined = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-        return joined.isEmpty ? nil : joined
+        return joined.isEmpty ? .empty : .text(joined)
     }
 
     // MARK: - 解码期降采样

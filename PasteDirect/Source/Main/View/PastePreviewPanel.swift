@@ -7,6 +7,7 @@
 
 import AppKit
 import Carbon
+import ImageIO
 import SnapKit
 import VisionKit
 
@@ -335,8 +336,13 @@ final class PastePreviewViewController: NSViewController {
         let token = imageAnalysisToken
         Task { [weak self] in
             let originalData = await PasteDataStore.main.loadOriginalImageData(for: model)
-            guard let self, self.imageAnalysisToken == token,
-                  let image = NSImage(data: originalData) else { return }
+            // 原图可能有数 MB,解码放后台线程避免主线程掉帧;CGImage 可 Sendable,回主线程包 NSImage
+            let decoded = await Task.detached(priority: .userInitiated) { () -> CGImage? in
+                guard let source = CGImageSourceCreateWithData(originalData as CFData, nil) else { return nil }
+                return CGImageSourceCreateImageAtIndex(source, 0, nil)
+            }.value
+            guard let self, self.imageAnalysisToken == token, let decoded else { return }
+            let image = NSImage(cgImage: decoded, size: .zero)
             self.imageView.image = image
             // 原图就绪后做系统级文字识别，使图片中的文字可被选中/复制
             await self.analyzeImageForLiveText(image, token: token)
