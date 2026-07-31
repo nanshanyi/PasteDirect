@@ -6,6 +6,23 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.5.0] - 2026-07-31
+
+### Added
+- Pin clipboard items: pin frequently used items from the right-click menu. Pinned items always stay at the top of the list and are exempt from history expiration cleanup.
+- The "Always paste as plain text" toggle now works: when enabled, pasted text has its formatting stripped.
+
+### Changed
+- Tidied up storage locations: the database, images, and ignore list have moved from the sandbox Documents folder to the more semantically correct Application Support (migrated automatically in-app, no manual steps needed).
+- Smoother image preview loading: decoding of large originals moved to a background thread.
+- The right-click menu is now rebuilt each time it opens, so "Paste to X" always shows the correct target after switching the frontmost app.
+
+### Fixed
+- Fixed identical content being recorded again after a restart, with old entries that couldn't be deleted (now uses a stable content hash for deduplication).
+- Fixed built-in password apps (e.g. Passwords, Keychain Access) losing their ignore protection after the second launch.
+- Fixed search keywords containing `%` or `_` being treated as wildcards and matching unrelated content.
+- Fixed image text recognition (OCR) not retrying within the same session after an occasional failure.
+
 ## [3.4.0] - 2026-06-22
 
 ### Added
