@@ -16,14 +16,14 @@ actor ImageBlobStore {
 
     private let directory: URL
 
-    /// - Parameter directory: 存储目录，默认 `~/Documents/paste/images`。测试可注入临时目录。
+    /// - Parameter directory: 存储目录，默认 `~/Library/Application Support/paste/images`。测试可注入临时目录。
     init(directory: URL? = nil) {
         if let directory {
             self.directory = directory
         } else {
-            let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
                 ?? URL(fileURLWithPath: NSTemporaryDirectory())
-            self.directory = docDir.appendingPathComponent("paste/images", isDirectory: true)
+            self.directory = appSupportDir.appendingPathComponent("paste/images", isDirectory: true)
         }
         createDirectoryIfNeeded()
     }

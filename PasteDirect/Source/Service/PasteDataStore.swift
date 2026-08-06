@@ -120,6 +120,8 @@ extension PasteDataStore {
         currentKeyword = ""
         currentFilterState = .empty
         isColorFilter = false
+        // 重置列表时同时取消进行中的搜索,避免旧搜索结果回来覆盖默认列表
+        searchTask?.cancel()
         loadTask?.cancel()
         loadState = .loading
         dbOffset = pageSize
@@ -201,13 +203,48 @@ extension PasteDataStore {
     func insertModel(_ model: PasteboardModel) {
         needRefresh = true
         var list = dataList.value
+        // 同内容旧条目若已置顶,新捕获的条目继承置顶状态,避免去重替换时顶掉用户的置顶
+        // (与 PasteSQLManager.insert 的 DB 侧继承保持一致)。
+        var newModel = model
+        if let existing = list.first(where: { $0 == model }),
+           let pinned = existing.pinnedDate {
+            newModel = model.withPinnedDate(pinned)
+        }
         list.removeAll(where: { $0 == model })
-        list.insert(model, at: 0)
+        list.insert(newModel, at: 0)
+        // 按置顶优先重排,保证新条目落在置顶区之后而非盖到置顶项上面
+        list = sortedByPinThenDate(list)
         list = Array(list.prefix(pageSize))
         dataList.send(list)
         Task {
-            await sqlManager.insert(item: model)
+            await sqlManager.insert(item: newModel)
             await updateTotalCount()
+        }
+    }
+
+    /// 列表排序规则(与 DB 查询一致):置顶项在前(按 pinnedDate 倒序),其余按 date 倒序。
+    private func sortedByPinThenDate(_ list: [PasteboardModel]) -> [PasteboardModel] {
+        list.sorted { a, b in
+            switch (a.pinnedDate, b.pinnedDate) {
+            case let (l?, r?): return l > r          // 都置顶,按置顶时间倒序
+            case (_?, nil): return true              // 仅 a 置顶,a 在前
+            case (nil, _?): return false             // 仅 b 置顶,b 在前
+            case (nil, nil): return a.date > b.date   // 都不置顶,按时间倒序
+            }
+        }
+    }
+
+    /// 设置/取消某条目的置顶状态。更新内存列表并异步回写 DB。
+    func setPinned(_ pinned: Bool, for model: PasteboardModel) {
+        let newDate: Date? = pinned ? Date() : nil
+        var list = dataList.value
+        if let idx = list.firstIndex(where: { $0.hashValue == model.hashValue }) {
+            list[idx] = list[idx].withPinnedDate(newDate)
+            list = sortedByPinThenDate(list)
+            dataList.send(list)
+        }
+        Task {
+            await sqlManager.updatePinned(newDate, forHash: model.hashValue)
         }
     }
 
@@ -267,7 +304,8 @@ extension PasteDataStore {
             return
         }
         if let deadDate = Calendar.current.date(byAdding: dateCom, to: Date()) {
-            let filtered = dataList.value.filter { $0.date > deadDate }
+            // 置顶项豁免过期清理
+            let filtered = dataList.value.filter { $0.date > deadDate || $0.isPinned }
             let hasExpired = filtered.count < dataList.value.count
             if hasExpired {
                 dataList.send(filtered)

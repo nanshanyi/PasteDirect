@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.4.0-green" alt="Version 3.4.0">
+  <img src="https://img.shields.io/badge/version-3.5.0-green" alt="Version 3.5.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -31,7 +31,8 @@
 - 🏷️ **多维筛选** — 按类型（文本/图片/颜色）、来源应用、时间范围组合筛选，筛选条件以 tag 形式贴合展示
 - 👁️ **空格预览** — 按空格键快速预览选中内容，支持文本、图片、颜色详情，图片预览中可直接选取文字
 - 🖱️ **多种粘贴方式** — 双击粘贴、回车粘贴、拖拽到目标位置
-- 📝 **纯文本模式** — 一键去除富文本格式，粘贴为纯文本
+- 📌 **条目置顶** — 右键将常用条目置顶，始终排在列表最前，且不受历史清理影响
+- 📝 **纯文本模式** — 一键去除富文本格式，粘贴为纯文本；也可在设置中开启「始终以纯文本粘贴」
 - 📐 **面板高度可调** — 拖拽顶部边缘调整面板高度，内容等比缩放
 - 🧹 **自动清理** — 可设置保留时长：1 天 / 1 周 / 1 月 / 永久
 - 🚫 **应用过滤** — 可忽略特定应用（如钥匙串、密码管理器）的剪贴板内容

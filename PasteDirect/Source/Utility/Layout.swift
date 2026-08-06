@@ -38,6 +38,9 @@ enum Layout {
     static let itemTopViewHeight: CGFloat = 60
     static let itemBottomViewHeight: CGFloat = 24
     static let itemBottomOffset: CGFloat = 24
+    /// 卡片上下内缩留白,给阴影(blur+offset)留出不被 scrollView 垂直裁切的空间。
+    /// 仅上下:水平滚动列表只在垂直方向裁切,左右贴边由 lineSpacing 控制间距。
+    static let itemShadowMargin: CGFloat = 6
     static let headerFooterSize = NSSize(width: 0, height: itemSize.height)
     static let edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: -20, right: 0)
 
@@ -70,8 +73,10 @@ enum Layout {
     }
 
     static func dynamicItemSize(for height: CGFloat) -> NSSize {
-        let itemHeight = height - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
-        return NSSize(width: itemHeight, height: itemHeight)
+        // 卡片边长(正方形),与未加阴影留白前保持一致
+        let cardSide = height - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
+        // cell 宽 = 卡片宽(左右贴边);cell 高 = 卡片高 + 上下阴影留白,cell 内卡片再内缩回正方形
+        return NSSize(width: cardSide, height: cardSide + itemShadowMargin * 2)
     }
 
     static func dynamicTopViewHeight(for itemHeight: CGFloat) -> CGFloat {
@@ -82,5 +87,11 @@ enum Layout {
     static func dynamicTypeFontSize(for itemHeight: CGFloat) -> CGFloat {
         let size = itemHeight * 18 / 260
         return min(max(size, 14), 18)
+    }
+
+    /// 置顶徽章尺寸随 item 高度缩放(基准 26pt @ 260),小面板时同比缩小
+    static func dynamicPinBadgeSize(for itemHeight: CGFloat) -> CGFloat {
+        let size = itemHeight * 26 / 260
+        return min(max(size, 16), 26)
     }
 }

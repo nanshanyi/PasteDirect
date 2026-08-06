@@ -19,6 +19,7 @@ protocol PasteCollectionViewItemDelegate: NSObjectProtocol {
     func copyItem(_ item: PasteboardModel)
     func copyOCRText(_ item: PasteboardModel)
     func pasteOCRText(_ item: PasteboardModel)
+    func togglePin(_ item: PasteboardModel)
 }
 
 let maxLength = 300
@@ -29,6 +30,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
     private var isAttribute: Bool = true
     private var appearanceCancellable: AnyCancellable?
     private var topViewHeightConstraint: NSLayoutConstraint?
+    private var pinBadgeSizeConstraints: [NSLayoutConstraint] = []
     private(set) var isCompact: Bool = false
 
     // compact 模式约束
@@ -56,6 +58,39 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
     private lazy var iconImageView = NSImageView().then {
         $0.alignment = .center
         $0.imageScaling = .scaleAxesIndependently
+    }
+
+    /// 置顶标记:卡片右上角的圆形徽章(琥珀橙圆底 + 白色图钉),仅置顶项显示。
+    /// 此为基准尺寸(@ item 260),实际尺寸由 updateLayout 按面板高度动态覆盖。
+    private static let pinBadgeSize: CGFloat = 26
+    /// 徽章底色:琥珀橙,置顶/收藏类标记的经典色,不与系统主题色/头部动态底色撞色
+    private static let pinBadgeColor = NSColor("#FF9500") ?? .systemOrange
+
+    private lazy var pinBadge = NSView().then {
+        $0.wantsLayer = true
+        $0.layer?.backgroundColor = Self.pinBadgeColor.cgColor
+        $0.layer?.cornerRadius = Self.pinBadgeSize / 2
+        $0.layer?.borderColor = NSColor.white.withAlphaComponent(0.9).cgColor
+        $0.layer?.borderWidth = 1.5
+        // 轻微投影,让徽章从彩色头部上浮起来
+        $0.shadow = NSShadow().then { s in
+            s.shadowColor = NSColor.black.withAlphaComponent(0.35)
+            s.shadowBlurRadius = 3
+            s.shadowOffset = NSSize(width: 0, height: -1)
+        }
+        $0.isHidden = true
+        $0.addSubview(pinImageView)
+        pinImageView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+    }
+
+    private lazy var pinImageView = NSImageView().then {
+        let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        $0.image = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)?
+            .withSymbolConfiguration(config)
+        $0.contentTintColor = .white
+        $0.alignment = .center
     }
 
     private lazy var typeLabel = NSlabel().then {
@@ -128,8 +163,9 @@ extension PasteCollectionViewItem {
 
     override func viewDidLayout() {
         super.viewDidLayout()
-        let itemHeight = view.bounds.height
-        let topHeight = isCompact ? 36.0 : Layout.dynamicTopViewHeight(for: itemHeight)
+        // bounds 是 cell 高(含上下阴影留白),扣除后才是卡片高度
+        let cardHeight = view.bounds.height - Layout.itemShadowMargin * 2
+        let topHeight = isCompact ? 36.0 : Layout.dynamicTopViewHeight(for: cardHeight)
         topViewHeightConstraint?.constant = topHeight
     }
 
@@ -140,6 +176,32 @@ extension PasteCollectionViewItem {
         } else if !compact {
             typeLabel.font = .systemFont(ofSize: Layout.dynamicTypeFontSize(for: itemHeight), weight: .medium)
         }
+        updatePinBadgeSize(for: itemHeight)
+    }
+
+    /// 徽章尺寸随 item 高度缩放,避免小面板时过大
+    private func updatePinBadgeSize(for itemHeight: CGFloat) {
+        let size = Layout.dynamicPinBadgeSize(for: itemHeight)
+        pinBadgeSizeConstraints.forEach { $0.constant = size }
+        pinBadge.layer?.cornerRadius = size / 2
+        let symbolSize = size * 13 / 26
+        pinImageView.image = Self.pinImage(for: symbolSize)
+    }
+
+    /// 置顶图钉旋转图按符号尺寸分桶缓存,避免拖拽 resize 时每帧对每个 cell 重建位图。
+    /// symbolSize 被 Layout.dynamicPinBadgeSize 钳在 8...13,整点分桶后桶数有界。
+    private static var pinImageCache: [Int: NSImage] = [:]
+
+    private static func pinImage(for symbolSize: CGFloat) -> NSImage? {
+        let key = Int(symbolSize.rounded())
+        if let cached = pinImageCache[key] { return cached }
+        guard let base = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: symbolSize, weight: .bold))
+        else { return nil }
+        // 直接旋转图片本身(顺时针 45°),不依赖 layer/frame 变换,规避布局重置
+        let rotated = base.rotated(byDegrees: -45)
+        pinImageCache[key] = rotated
+        return rotated
     }
 
     private func applyLayoutMode(compact: Bool, itemHeight: CGFloat) {
@@ -177,6 +239,7 @@ extension PasteCollectionViewItem {
         contentView.layer?.backgroundColor = .clear
         topView.layer?.backgroundColor = NSColor.bg.cgColor
         iconImageView.image = nil
+        pinBadge.isHidden = true
         isAttribute = true
     }
 }
@@ -239,9 +302,20 @@ extension PasteCollectionViewItem {
         contentView.addSubview(imageContentView)
         contentView.addSubview(contentLabel)
         contentView.addSubview(bottomView)
+        // 徽章挂到最外层 view(非裁剪),才能浮出卡片圆角边缘并投影
+        view.addSubview(pinBadge)
 
         contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            // 只上下留 margin,让阴影落在 cell 内不被垂直裁切;左右贴边,横向间距由 lineSpacing 控制
+            make.leading.trailing.equalToSuperview()
+            make.top.bottom.equalToSuperview().inset(Layout.itemShadowMargin)
+        }
+
+        pinBadge.snp.makeConstraints { make in
+            // 顶到卡片右上角,避免越过边界被上层 scrollView 裁切
+            make.top.equalTo(contentView)
+            make.trailing.equalTo(contentView)
+            self.pinBadgeSizeConstraints = make.width.height.equalTo(Self.pinBadgeSize).constraint.layoutConstraints
         }
 
         topView.snp.makeConstraints { make in
@@ -297,6 +371,7 @@ extension PasteCollectionViewItem {
             updateTopColor(.bg)
         }
         setViewMenu()
+        pinBadge.isHidden = !model.isPinned
         timeLabel.stringValue = model.date.timeAgo
         typeLabel.stringValue = model.type.string
         bottomLabel.stringValue = model.sizeString(or: pasteImageView.image)
@@ -364,12 +439,22 @@ extension PasteCollectionViewItem {
     }
 
     private func setViewMenu() {
+        // 只挂一个空菜单并设 delegate;菜单项在每次右键弹出时由 menuNeedsUpdate 现构建,
+        // 保证 frontAppName、纯文本开关等运行时状态始终读到最新值(cell 复用后不会用旧菜单)。
         let menu = NSMenu()
+        menu.delegate = self
+        view.menu = menu
+    }
+
+    /// 每次右键弹出前重建菜单项,读取当时的前台应用名与纯文本开关。
+    private func rebuildMenu(_ menu: NSMenu) {
+        menu.removeAllItems()
         if let name = AppContext.coordinator.frontAppName {
             let item = NSMenuItem(title: String(localized: "Paste to \(name)"), action: #selector(pasteOriginalTextClick), keyEquivalent: "")
             menu.addItem(item)
         }
-        if pModel?.type == .string {
+        // "始终以纯文本粘贴"开启时,默认粘贴已是纯文本,该菜单项冗余,隐藏之。
+        if pModel?.type == .string, !PasteUserDefaults.pasteOnlyText {
             let item1 = NSMenuItem(title: String(localized: "Paste as Plain Text"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
@@ -393,12 +478,22 @@ extension PasteCollectionViewItem {
         previewItem.keyEquivalentModifierMask = .init(rawValue: 0)
         menu.addItem(previewItem)
         menu.addItem(.separator())
+        let pinTitle = (pModel?.isPinned ?? false) ? String(localized: "Unpin") : String(localized: "Pin")
+        let pinItem = NSMenuItem(title: pinTitle, action: #selector(togglePinClick), keyEquivalent: "")
+        menu.addItem(pinItem)
         let item2 = NSMenuItem(title: String(localized: "Copy"), action: #selector(copyItemData), keyEquivalent: "")
         menu.addItem(item2)
         let item3 = NSMenuItem(title: String(localized: "Delete"), action: #selector(deleteItem), keyEquivalent: "d")
         item3.keyEquivalentModifierMask = .init(rawValue: 0)
         menu.addItem(item3)
-        view.menu = menu
+    }
+}
+
+// MARK: - NSMenuDelegate
+
+extension PasteCollectionViewItem: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        rebuildMenu(menu)
     }
 }
 
@@ -409,7 +504,11 @@ extension PasteCollectionViewItem {
         appearanceCancellable = NSApp.publisher(for: \.effectiveAppearance)
             .sink { [weak self] appearance in
                 appearance.performAsCurrentDrawingAppearance {
-                    guard let self, !self.isAttribute else { return }
+                    guard let self else { return }
+                    // 徽章橙底+白描边随外观刷新(cgColor 不自动跟随)
+                    self.pinBadge.layer?.backgroundColor = Self.pinBadgeColor.cgColor
+                    self.pinBadge.layer?.borderColor = NSColor.white.withAlphaComponent(0.9).cgColor
+                    guard !self.isAttribute else { return }
                     self.contentView.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
                 }
             }
@@ -460,7 +559,35 @@ extension PasteCollectionViewItem {
         guard let pModel else { return }
         delegate?.previewItem(pModel, relativeTo: view)
     }
+
+    @objc
+    private func togglePinClick() {
+        guard let pModel else { return }
+        delegate?.togglePin(pModel)
+    }
 }
 
 extension PasteCollectionViewItem: UserInterfaceItemIdentifier {}
+
+private extension NSImage {
+    /// 返回绕中心旋转指定角度(度,负为顺时针)的新图。
+    /// 保持 isTemplate,使 contentTintColor 仍生效。
+    func rotated(byDegrees degrees: CGFloat) -> NSImage {
+        let radians = degrees * .pi / 180
+        // 旋转后包围盒可能变大,用对角线边长的正方形画布容纳,避免裁切
+        let side = ceil(hypot(size.width, size.height))
+        let newSize = NSSize(width: side, height: side)
+        let rotated = NSImage(size: newSize)
+        rotated.lockFocus()
+        let transform = NSAffineTransform()
+        transform.translateX(by: side / 2, yBy: side / 2)
+        transform.rotate(byRadians: radians)
+        transform.concat()
+        let drawRect = NSRect(x: -size.width / 2, y: -size.height / 2, width: size.width, height: size.height)
+        draw(in: drawRect, from: .zero, operation: .sourceOver, fraction: 1)
+        rotated.unlockFocus()
+        rotated.isTemplate = isTemplate
+        return rotated
+    }
+}
 

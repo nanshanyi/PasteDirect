@@ -187,6 +187,43 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertGreaterThan(size, 0)
     }
 
+    /// LIKE 通配符转义:搜索关键字里的 % / _ 应按字面匹配,不当作通配符
+    func testSQLManagerSearchEscapesLikeWildcards() async {
+        let manager = await makeTempManager()
+        let tag = UUID().uuidString
+        // 一条含字面 "%" 的内容,一条不含 "%" 的普通内容(共享 tag 便于隔离本用例数据)
+        let withPercent = makeTextModel(string: "discount 50% off \(tag)")
+        let plain = makeTextModel(string: "plain text \(tag)")
+        await manager.insert(item: withPercent)
+        await manager.insert(item: plain)
+
+        // 搜 "50%":未转义时 % 会通配,plain 那条也可能被 "50" 前缀匹配到;
+        // 正确行为是只命中真正含 "50%" 字面的那条
+        let results = await manager.searchWithParams(
+            keyword: "50%", state: .empty, limit: 100, offset: 0
+        )
+        let hashes = Set(results.map { $0.hashValue })
+        XCTAssertTrue(hashes.contains(withPercent.hashValue), "应命中含字面 50% 的条目")
+        XCTAssertFalse(hashes.contains(plain.hashValue), "不应把 % 当通配符匹配到无关条目")
+    }
+
+    /// LIKE 通配符转义:单独搜 "_" 不应匹配任意单字符内容
+    func testSQLManagerSearchEscapesUnderscore() async {
+        let manager = await makeTempManager()
+        let tag = UUID().uuidString
+        let withUnderscore = makeTextModel(string: "file_name \(tag)")
+        let plain = makeTextModel(string: "filename \(tag)")
+        await manager.insert(item: withUnderscore)
+        await manager.insert(item: plain)
+
+        let results = await manager.searchWithParams(
+            keyword: "file_name", state: .empty, limit: 100, offset: 0
+        )
+        let hashes = Set(results.map { $0.hashValue })
+        XCTAssertTrue(hashes.contains(withUnderscore.hashValue), "应命中含字面下划线的条目")
+        XCTAssertFalse(hashes.contains(plain.hashValue), "不应把 _ 当作任意单字符通配符")
+    }
+
     // MARK: - LoadState
 
     func testLoadStateSendable() {
@@ -409,5 +446,55 @@ final class PasteDirectTests: XCTestCase {
         let fetched = results.first(where: { $0.hashValue == hash })
         XCTAssertEqual(fetched?.imageWidth, 800)
         XCTAssertEqual(fetched?.imageHeight, 450)
+    }
+
+    // MARK: - ContentHash (稳定内容哈希)
+
+    func testContentHashDeterministic() {
+        let data = "同一段内容".data(using: .utf8)!
+        XCTAssertEqual(data.contentHash, data.contentHash)
+        let other = "另一段内容".data(using: .utf8)!
+        XCTAssertNotEqual(data.contentHash, other.contentHash)
+    }
+
+    func testContentHashStableAcrossInstances() {
+        // 模拟跨进程:独立构造的相同 Data 必须算出相同哈希(不依赖进程随机种子)
+        let a = Data("abc123".utf8).contentHash
+        let b = Data("abc123".utf8).contentHash
+        XCTAssertEqual(a, b)
+    }
+
+    func testContentHashNonNegative() {
+        let data = Data((0..<256).map { UInt8($0) })
+        XCTAssertGreaterThanOrEqual(data.contentHash, 0)
+    }
+
+    func testSQLManagerInsertInheritsPinnedDate() async {
+        let manager = await makeTempManager()
+        let data = "置顶内容-\(UUID().uuidString)".data(using: .utf8)!
+        let hash = data.contentHash
+
+        // 先插入一条并置顶
+        let pinned = PasteboardModel(
+            pasteboardType: .string, data: data, showData: nil,
+            hashValue: hash, date: Date(),
+            appPath: "", appName: "", dataString: "置顶内容", length: 4
+        )
+        await manager.insert(item: pinned)
+        await manager.updatePinned(Date(), forHash: hash)
+
+        // 重新捕获相同内容(新捕获恒无置顶),去重插入
+        let recaptured = PasteboardModel(
+            pasteboardType: .string, data: data, showData: nil,
+            hashValue: hash, date: Date(),
+            appPath: "", appName: "", dataString: "置顶内容", length: 4
+        )
+        await manager.insert(item: recaptured)
+
+        // 去重插入后应仍保持置顶,且只有一行
+        let results = await manager.search(limit: 100, offset: 0)
+        let fetched = results.filter { $0.hashValue == hash }
+        XCTAssertEqual(fetched.count, 1, "去重插入后应只有一行")
+        XCTAssertNotNil(fetched.first?.pinnedDate, "去重插入应继承旧行的置顶状态")
     }
 }

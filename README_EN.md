@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.4.0-green" alt="Version 3.4.0">
+  <img src="https://img.shields.io/badge/version-3.5.0-green" alt="Version 3.5.0">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
 </p>
 
@@ -31,7 +31,8 @@
 - 🏷️ **Multi-dimensional filters** — Combine filters by type (text/image/color), source app, and time range; active filters are shown as tags
 - 👁️ **Space preview** — Press Space to quickly preview the selected item, including text, images, and color details; text can be selected directly in the image preview
 - 🖱️ **Multiple paste methods** — Paste by double-clicking, pressing Enter, or dragging an item to the target location
-- 📝 **Plain text mode** — Remove rich-text formatting with one click and paste as plain text
+- 📌 **Pin items** — Pin frequently used items from the right-click menu; they always stay at the top of the list and are exempt from history cleanup
+- 📝 **Plain text mode** — Remove rich-text formatting with one click and paste as plain text; you can also enable "Always paste as plain text" in Settings
 - 📐 **Resizable panel** — Drag the top edge to adjust panel height; items scale proportionally
 - 🧹 **Auto cleanup** — Configure retention duration: 1 day / 1 week / 1 month / forever
 - 🚫 **App filtering** — Ignore clipboard content from specific apps, such as Keychain or password managers
