@@ -34,6 +34,7 @@ enum DataMigration {
         // 确保目标根目录存在（Application Support 首次可能不存在）。
         try? fm.createDirectory(at: newRoot, withIntermediateDirectories: true)
 
+        var failed = false
         for item in items {
             let src = oldRoot.appendingPathComponent(item)
             let dst = newRoot.appendingPathComponent(item)
@@ -44,9 +45,13 @@ enum DataMigration {
                 Log("DataMigration moved \(item) to Application Support")
             } catch {
                 Log("DataMigration failed for \(item): \(error)")
+                failed = true
             }
         }
 
+        // 只有全部迁移成功（或本就无可迁移）才置位完成标记；
+        // 有失败时保持未置位,下次启动重试,避免用户数据永远滞留在 Documents。
+        guard !failed else { return }
         defaults.set(true, forKey: migrationKey)
     }
 }

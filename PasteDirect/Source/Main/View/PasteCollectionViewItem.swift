@@ -185,10 +185,23 @@ extension PasteCollectionViewItem {
         pinBadgeSizeConstraints.forEach { $0.constant = size }
         pinBadge.layer?.cornerRadius = size / 2
         let symbolSize = size * 13 / 26
-        let base = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)?
+        pinImageView.image = Self.pinImage(for: symbolSize)
+    }
+
+    /// 置顶图钉旋转图按符号尺寸分桶缓存,避免拖拽 resize 时每帧对每个 cell 重建位图。
+    /// symbolSize 被 Layout.dynamicPinBadgeSize 钳在 8...13,整点分桶后桶数有界。
+    private static var pinImageCache: [Int: NSImage] = [:]
+
+    private static func pinImage(for symbolSize: CGFloat) -> NSImage? {
+        let key = Int(symbolSize.rounded())
+        if let cached = pinImageCache[key] { return cached }
+        guard let base = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)?
             .withSymbolConfiguration(.init(pointSize: symbolSize, weight: .bold))
+        else { return nil }
         // 直接旋转图片本身(顺时针 45°),不依赖 layer/frame 变换,规避布局重置
-        pinImageView.image = base?.rotated(byDegrees: -45)
+        let rotated = base.rotated(byDegrees: -45)
+        pinImageCache[key] = rotated
+        return rotated
     }
 
     private func applyLayoutMode(compact: Bool, itemHeight: CGFloat) {
