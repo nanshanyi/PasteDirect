@@ -72,7 +72,7 @@ If macOS shows a security warning for the self-signed certificate, go to **Syste
 
 Starting from v2.2.0, PasteDirect uses a self-signed certificate mechanism so Accessibility permission is preserved during updates and does not need to be granted again.
 
-Starting from v3.1.3, the app supports manually checking for updates in-app. You can also enable automatic update checks on launch in Settings.
+Starting from v3.6.0, the app ships with [Sparkle](https://sparkle-project.org/) automatic updates: when a new version is detected, it can be downloaded and installed right inside the app with an automatic relaunch — no more manually downloading the dmg. You can also enable "Automatically download updates" to download silently and install on quit.
 
 ## Usage
 
@@ -101,7 +101,7 @@ Starting from v3.1.3, the app supports manually checking for updates in-app. You
 - **History retention** — 1 day / 1 week / 1 month / forever
 - **Ignored apps** — Configure apps whose clipboard content should not be recorded
 - **Shortcut** — Customize the global shortcut for opening the panel
-- **Check for updates** — Supports manual update checks and checking automatically on launch
+- **Automatic updates** — Powered by Sparkle: checks for new versions, downloads in-app, and installs with an automatic relaunch; optional silent "Automatically download updates"
 
 ## Build from source
 

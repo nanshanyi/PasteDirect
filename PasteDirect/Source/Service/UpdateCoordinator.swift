@@ -6,86 +6,109 @@
 //
 
 import AppKit
+import Combine
+import Sparkle
 
+/// 基于 Sparkle 的自动更新门面：
+/// - 检查时机（启动 + 周期性）由 Sparkle 的自动检查管理，About 页开关映射 SUEnableAutomaticChecks
+/// - "自动下载更新"开关映射 SUAutomaticallyUpdate（前提是自动检查开启，Sparkle 自身有此约束）
+/// - 下载、签名校验、安装、重启全部由 Sparkle 标准用户驱动完成
 @MainActor
-final class UpdateCoordinator {
+final class UpdateCoordinator: NSObject, ObservableObject {
     static let shared = UpdateCoordinator()
 
-    private var isChecking = false
+    @Published private(set) var automaticallyChecksForUpdates = true
+    @Published private(set) var automaticallyDownloadsUpdates = false
 
-    private init() {}
+    private var updaterController: SPUStandardUpdaterController?
 
-    /// 启动时自动检查:尊重"自动检查"开关与"忽略版本"
-    func checkSilently() {
-        guard PasteUserDefaults.autoCheckUpdate else { return }
-        Task { await run(manual: false) }
+    private override init() {
+        Self.migrateLegacySettings()
+        automaticallyChecksForUpdates = UserDefaults.standard.object(forKey: "SUEnableAutomaticChecks") as? Bool ?? true
+        automaticallyDownloadsUpdates = UserDefaults.standard.object(forKey: "SUAutomaticallyUpdate") as? Bool ?? false
+        super.init()
     }
 
-    /// 手动触发:忽略开关与忽略版本,无更新也要提示
-    func checkManually() {
-        Task { await run(manual: true) }
+    /// applicationDidFinishLaunching 时调用
+    func startup() {
+        guard updaterController == nil else { return }
+
+        guard hasValidPublicKey else {
+            Log("Sparkle 公钥尚未配置，暂不启动更新器；请将 generate_keys 输出的 SUPublicEDKey 填入 Info.plist")
+            return
+        }
+
+        // 先配置动态开关，再启动 Sparkle，避免启动周期读取到旧值。
+        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: self, userDriverDelegate: nil)
+        controller.updater.automaticallyChecksForUpdates = automaticallyChecksForUpdates
+        controller.updater.automaticallyDownloadsUpdates = automaticallyDownloadsUpdates && automaticallyChecksForUpdates
+        updaterController = controller
+
+#if DEBUG
+        // 开发构建不做后台自动检查；手动“检查更新”仍可用。
+        controller.updater.automaticallyChecksForUpdates = false
+        automaticallyChecksForUpdates = false
+#endif
+        controller.startUpdater()
     }
 
-    private func run(manual: Bool) async {
-        guard !isChecking else { return }
-        isChecking = true
-        defer { isChecking = false }
+    /// 手动触发检查（状态栏菜单 / About 页）
+    func checkForUpdates() {
+        updaterController?.updater.checkForUpdates()
+    }
 
-        do {
-            let result = try await UpdateChecker.check()
-            switch result {
-            case .upToDate:
-                if manual { presentUpToDate() }
-            case .newer(let release):
-                if !manual, PasteUserDefaults.ignoredUpdateVersion == release.version {
-                    return
-                }
-                presentNewVersion(release, manual: manual)
-            }
-        } catch {
-            if manual { presentError(error) }
+    func setAutomaticallyChecksForUpdates(_ enabled: Bool) {
+        automaticallyChecksForUpdates = enabled
+        updaterController?.updater.automaticallyChecksForUpdates = enabled
+        if !enabled {
+            setAutomaticallyDownloadsUpdates(false)
         }
     }
 
-    // MARK: - Alerts
-
-    private func presentUpToDate() {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "You're up to date")
-        alert.informativeText = String(localized: "PasteDirect \(UpdateChecker.currentVersion()) is the latest version.")
-        alert.addButton(withTitle: String(localized: "OK"))
-        alert.runModal()
+    func setAutomaticallyDownloadsUpdates(_ enabled: Bool) {
+        let value = enabled && automaticallyChecksForUpdates
+        automaticallyDownloadsUpdates = value
+        updaterController?.updater.automaticallyDownloadsUpdates = value
     }
 
-    private func presentNewVersion(_ release: AppRelease, manual: Bool) {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "A new version is available")
-        let current = UpdateChecker.currentVersion()
-        let summary = String(localized: "PasteDirect \(release.version) is available — you have \(current).")
-        let notes = release.notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        alert.informativeText = notes.isEmpty ? summary : "\(summary)\n\n\(notes)"
-        alert.addButton(withTitle: String(localized: "Download"))
-        alert.addButton(withTitle: String(localized: "Later"))
-        if !manual {
-            alert.addButton(withTitle: String(localized: "Skip this version"))
+    /// v3.5.x 旧设置迁移：autoCheckUpdate → SUEnableAutomaticChecks、ignoredUpdateVersion → SUSkippedVersion。
+    /// 显式写入 SUEnableAutomaticChecks 后，Sparkle 不会再弹自动检查授权询问。
+    private static func migrateLegacySettings() {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: "SUEnableAutomaticChecks") == nil,
+           let legacyAutoCheck = defaults.object(forKey: "autoCheckUpdate") as? Bool {
+            defaults.set(legacyAutoCheck, forKey: "SUEnableAutomaticChecks")
         }
-
-        let response = alert.runModal()
-        switch response {
-        case .alertFirstButtonReturn:
-            NSWorkspace.shared.open(release.htmlURL)
-        case .alertThirdButtonReturn where !manual:
-            PasteUserDefaults.ignoredUpdateVersion = release.version
-        default:
-            break
+        if defaults.object(forKey: "SUSkippedVersion") == nil,
+           let legacyIgnored = defaults.string(forKey: "ignoredUpdateVersion"), !legacyIgnored.isEmpty {
+            defaults.set(legacyIgnored, forKey: "SUSkippedVersion")
         }
+        defaults.removeObject(forKey: "autoCheckUpdate")
+        defaults.removeObject(forKey: "ignoredUpdateVersion")
     }
 
-    private func presentError(_ error: Error) {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Unable to check for updates")
-        alert.informativeText = String(localized: "Please check your network connection and try again.")
-        alert.addButton(withTitle: String(localized: "OK"))
-        alert.runModal()
+    private var hasValidPublicKey: Bool {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
+              let data = Data(base64Encoded: value),
+              data.count == 32 else {
+            return false
+        }
+        return true
+    }
+}
+
+// MARK: - SPUUpdaterDelegate
+
+extension UpdateCoordinator: SPUUpdaterDelegate {
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
+        Log("未发现新版本")
+    }
+
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        Log("发现新版本: \(item.displayVersionString)")
+    }
+
+    func updater(_ updater: SPUUpdater, failedToDownloadUpdate item: SUAppcastItem, error: any Error) {
+        Log("更新包下载失败: \(error.localizedDescription)")
     }
 }

@@ -18,6 +18,7 @@
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
+		CB5A1E000000000000000A03 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = CB5A1E000000000000000A02 /* Sparkle */; };
 		CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */; };
 		CBAAAA0000000000DCFDAA03 /* ImageThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */; };
 		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
@@ -76,7 +77,6 @@
 		CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */; };
 		CBD1CB022F87BC00003ACBD7 /* PanelResizeHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB032F87BC00003ACBD7 /* PanelResizeHandle.swift */; };
 		CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */; };
-		D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,7 +109,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCoordinator.swift; sourceTree = "<group>"; };
 		BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEmptyStateView.swift; sourceTree = "<group>"; };
 		CB0AB0012F10A00000ABOUT1 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -190,6 +189,7 @@
 				CB9986FF29260015007E585C /* SQLite in Frameworks */,
 				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
 				CB99870229260372007E585C /* SnapKit in Frameworks */,
+				CB5A1E000000000000000A03 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,7 +332,6 @@
 				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
 				CBD1CAA02F87B2A6003ACBD7 /* PasteDataStore.swift */,
 				CBD1CAA12F87B2A6003ACBD7 /* PasteSQLManager.swift */,
-				21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */,
 				7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */,
 			);
 			path = Service;
@@ -476,6 +475,7 @@
 				CB9986F52925FF46007E585C /* KeyboardShortcuts */,
 				CB9986FE29260015007E585C /* SQLite */,
 				CB99870129260372007E585C /* SnapKit */,
+				CB5A1E000000000000000A02 /* Sparkle */,
 			);
 			productName = PasteDirect;
 			productReference = CB2CDEEA2924E8D500E81836 /* PasteDirect.app */;
@@ -554,6 +554,7 @@
 				CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
+				CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = CB2CDEEB2924E8D500E81836 /* Products */;
 			projectDirPath = "";
@@ -614,7 +615,6 @@
 				CBD1CAD22F87B2A6003ACBD7 /* PasteboardModel.swift in Sources */,
 				CBD1CAD32F87B2A6003ACBD7 /* Then.swift in Sources */,
 				CBD1CAD42F87B2A6003ACBD7 /* PasteSQLManager.swift in Sources */,
-				D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */,
 				BB1A5E47239B42BC8043DA79 /* UpdateCoordinator.swift in Sources */,
 				CBD1CAD52F87B2A6003ACBD7 /* PasteFilterView.swift in Sources */,
 				CBD1CAD62F87B2A6003ACBD7 /* Date+Extension.swift in Sources */,
@@ -832,7 +832,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "PasteDirect Code Signing Certificate";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11002;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
@@ -848,7 +848,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.5.0;
+				MARKETING_VERSION = 3.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -868,9 +868,10 @@
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
 				CODE_SIGN_IDENTITY = "PasteDirect Code Signing Certificate";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "PasteDirect Code Signing Certificate";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11002;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
@@ -896,7 +897,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.5.0;
+				MARKETING_VERSION = 3.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1040,6 +1041,14 @@
 				minimumVersion = 5.0.0;
 			};
 		};
+		CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1057,6 +1066,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		CB5A1E000000000000000A02 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -6,6 +6,16 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [3.6.0] - 2026-08-31
+
+### 新增
+- 基于 [Sparkle](https://sparkle-project.org/) 的应用内自动更新:检测到新版本后可直接在应用内下载并自动安装重启，无需再手动下载 dmg 拖入「应用程序」。
+- 新增「自动下载更新」开关:开启后发现的更新将后台静默下载，退出应用时自动安装。
+- 新增 GitHub Actions 自动发版工作流:推送 `v*` tag 即自动构建、签名、打包 dmg、生成 appcast 并发布 Release（发版流程见 `docs/RELEASE.md`）。
+
+### 变更
+- 「检查更新」由自研 GitHub API 检查迁移至 Sparkle 标准更新界面，支持跳过版本与自动本地化的更新弹窗；v3.5.x 的「启动时自动检查」与「忽略版本」设置会自动迁移，无需重新配置。
+
 ## [3.5.0] - 2026-07-31
 
 ### 新增

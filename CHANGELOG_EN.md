@@ -6,6 +6,16 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.6.0] - 2026-08-31
+
+### Added
+- In-app automatic updates powered by [Sparkle](https://sparkle-project.org/): new versions can be downloaded and installed right inside the app with an automatic relaunch — no more manually downloading the dmg and dragging it into Applications.
+- New "Automatically download updates" toggle: updates found will be downloaded silently in the background and installed when the app quits.
+- New GitHub Actions release workflow: pushing a `v*` tag automatically builds, signs, packages the dmg, generates the appcast, and publishes the Release (see `docs/RELEASE.md`).
+
+### Changed
+- Update checking moved from a hand-rolled GitHub API checker to Sparkle's standard update UI, with skip-this-version support and localized update prompts; the v3.5.x "check on launch" and "ignored version" settings migrate automatically.
+
 ## [3.5.0] - 2026-07-31
 
 ### Added

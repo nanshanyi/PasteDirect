@@ -1,0 +1,200 @@
+name: Release
+
+# 推送 v* tag 自动发版。
+# 发布顺序（严格固定，避免 appcast 指向尚不存在的下载地址）：
+#   构建并签名 App → 打 ZIP(主更新包) / DMG(手动安装) → EdDSA 签名 ZIP
+#   → 创建 GitHub Release 并上传两个包 → 校验下载地址可用 → 最后发布 appcast.xml
+#
+# 所需配置（详见 docs/RELEASE.md）：
+#   - release Environment 及其中的 Secrets：
+#       CERTIFICATE_P12 / CERTIFICATE_PASSWORD / EDDSA_PRIVATE_KEY
+#   - 建议开启 tag 保护规则（Settings → Tags），仅维护者可创建 v* tag
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    # 签名 Secrets 仅存放在 release Environment 中，环境必须预先创建
+    environment: release
+    steps:
+      # actions/checkout v4.4.0
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      # maxim-lobanov/setup-xcode v1.7.0
+      - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90
+        with:
+          xcode-version: latest-stable
+
+      - name: Import code signing certificate
+        env:
+          CERT_P12_BASE64: ${{ secrets.CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+        run: |
+          CERT_PATH="$RUNNER_TEMP/cert.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          echo -n "$CERT_P12_BASE64" | base64 --decode -o "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          if ! security find-certificate -a -c 'PasteDirect Code Signing Certificate' "$KEYCHAIN_PATH" > /dev/null; then
+            echo "::error::导入的 keychain 中没有 PasteDirect Code Signing Certificate"
+            security find-certificate -a -Z "$KEYCHAIN_PATH" || true
+            exit 1
+          fi
+          rm -f "$CERT_PATH"
+
+      - name: Download Sparkle tools
+        env:
+          SPARKLE_VERSION: "2.9.6"
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/sparkle.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          mkdir -p "$RUNNER_TEMP/sparkle"
+          tar -xf "$RUNNER_TEMP/sparkle.tar.xz" -C "$RUNNER_TEMP/sparkle"
+          "$RUNNER_TEMP/sparkle/bin/sign_update" --help > /dev/null
+          echo "SIGN_UPDATE=$RUNNER_TEMP/sparkle/bin/sign_update" >> "$GITHUB_ENV"
+
+      # 构建号 = 20000 + GitHub Actions run number：严格递增且大于历史值(11002)。
+      # Sparkle 用 appcast 的 sparkle:version 与本机 CFBundleVersion 比较判断是否有更新，
+      # 因此每个发布版本的 CFBundleVersion 必须不同且递增。
+      - name: Compute build number
+        run: |
+          BUILD=$((20000 + GITHUB_RUN_NUMBER))
+          echo "BUILD=$BUILD" >> "$GITHUB_ENV"
+          echo "build number: $BUILD"
+
+      - name: Build app
+        run: |
+          xcodebuild -project PasteDirect.xcodeproj \
+            -scheme PasteDirect \
+            -configuration Release \
+            -derivedDataPath build \
+            CURRENT_PROJECT_VERSION="$BUILD" \
+            build
+
+      # ZIP 是 Sparkle 自动更新的主包（ditto 保留签名与元数据）；
+      # DMG 仅用于 Release 页面给新用户手动安装
+      - name: Package ZIP and DMG
+        run: |
+          APP="build/Build/Products/Release/PasteDirect.app"
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Contents/Info.plist")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TAG_VERSION="${TAG_VERSION%%-*}"
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::工程版本号 ($VERSION) 与 tag ($GITHUB_REF_NAME) 不一致，请先更新 MARKETING_VERSION 并更新 CHANGELOG"
+            exit 1
+          fi
+          PUBLIC_KEY=$(/usr/libexec/PlistBuddy -c "Print :SUPublicEDKey" "$APP/Contents/Info.plist" 2>/dev/null || true)
+          if [[ -z "$PUBLIC_KEY" || "$PUBLIC_KEY" == REPLACE_* ]]; then
+            echo "::error::PasteDirect/Info.plist 尚未配置有效的 SUPublicEDKey，请先运行 Sparkle generate_keys"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          mkdir -p dist
+          ditto -c -k --keepParent "$APP" "dist/PasteDirect-$VERSION.zip"
+          STAGING="$RUNNER_TEMP/dmg-staging"
+          mkdir -p "$STAGING"
+          cp -R "$APP" "$STAGING/"
+          ln -s /Applications "$STAGING/Applications"
+          hdiutil create -volname "PasteDirect $VERSION" -srcfolder "$STAGING" \
+            -ov -format UDZO "dist/PasteDirect-$VERSION.dmg"
+
+      - name: Sign ZIP and generate appcast
+        env:
+          EDDSA_KEY: ${{ secrets.EDDSA_PRIVATE_KEY }}
+        run: |
+          if [ -z "$EDDSA_KEY" ]; then
+            echo "::error::缺少 secret EDDSA_PRIVATE_KEY，参见 docs/RELEASE.md 配置 Sparkle 签名密钥"
+            exit 1
+          fi
+          printf '%s' "$EDDSA_KEY" > "$RUNNER_TEMP/eddsa.key"
+          mkdir -p old-pages
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
+            git fetch --depth 1 origin gh-pages
+            git show origin/gh-pages:appcast.xml > old-pages/appcast.xml 2>/dev/null || true
+          fi
+          # 注意：appcast 指向 ZIP（Sparkle 自动更新主包）
+          python3 scripts/generate_appcast.py \
+            --archive "dist/PasteDirect-$VERSION.zip" \
+            --tag "$GITHUB_REF_NAME" \
+            --version "$VERSION" \
+            --build "$BUILD" \
+            --key-file "$RUNNER_TEMP/eddsa.key" \
+            --sign-update "$SIGN_UPDATE" \
+            --existing old-pages/appcast.xml \
+            --out appcast.xml \
+            --notes-out release-notes.md
+          rm -f "$RUNNER_TEMP/eddsa.key"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ZIP="dist/PasteDirect-$VERSION.zip"
+          DMG="dist/PasteDirect-$VERSION.dmg"
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$ZIP" "$DMG" --clobber
+            gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" "$ZIP" "$DMG" \
+              --title "PasteDirect $VERSION" \
+              --notes-file release-notes.md
+          fi
+
+      # Release 资产就位后、公开 appcast 前的最后确认
+      - name: Verify download URLs
+        run: |
+          for ASSET in "PasteDirect-$VERSION.zip" "PasteDirect-$VERSION.dmg"; do
+            URL="https://github.com/${{ github.repository }}/releases/download/$GITHUB_REF_NAME/$ASSET"
+            STATUS=$(curl -fsIL -o /dev/null -w "%{http_code}" "$URL" || true)
+            if [ "$STATUS" != "200" ]; then
+              echo "::error::下载地址不可用 ($STATUS): $URL"
+              exit 1
+            fi
+            echo "OK $STATUS $URL"
+          done
+
+      # 最后才发布 appcast：此时下载地址已确认可用
+      - name: Publish appcast to gh-pages
+        run: |
+          PAGES_URL="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
+            git clone --depth 1 --branch gh-pages "$PAGES_URL" pages
+          else
+            git clone --depth 1 "$PAGES_URL" pages
+            cd pages
+            git checkout --orphan gh-pages
+            git rm -rf .
+            cd ..
+          fi
+          cp appcast.xml pages/appcast.xml
+          cd pages
+          git add appcast.xml
+          git commit -m "chore: appcast for ${GITHUB_REF_NAME}"
+          git push origin gh-pages
+
+      - name: Clean signing material
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP/eddsa.key"
+          security delete-keychain "$RUNNER_TEMP/build.keychain-db" 2>/dev/null || true

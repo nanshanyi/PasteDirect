@@ -82,11 +82,8 @@ extension PasteAppDelegate {
             showOrDismissWindow(curFrame)
         }
 
-        /// 启动后延迟检查更新
-        Task {
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
-            UpdateCoordinator.shared.checkSilently()
-        }
+        /// 启动自动更新（检查时机由 Sparkle 管理：启动后自动检查 + 周期检查）
+        UpdateCoordinator.shared.startup()
     }
 
     private func showPromptAccessibility() {
@@ -156,7 +153,7 @@ extension PasteAppDelegate {
 
     @objc
     private func checkForUpdatesAction() {
-        UpdateCoordinator.shared.checkManually()
+        UpdateCoordinator.shared.checkForUpdates()
     }
 }
 

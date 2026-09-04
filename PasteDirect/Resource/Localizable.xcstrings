@@ -57,16 +57,6 @@
         }
       }
     },
-    "A new version is available" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "发现新版本"
-          }
-        }
-      }
-    },
     "About" : {
       "localizations" : {
         "zh-Hans" : {
@@ -103,6 +93,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "应用"
+          }
+        }
+      }
+    },
+    "Automatically check for updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动检查更新"
+          }
+        }
+      }
+    },
+    "Automatically download updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动下载更新"
           }
         }
       }
@@ -310,16 +320,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不要保存从以下应用程序复制的内容。"
-          }
-        }
-      }
-    },
-    "Download" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下载"
           }
         }
       }
@@ -569,37 +569,6 @@
     "PasteDirect" : {
 
     },
-    "PasteDirect %@ is available — you have %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "PasteDirect %1$@ is available — you have %2$@."
-          }
-        }
-      }
-    },
-    "PasteDirect %@ is the latest version." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PasteDirect %@ 已经是最新版本。"
-          }
-        }
-      }
-    },
-    "PasteDirect %1$@ is available — you have %2$@." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PasteDirect %1$@ 已发布 — 你当前版本为 %2$@。"
-          }
-        }
-      }
-    },
     "PasteDirect requires accessibility permissions" : {
       "localizations" : {
         "zh-Hans" : {
@@ -616,16 +585,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "像素"
-          }
-        }
-      }
-    },
-    "Please check your network connection and try again." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请检查网络连接后重试。"
           }
         }
       }
@@ -730,16 +689,6 @@
         }
       }
     },
-    "Skip this version" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "跳过此版本"
-          }
-        }
-      }
-    },
     "Storage size" : {
       "localizations" : {
         "zh-Hans" : {
@@ -830,16 +779,6 @@
         }
       }
     },
-    "Unable to check for updates" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法检查更新"
-          }
-        }
-      }
-    },
     "Unknown" : {
       "localizations" : {
         "zh-Hans" : {
@@ -887,16 +826,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您有比新的历史限制更旧的项目。是否要删除这些较旧的项目并应用新的限制？"
-          }
-        }
-      }
-    },
-    "You're up to date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已是最新版本"
           }
         }
       }
