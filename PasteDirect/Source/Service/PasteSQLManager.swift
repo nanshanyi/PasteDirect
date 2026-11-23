@@ -44,8 +44,8 @@ actor PasteSQLManager {
     private let col_imgW = Expression<Int?>("imgW")
     private let col_imgH = Expression<Int?>("imgH")
     private let col_pinnedDate = Expression<Date?>("pinnedDate")
-    /// 派生类型标签(PasteModelType 的 rawValue,如 "color"/"link"),其他为 NULL。写入时打好,筛选与计数直接走 SQL
-    private let col_kind = Expression<String?>("kind")
+    /// 派生类型编号(PasteModelType 的固定整数 rawValue),其他为 NULL。写入时打好,筛选与计数直接走 SQL
+    private let col_kind = Expression<Int?>("kindCode")
 
     // MARK: - DB
 
@@ -148,7 +148,7 @@ actor PasteSQLManager {
 
     /// 旧库没有 kind 列(颜色/链接分类引入):加列并按现有文本行回填一次。
     /// 以 user_version 记录规则版本;日后调整颜色/链接识别规则时递增版本号即可触发重新回填。
-    private static let kindRulesVersion = 1
+    private static let kindRulesVersion = 2
 
     private func migrateAddKindColumn() {
         guard let db else { return }

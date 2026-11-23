@@ -8,12 +8,13 @@
 import AppKit
 import Foundation
 
-enum PasteModelType: String, Sendable {
-    case none
-    case image
-    case string
-    case color
-    case link
+/// rawValue 会写入数据库 kindCode 列(仅派生类型),编号发布后不可修改或复用,新增类型只能追加新编号。
+enum PasteModelType: Int, Sendable {
+    case none = 0
+    case image = 1
+    case string = 2
+    case color = 3
+    case link = 4
 
     init(with type: PasteboardType) {
         switch type {
@@ -26,7 +27,7 @@ enum PasteModelType: String, Sendable {
         }
     }
 
-    /// 由内容推出、存库时打标签(kind 列,值为 rawValue)的类型,按此顺序依次匹配。
+    /// 由内容推出、存库时打标签(kindCode 列,值为 rawValue)的类型,按此顺序依次匹配。
     /// 新增派生类型:加 case、在此登记、在 PasteboardModel.derivedType 里补规则,
     /// 并递增 PasteSQLManager.kindRulesVersion 触发旧数据回填。
     static let derivedTypes: [PasteModelType] = [.color, .link]
