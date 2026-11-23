@@ -287,6 +287,13 @@ extension PasteCollectionViewItem {
 
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
+        // ⌘+单击链接卡片:在浏览器中打开
+        if event.type == .leftMouseDown,
+           event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+           pModel?.type == .link {
+            openLinkClick()
+            return
+        }
         if event.type == .leftMouseDown, event.clickCount == 2 {
             pasteAction()
         }
@@ -315,6 +322,7 @@ extension PasteCollectionViewItem {
         view.layer?.backgroundColor = .clear
         applyShadow(hovering: false)
         (view as? HoverTrackingView)?.onHoverChange = { [weak self] in self?.setHovering($0) }
+        (view as? HoverTrackingView)?.onMouseMove = { [weak self] in self?.applyLinkCursor() }
 
         view.addSubview(ringView)
         view.addSubview(cardView)
@@ -453,6 +461,20 @@ extension PasteCollectionViewItem {
         hoveredItem?.setHovering(false)
     }
 
+    /// 按下/松开 ⌘ 时刷新悬停卡片的指针(链接卡片 ⌘+单击可打开)
+    static func refreshLinkCursor() {
+        hoveredItem?.applyLinkCursor()
+    }
+
+    private func applyLinkCursor() {
+        let commandOnly = NSEvent.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command
+        if isHovering, commandOnly, pModel?.type == .link {
+            NSCursor.pointingHand.set()
+        } else {
+            NSCursor.arrow.set()
+        }
+    }
+
     private func setHovering(_ hovering: Bool) {
         if hovering, let other = Self.hoveredItem, other !== self {
             other.setHovering(false)
@@ -464,6 +486,7 @@ extension PasteCollectionViewItem {
         }
         guard hovering != isHovering else { return }
         isHovering = hovering
+        applyLinkCursor()
         actionStack.isHidden = !hovering
         timeLabel.isHidden = hovering
         pinMark.isHidden = hovering || !(pModel?.isPinned ?? false)
@@ -800,7 +823,7 @@ extension PasteCollectionViewItem {
         }
 
         if pModel?.type == .link {
-            menu.addItem(NSMenuItem(title: String(localized: "Open in Browser"), action: #selector(openLinkClick), keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: String(localized: "Open in Browser (⌘+Click)"), action: #selector(openLinkClick), keyEquivalent: ""))
         }
 
         let previewItem = NSMenuItem(title: String(localized: "Preview"), action: #selector(previewItemAction), keyEquivalent: " ")
@@ -1044,17 +1067,19 @@ enum CardIcon {
 /// 跟踪鼠标进出的 cell 根视图
 final class HoverTrackingView: NSView {
     var onHoverChange: ((Bool) -> Void)?
+    var onMouseMove: (() -> Void)?
 
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         trackingAreas.forEach(removeTrackingArea)
         addTrackingArea(NSTrackingArea(rect: .zero,
-                                       options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                                       options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .inVisibleRect],
                                        owner: self))
     }
 
     override func mouseEntered(with event: NSEvent) { onHoverChange?(true) }
     override func mouseExited(with event: NSEvent) { onHoverChange?(false) }
+    override func mouseMoved(with event: NSEvent) { onMouseMove?() }
 }
 
 /// 自上而下由半透明黑渐隐的遮罩,用于图片卡头部

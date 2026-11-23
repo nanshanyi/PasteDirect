@@ -507,12 +507,12 @@
         }
       }
     },
-    "Open in Browser" : {
+    "Open in Browser (⌘+Click)" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在浏览器中打开"
+            "value" : "在浏览器中打开（⌘+单击）"
           }
         }
       }

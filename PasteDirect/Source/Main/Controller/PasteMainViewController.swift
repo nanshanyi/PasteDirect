@@ -316,6 +316,7 @@ extension PasteMainViewController {
             if event.type == .flagsChanged {
                 let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
                 self.setShortcutHintsVisible(flags == .command)
+                PasteCollectionViewItem.refreshLinkCursor()
                 return event
             }
             if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
