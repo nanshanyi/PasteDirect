@@ -30,16 +30,16 @@
 	<string>PasteDirect 需要辅助功能权限来监听剪贴板变化和粘贴内容</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>SUFeedURL</key>
-	<string>https://nanshanyi.github.io/PasteDirect/appcast.xml</string>
-	<key>SUEnableAutomaticChecks</key>
-	<true/>
 	<key>SUAutomaticallyUpdate</key>
 	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
+	<key>SUFeedURL</key>
+	<string>https://nanshanyi.github.io/PasteDirect/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>1QQoEM8JpTV6p6in9VjnldAv3xHsw3H2jwciXLSHpk8=</string>
+	<string>/pHELSm5RxvDS7SqWSeBIJlNkSUqa8JpUeunLtsvBZI=</string>
 	<key>SURequireSignedFeed</key>
 	<true/>
 	<key>SUVerifyUpdateBeforeExtraction</key>
