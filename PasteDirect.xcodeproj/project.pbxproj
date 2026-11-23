@@ -19,6 +19,7 @@
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
+		DE30DA7A0000000000000001 /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE30DA7A0000000000000002 /* DemoData.swift */; };
 		CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */; };
 		CBAAAA0000000000DCFDAA03 /* ImageThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */; };
 		CBAAAA0000000000DCFDAA05 /* Data+ContentHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */; };
@@ -120,6 +121,7 @@
 		CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteDirectUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRCache.swift; sourceTree = "<group>"; };
 		CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOCRExtractor.swift; sourceTree = "<group>"; };
+		DE30DA7A0000000000000002 /* DemoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoData.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlobStore.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnail.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+ContentHash.swift"; sourceTree = "<group>"; };
@@ -325,6 +327,7 @@
 			isa = PBXGroup;
 			children = (
 				CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */,
+				DE30DA7A0000000000000002 /* DemoData.swift */,
 				CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */,
 				CBAAAA0000000000DCFDAB02 /* DataMigration.swift */,
 				CBD1CA9E2F87B2A6003ACBD7 /* ColorCache.swift */,
@@ -604,6 +607,7 @@
 				CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */,
 				CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */,
 				CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */,
+				DE30DA7A0000000000000001 /* DemoData.swift in Sources */,
 				CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */,
 				CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */,
 				CBD1CACE2F87B2A6003ACBD7 /* PasteSettingWindowController.swift in Sources */,

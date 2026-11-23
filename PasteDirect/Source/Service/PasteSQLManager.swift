@@ -50,7 +50,7 @@ actor PasteSQLManager {
             let appSupportDir = NSSearchPathForDirectoriesInDomains(
                 .applicationSupportDirectory, .userDomainMask, true
             ).first ?? NSTemporaryDirectory()
-            path = appSupportDir.appending("/paste/paste.sqlite3")
+            path = appSupportDir.appending("/\(StorageLocation.folderName)/paste.sqlite3")
         }
         let dirPath = (path as NSString).deletingLastPathComponent
         var isDir = ObjCBool(false)

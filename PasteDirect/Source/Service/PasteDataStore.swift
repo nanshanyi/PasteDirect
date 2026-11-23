@@ -51,6 +51,9 @@ extension PasteDataStore {
         dbOffset = pageSize
         Task {
             await sqlManager.setup()
+            #if DEBUG
+            await seedDemoDataIfNeeded()
+            #endif
             await updateTotalCount()
             await updateStorageSize()
             let list = await sqlManager.search(limit: pageSize, offset: 0)
@@ -60,6 +63,19 @@ extension PasteDataStore {
             }
         }
     }
+
+    #if DEBUG
+    /// 演示模式且演示库为空时写入演示数据
+    private func seedDemoDataIfNeeded() async {
+        guard DemoData.isEnabled, await sqlManager.totalCount == 0 else { return }
+        for entry in DemoData.makeEntries() {
+            if let original = entry.original {
+                await ImageBlobStore.shared.save(original, for: entry.model.hashValue)
+            }
+            await sqlManager.insert(item: entry.model)
+        }
+    }
+    #endif
 
     private func updateTotalCount() async {
         let count = await sqlManager.totalCount

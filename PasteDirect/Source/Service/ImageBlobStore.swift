@@ -23,7 +23,7 @@ actor ImageBlobStore {
         } else {
             let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
                 ?? URL(fileURLWithPath: NSTemporaryDirectory())
-            self.directory = appSupportDir.appendingPathComponent("paste/images", isDirectory: true)
+            self.directory = appSupportDir.appendingPathComponent("\(StorageLocation.folderName)/images", isDirectory: true)
         }
         createDirectoryIfNeeded()
     }
