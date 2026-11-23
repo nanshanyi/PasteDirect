@@ -8,35 +8,30 @@
         <item>
             <title>Version 4.0.0</title>
             <sparkle:shortVersionString>4.0.0</sparkle:shortVersionString>
-            <sparkle:version>20003</sparkle:version>
-            <pubDate>Mon, 23 Nov 2026 14:24:19 +0000</pubDate>
+            <sparkle:version>20004</sparkle:version>
+            <pubDate>Mon, 23 Nov 2026 14:32:52 +0000</pubDate>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <description>&lt;p&gt;首个 4.0 测试版（Beta）。内置自动更新是全新实现，升级后如遇到问题，请到 https://github.com/nanshanyi/PasteDirect/issues 反馈。&lt;/p&gt;
-&lt;h4&gt;新增&lt;/h4&gt;
+            <description>&lt;p&gt;首个 4.0 测试版（Beta）：界面整体重做，更新方式改为应用内自动更新。遇到问题请到 https://github.com/nanshanyi/PasteDirect/issues 反馈。&lt;/p&gt;
+&lt;h4&gt;全新 UI 设计&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;基于 [Sparkle](https://sparkle-project.org/) 的应用内自动更新:检测到新版本后可直接在应用内下载并自动安装重启，无需再手动下载 dmg 拖入「应用程序」。&lt;/li&gt;
-&lt;li&gt;新增「自动下载更新」开关:开启后发现的更新将后台静默下载，退出应用时自动安装。&lt;/li&gt;
-&lt;li&gt;顶栏新增类型分段筛选（全部 / 文本 / 图片 / 颜色），并显示各类型条数。&lt;/li&gt;
-&lt;li&gt;鼠标悬停卡片时显示置顶 / 删除快捷按钮。&lt;/li&gt;
-&lt;li&gt;新增 GitHub Actions 自动发版工作流:推送 `v*` tag 即自动构建、签名、打包 dmg、生成 appcast 并发布 Release（发版流程见 `docs/RELEASE.md`）。&lt;/li&gt;
+&lt;li&gt;主面板整体重做：卡片头部取来源应用主色，悬停上浮、选中描边更清晰，置顶条目与普通历史分开成组。&lt;/li&gt;
+&lt;li&gt;搜索框、预览弹窗、设置页统一到同一套视觉规则；深色与浅色模式分别调校，切换主题不再出现颜色跳变。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4&gt;变更&lt;/h4&gt;
+&lt;h4&gt;应用内自动更新&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;主面板 UI 全面改版：卡片重新设计，头部取来源应用主色；悬停上浮、选中描边更清晰；置顶分组带背景区分。&lt;/li&gt;
-&lt;li&gt;搜索框新增聚焦态，预览弹窗信息行更易读。&lt;/li&gt;
-&lt;li&gt;置顶 / 取消置顶时卡片以动画移动到新位置。&lt;/li&gt;
-&lt;li&gt;「检查更新」由自研 GitHub API 检查迁移至 Sparkle 标准更新界面，支持跳过版本与自动本地化的更新弹窗；v3.5.x 的「启动时自动检查」与「忽略版本」设置会自动迁移，无需重新配置。&lt;/li&gt;
-&lt;li&gt;开源协议由 MIT 改为 [GNU AGPL-3.0](LICENSE)。&lt;/li&gt;
+&lt;li&gt;接入 &lt;a href="https://sparkle-project.org/"&gt;Sparkle&lt;/a&gt;：发现新版本后可在应用内直接下载、安装并重启，不必再手动下载 dmg 拖进「应用程序」。&lt;/li&gt;
+&lt;li&gt;新增「自动下载更新」：更新在后台静默下载，退出应用时自动安装；也可以跳过某个版本不再提示。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4&gt;修复&lt;/h4&gt;
+&lt;h4&gt;更顺手的操作&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;置顶切换、切换筛选类型时卡片闪烁（头部先变黑再变色）。&lt;/li&gt;
-&lt;li&gt;面板顶部拖拽把手的光标显示异常。&lt;/li&gt;
-&lt;/ul&gt;</description>
-            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="JQrved9OS2lPfLht3ni7IHdsFg+RovUsoF1pn6FBDrDIG2p1UOkOooU6QPCEgGCzZAeP7PjbLuN8vpO64RcOCg==" length="4882889" type="application/octet-stream" />
+&lt;li&gt;顶栏可按类型筛选（全部 / 文本 / 图片 / 颜色），并显示各类型条数。&lt;/li&gt;
+&lt;li&gt;悬停卡片直接出现置顶 / 删除按钮；置顶、取消置顶时卡片带动画移动到新位置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;另外，开源协议由 MIT 改为 GNU AGPL-3.0。&lt;/p&gt;</description>
+            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="Pm/S8y9AsQLmg0Yz4mr409RsShWDNyuqH8dZSpECDP8tiqLppJxClLQD6m87vYGHCCx/yfaYxyG2T3nt+WUkBg==" length="4882877" type="application/octet-stream" />
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: F6k/pACj1SOhQLQlHeu7MKekYc9qQvmKD5IECugPFoYw4+ZRmpBmT8trwHs1eLDrvvwP4Nz4bDnLuQremH95DA==
-length: 2962
+edSignature: 4NQC8P8znylPrOsFB1kKakEViLQxBNUNwzg8HEBemDDlAHzBhE3cKZO32twITvpLaz7eNg3rvEVQxwd3oAwWAQ==
+length: 2429
 -->
