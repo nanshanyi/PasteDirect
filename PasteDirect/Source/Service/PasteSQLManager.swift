@@ -13,11 +13,21 @@ typealias Expression = SQLite.Expression
 struct TypeCounts: Sendable, Equatable {
     var text = 0
     var image = 0
-    var link = 0
-    var color = 0
+    /// 派生类型(颜色/链接等)的条数,按 kind 标签统计
+    var derived: [PasteModelType: Int] = [:]
+
+    func count(for type: PasteModelType) -> Int? {
+        switch type {
+        case .string: return text
+        case .image: return image
+        case .none: return nil
+        default: return derived[type] ?? 0
+        }
+    }
 }
 
 actor PasteSQLManager {
+
     // MARK: - Column Definitions
 
     private let col_id = Expression<Int>("id")
@@ -34,6 +44,8 @@ actor PasteSQLManager {
     private let col_imgW = Expression<Int?>("imgW")
     private let col_imgH = Expression<Int?>("imgH")
     private let col_pinnedDate = Expression<Date?>("pinnedDate")
+    /// 派生类型标签(PasteModelType 的 rawValue,如 "color"/"link"),其他为 NULL。写入时打好,筛选与计数直接走 SQL
+    private let col_kind = Expression<String?>("kind")
 
     // MARK: - DB
 
@@ -90,11 +102,13 @@ actor PasteSQLManager {
             migrateAddOCRTextColumn()
             migrateAddImageSizeColumns()
             migrateAddPinnedColumn()
+            migrateAddKindColumn()
             try db?.run(table.createIndex(col_date, ifNotExists: true))
             try db?.run(table.createIndex(col_appName, ifNotExists: true))
             try db?.run(table.createIndex(col_type, ifNotExists: true))
             try db?.run(table.createIndex(col_hashKey, ifNotExists: true))
             try db?.run(table.createIndex(col_pinnedDate, ifNotExists: true))
+            try db?.run(table.createIndex(col_kind, ifNotExists: true))
             Log("Create Table Success")
         } catch {
             Log("Create Table Error: \(error)")
@@ -131,6 +145,35 @@ actor PasteSQLManager {
             // 列已存在,符合预期
         }
     }
+
+    /// 旧库没有 kind 列(颜色/链接分类引入):加列并按现有文本行回填一次。
+    /// 以 user_version 记录规则版本;日后调整颜色/链接识别规则时递增版本号即可触发重新回填。
+    private static let kindRulesVersion = 1
+
+    private func migrateAddKindColumn() {
+        guard let db else { return }
+        do {
+            let current = Int(db.userVersion ?? 0)
+            guard current < Self.kindRulesVersion else { return }
+            _ = try? db.run(table.addColumn(col_kind))
+            let textTypes = [PasteboardType.rtf, .rtfd, .string].map(\.rawValue)
+            let query = table.select(col_id, col_type, col_dataString, col_length)
+                .filter(makeTypeFilter(textTypes))
+            let rows = try Array(db.prepare(query))
+            try db.transaction {
+                _ = try db.run(table.update(col_kind <- nil))
+                for row in rows {
+                    let kind = PasteboardModel.derivedType(forText: row[col_dataString], type: PasteboardType(row[col_type]))
+                    guard let kind else { continue }
+                    _ = try db.run(table.filter(col_id == row[col_id]).update(col_kind <- kind.rawValue))
+                }
+            }
+            db.userVersion = Int32(Self.kindRulesVersion)
+            Log("Migrated: backfilled kind column")
+        } catch {
+            Log("回填 kind 失败：\(error)")
+        }
+    }
 }
 
 // MARK: - 对外接口
@@ -158,30 +201,26 @@ extension PasteSQLManager {
     }
 
     /// 顶栏分段按钮上显示的各类型条数。
-    /// 文本条数与「文本」筛选结果保持一致(含颜色值文本);
-    /// 颜色/链接不是独立列,只扫描候选文本行再用 HexColorValidator / linkURL 判定。
+    /// 文本条数与「文本」筛选结果保持一致(含颜色/链接);颜色、链接按 kind 标签直接统计。
     func typeCounts() -> TypeCounts {
         let textTypes = [PasteboardType.rtf, .rtfd, .string].map(\.rawValue)
         let imageTypes = [PasteboardType.png, .tiff].map(\.rawValue)
-        let text = countRows(filter: makeTypeFilter(textTypes))
-        let image = countRows(filter: makeTypeFilter(imageTypes))
-        var color = 0
-        var link = 0
+        var derived: [PasteModelType: Int] = [:]
         do {
-            let colorQuery = table.select(col_dataString).filter(makeTypeFilter(textTypes) && col_length <= 40)
-            for row in try db?.prepare(colorQuery) ?? AnySequence([]) {
-                if HexColorValidator.isValidHexColor(row[col_dataString]) != nil { color += 1 }
-            }
-            // 链接只可能是纯文本，用 :// 预筛后再精确判定
-            let linkQuery = table.select(col_dataString).filter(
-                col_type == PasteboardType.string.rawValue && col_length < 2048 && col_dataString.like("%://%"))
-            for row in try db?.prepare(linkQuery) ?? AnySequence([]) {
-                if PasteboardModel.linkURL(in: row[col_dataString]) != nil { link += 1 }
+            let query = table.select(col_kind, col_kind.count).filter(col_kind != nil).group(col_kind)
+            for row in try db?.prepare(query) ?? AnySequence([]) {
+                if let raw = row[col_kind], let type = PasteModelType(rawValue: raw) {
+                    derived[type] = row[col_kind.count]
+                }
             }
         } catch {
-            Log("统计颜色/链接条数失败：\(error)")
+            Log("统计派生类型条数失败：\(error)")
         }
-        return TypeCounts(text: text, image: image, link: link, color: color)
+        return TypeCounts(
+            text: countRows(filter: makeTypeFilter(textTypes)),
+            image: countRows(filter: makeTypeFilter(imageTypes)),
+            derived: derived
+        )
     }
 
     func insert(item: PasteboardModel) {
@@ -210,7 +249,8 @@ extension PasteSQLManager {
             col_ocrText <- item.ocrText,
             col_imgW <- item.imageWidth,
             col_imgH <- item.imageHeight,
-            col_pinnedDate <- pinnedDate
+            col_pinnedDate <- pinnedDate,
+            col_kind <- item.derivedType?.rawValue
         )
         do {
             let rowId = try db?.run(insertQuery)
@@ -427,10 +467,11 @@ extension PasteSQLManager {
                 conditions.append(makeTypeFilter([PasteboardType.rtf.rawValue, PasteboardType.rtfd.rawValue, PasteboardType.string.rawValue]))
             case .image:
                 conditions.append(makeTypeFilter([PasteboardType.png.rawValue, PasteboardType.tiff.rawValue]))
-            case .color, .link:
-                conditions.append(makeTypeFilter([PasteboardType.rtf.rawValue, PasteboardType.rtfd.rawValue, PasteboardType.string.rawValue]))
             case .none:
                 break
+            default:
+                // 颜色/链接等派生类型按 kind 标签筛选
+                conditions.append((col_kind == selectedType.rawValue) ?? false)
             }
         }
         if let dateRange = state.selectedDateRange {

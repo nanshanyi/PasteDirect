@@ -319,6 +319,22 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(a.ocrText)
     }
 
+    func testKindFilterAndCounts() async {
+        let manager = await makeTempManager()
+        for text in ["https://a.com/\(UUID().uuidString)", "#FF5733", "plain \(UUID().uuidString)"] {
+            await manager.insert(item: makeTextModel(string: text))
+        }
+        let links = await manager.searchWithParams(keyword: "", state: FilterState(selectedType: .link), limit: 20, offset: 0)
+        XCTAssertEqual(links.count, 1)
+        XCTAssertEqual(links.first?.type, .link)
+        let colors = await manager.searchWithParams(keyword: "", state: FilterState(selectedType: .color), limit: 20, offset: 0)
+        XCTAssertEqual(colors.map(\.type), [.color])
+        let counts = await manager.typeCounts()
+        XCTAssertEqual(counts.text, 3)
+        XCTAssertEqual(counts.count(for: .link), 1)
+        XCTAssertEqual(counts.count(for: .color), 1)
+    }
+
     func testSQLManagerOCRTextColumnRoundTrip() async {
         let manager = await makeTempManager()
         let unique = "ocr-col-\(UUID().uuidString)"

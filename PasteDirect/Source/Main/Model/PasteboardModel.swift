@@ -8,7 +8,7 @@
 import AppKit
 import Foundation
 
-enum PasteModelType: Sendable {
+enum PasteModelType: String, Sendable {
     case none
     case image
     case string
@@ -23,6 +23,26 @@ enum PasteModelType: Sendable {
             self = .image
         default:
             self = .none
+        }
+    }
+
+    /// 由内容推出、存库时打标签(kind 列,值为 rawValue)的类型,按此顺序依次匹配。
+    /// 新增派生类型:加 case、在此登记、在 PasteboardModel.derivedType 里补规则,
+    /// 并递增 PasteSQLManager.kindRulesVersion 触发旧数据回填。
+    static let derivedTypes: [PasteModelType] = [.color, .link]
+
+    /// 顶栏分段与筛选弹窗展示的类型(顺序即界面顺序)
+    static let filterable: [PasteModelType] = [.string, .link, .image, .color]
+
+    var isDerived: Bool { Self.derivedTypes.contains(self) }
+
+    var symbolName: String {
+        switch self {
+        case .image: return "photo"
+        case .string: return "doc.text"
+        case .color: return "paintpalette"
+        case .link: return "link"
+        case .none: return "questionmark"
         }
     }
 
@@ -48,8 +68,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
     let dataString: String
     let length: Int
     let hexColorString: String?
-    /// 纯文本且整体是单个 http(s) 链接（富文本保留原样展示，不算链接）
-    let isLink: Bool
+    /// 由内容推出的派生类型(颜色/链接等),同时也是写入数据库 kind 列的值
+    let derivedType: PasteModelType?
     /// 图片经 OCR 识别出的文本;仅图片类型可能非 nil,用于让图片内容可被搜索。非图片项为 nil
     let ocrText: String?
     /// 图片原图的像素尺寸。图片外置到文件后，不加载原图也能算预览尺寸和显示尺寸文案;非图片项为 nil
@@ -62,13 +82,22 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
     var isPinned: Bool { pinnedDate != nil }
 
     var type: PasteModelType {
-        if hexColorString != nil {
-            return .color
+        derivedType ?? PasteModelType(with: pasteboardType)
+    }
+
+    /// 由文本内容推出派生类型;init 与数据库回填共用,保证两处规则一致
+    static func derivedType(forText text: String, type: PasteboardType) -> PasteModelType? {
+        PasteModelType.derivedTypes.first { candidate in
+            switch candidate {
+            case .color:
+                return HexColorValidator.isValidHexColor(text.trimmingCharacters(in: .whitespacesAndNewlines)) != nil
+            case .link:
+                // 富文本保留原样展示，不算链接
+                return type == .string && linkURL(in: text) != nil
+            default:
+                return false
+            }
         }
-        if isLink {
-            return .link
-        }
-        return PasteModelType(with: pasteboardType)
     }
 
     /// 单段、无空白的 http(s) 链接
@@ -125,7 +154,7 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         } else {
             self.hexColorString = nil
         }
-        self.isLink = pasteboardType == .string && Self.linkURL(in: dataString) != nil
+        self.derivedType = pasteboardType.isText() ? Self.derivedType(forText: dataString, type: pasteboardType) : nil
     }
 
     /// 返回更新了日期的新实例

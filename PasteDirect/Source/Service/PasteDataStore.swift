@@ -92,25 +92,6 @@ extension PasteDataStore {
 // MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
-    /// 从 offset 起取一页数据。颜色/链接需在内存中过滤，因此持续向后扫描直到凑满一页或数据库耗尽
-    private func fetchPage(keyword: String, state: FilterState, from start: Int) async throws
-        -> (models: [PasteboardModel], offset: Int, exhausted: Bool)
-    {
-        let derivedType = state.selectedType.flatMap { $0 == .color || $0 == .link ? $0 : nil }
-        let batchSize = derivedType == nil ? pageSize : pageSize * 3
-        var accumulated = [PasteboardModel]()
-        var offset = start
-        while accumulated.count < pageSize {
-            let batch = await sqlManager.searchWithParams(keyword: keyword, state: state, limit: batchSize, offset: offset)
-            try Task.checkCancellation()
-            accumulated.append(contentsOf: derivedType == nil ? batch : batch.filter { $0.type == derivedType })
-            offset += batch.count
-            if batch.count < batchSize { return (accumulated, offset, true) }
-            if derivedType == nil { break }
-        }
-        return (accumulated, offset, false)
-    }
-
     /// 加载下一页（支持筛选条件）
     func loadNextPage() {
         guard loadState == .idle else { return }
@@ -121,10 +102,11 @@ extension PasteDataStore {
         loadTask = Task {
             do {
                 Log("loadNextPage offset=\(dbOffset)")
-                let page = try await fetchPage(keyword: keyword, state: state, from: dbOffset)
-                dbOffset = page.offset
-                dataList.send(dataList.value + page.models)
-                loadState = (page.models.isEmpty || page.exhausted) ? .noMore : .idle
+                let batch = await sqlManager.searchWithParams(keyword: keyword, state: state, limit: pageSize, offset: dbOffset)
+                try Task.checkCancellation()
+                dbOffset += batch.count
+                dataList.send(dataList.value + batch)
+                loadState = batch.count < pageSize ? .noMore : .idle
             } catch {
                 loadState = .idle
             }
@@ -160,10 +142,11 @@ extension PasteDataStore {
         currentFilterState = state
         searchTask = Task {
             do {
-                let page = try await fetchPage(keyword: keyWord, state: state, from: 0)
-                dbOffset = page.offset
-                dataList.send(page.models)
-                loadState = (page.exhausted && state.selectedType != nil) ? .noMore : .idle
+                let result = await sqlManager.searchWithParams(keyword: keyWord, state: state, limit: pageSize, offset: 0)
+                try Task.checkCancellation()
+                dbOffset = pageSize
+                dataList.send(result)
+                loadState = .idle
             } catch {
                 loadState = .idle
             }

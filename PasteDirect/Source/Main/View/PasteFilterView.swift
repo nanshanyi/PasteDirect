@@ -250,12 +250,7 @@ final class PasteFilterView: NSView {
             appItems.append(FilterItemModel(title: String(localized: "More"), icon: moreIcon, isMoreButton: true))
         }
 
-        let types: [(String, String, PasteModelType)] = [
-            (String(localized: "Text"), "doc.text", .string),
-            (String(localized: "Link"), "link", .link),
-            (String(localized: "Image"), "photo", .image),
-            (String(localized: "Color"), "paintpalette", .color),
-        ]
+        let types = PasteModelType.filterable.map { ($0.string, $0.symbolName, $0) }
         let typeItems: [FilterItemModel] = types.map {
             FilterItemModel(title: $0.0,
                             icon: NSImage(systemSymbolName: $0.1, accessibilityDescription: nil),
@@ -294,8 +289,7 @@ final class PasteFilterView: NSView {
     }
 
     private func typeTapped(_ idx: Int) {
-        let types: [PasteModelType] = [.string, .link, .image, .color]
-        let t = types[idx]
+        let t = PasteModelType.filterable[idx]
         filterState.selectedType = (filterState.selectedType == t) ? nil : t
         rebuildData()
     }

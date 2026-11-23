@@ -600,7 +600,7 @@ extension PasteCollectionViewItem {
         case .color: return "paintpalette"
         default:
             if model.pasteboardType != .string { return "textformat" }
-            if model.isLink { return "link" }
+            if model.type == .link { return "link" }
             if looksLikeCode(model.dataString) { return "chevron.left.forwardslash.chevron.right" }
             return "text.alignleft"
         }
