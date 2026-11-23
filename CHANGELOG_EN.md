@@ -6,7 +6,9 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [4.0.0] - Unreleased
+## [4.0.0] - 2026-11-23
+
+First 4.0 beta. The in-app updater is a brand-new implementation — if you run into problems after upgrading, please report them at https://github.com/nanshanyi/PasteDirect/issues
 
 ### Added
 - In-app automatic updates powered by [Sparkle](https://sparkle-project.org/): new versions can be downloaded and installed right inside the app with an automatic relaunch — no more manually downloading the dmg and dragging it into Applications.
@@ -224,7 +226,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Code cleanup.
 
-[4.0.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.5.0...HEAD
+[4.0.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.5.0...v4.0.0-beta
 [3.5.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.2.0...v3.3.0

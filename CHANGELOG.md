@@ -6,7 +6,9 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [4.0.0] - 未发布
+## [4.0.0] - 2026-11-23
+
+首个 4.0 测试版（Beta）。内置自动更新是全新实现，升级后如遇到问题，请到 https://github.com/nanshanyi/PasteDirect/issues 反馈。
 
 ### 新增
 - 基于 [Sparkle](https://sparkle-project.org/) 的应用内自动更新:检测到新版本后可直接在应用内下载并自动安装重启，无需再手动下载 dmg 拖入「应用程序」。
@@ -224,7 +226,7 @@
 ### 优化
 - 代码优化。
 
-[4.0.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.5.0...HEAD
+[4.0.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.5.0...v4.0.0-beta
 [3.5.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.2.0...v3.3.0
