@@ -88,7 +88,7 @@ final class PasteFlowLayout: NSCollectionViewFlowLayout {
     }
 }
 
-/// 置顶分组背景:系统橙 10% 填充 + 22% 描边(与设计稿一致)
+/// 置顶分组背景:系统橙 22% 填充 + 45% 描边
 final class PinnedGroupBackgroundView: NSView, NSCollectionViewElement {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)

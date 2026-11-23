@@ -132,6 +132,6 @@ enum AppColor {
     /// 置顶标记(头部图钉)
     static let pinned = NSColor.systemOrange
     /// 置顶分组底色与描边
-    static let pinnedGroupFill = NSColor.systemOrange.withAlphaComponent(0.10)
-    static let pinnedGroupBorder = NSColor.systemOrange.withAlphaComponent(0.22)
+    static let pinnedGroupFill = NSColor.systemOrange.withAlphaComponent(0.22)
+    static let pinnedGroupBorder = NSColor.systemOrange.withAlphaComponent(0.45)
 }
