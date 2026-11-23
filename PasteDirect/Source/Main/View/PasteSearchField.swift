@@ -28,7 +28,14 @@ final class PasteSearchField: NSView {
 
     var placeholderString: String? {
         get { textField.placeholderString }
-        set { textField.placeholderString = newValue }
+        set {
+            textField.placeholderAttributedString = newValue.map {
+                NSAttributedString(string: $0, attributes: [
+                    .font: NSFont.systemFont(ofSize: 13),
+                    .foregroundColor: AppColor.searchPlaceholder,
+                ])
+            }
+        }
     }
 
     var isFirstResponder: Bool {
@@ -53,7 +60,7 @@ final class PasteSearchField: NSView {
         let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .regular)
         let icon = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: nil)
         $0.image = icon?.withSymbolConfiguration(config)
-        $0.contentTintColor = .secondaryLabelColor
+        $0.contentTintColor = AppColor.searchPlaceholder
         $0.imageScaling = .scaleProportionallyDown
     }
 
@@ -63,7 +70,7 @@ final class PasteSearchField: NSView {
         $0.alignment = .centerY
     }
 
-    private lazy var textField = NSTextField().then {
+    private lazy var textField = NonVibrantTextField().then {
         $0.isBordered = false
         $0.drawsBackground = false
         $0.focusRingType = .none
@@ -92,7 +99,14 @@ final class PasteSearchField: NSView {
     }
 
     private var tagViews: [NSView] = []
-    private var isFocused = false { didSet { updateBorderAppearance() } }
+    private var isFocused = false {
+        didSet {
+            guard isFocused != oldValue else { return }
+            updateBorderAppearance()
+            updateBackgroundColor()
+        }
+    }
+    private var firstResponderObservation: NSKeyValueObservation?
 
     // MARK: - Init
 
@@ -189,6 +203,20 @@ final class PasteSearchField: NSView {
         window?.invalidateCursorRects(for: self)
     }
 
+    // MARK: - 聚焦状态
+
+    /// 监听窗口的第一响应者来判断聚焦。
+    /// controlTextDidBeginEditing 要等输入第一个字符才触发,点击或 Tab 进来时不会有任何变化。
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        firstResponderObservation = window?.observe(\.firstResponder, options: [.initial, .new]) { [weak self] _, _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.isFocused = self.isFirstResponder
+            }
+        }
+    }
+
     // MARK: - Appearance
 
     override func viewDidChangeEffectiveAppearance() {
@@ -197,18 +225,18 @@ final class PasteSearchField: NSView {
         updateBackgroundColor()
     }
 
+    /// 未聚焦:无描边,只有一层浅灰填充;聚焦:强调色描边
     private func updateBorderAppearance() {
-        layer?.borderWidth = isFocused ? 2 : 1
+        layer?.borderWidth = isFocused ? 1.5 : 0
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            layer?.borderColor = isFocused
-                ? NSColor.controlAccentColor.cgColor
-                : NSColor.separatorColor.cgColor
+            layer?.borderColor = AppColor.searchFocusRing.cgColor
         }
     }
 
+    /// 未聚焦与分段按钮底槽同色;聚焦时更亮
     private func updateBackgroundColor() {
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            layer?.backgroundColor = NSColor.textBackgroundColor.withAlphaComponent(0.5).cgColor
+            layer?.backgroundColor = (isFocused ? AppColor.searchFocusedFill : AppColor.toolbarFill).cgColor
         }
     }
 
@@ -303,21 +331,22 @@ private final class TagPillView: NSView {
 // MARK: - NSTextFieldDelegate
 
 extension PasteSearchField: NSTextFieldDelegate {
-    func controlTextDidBeginEditing(_ obj: Notification) {
-        isFocused = true
-    }
-
     func controlTextDidChange(_ obj: Notification) {
         text = textField.stringValue
         updateCancelButton()
     }
 
     func controlTextDidEndEditing(_ obj: Notification) {
-        isFocused = false
         delegate?.controlTextDidEndEditing?(obj)
     }
 
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         delegate?.control?(control, textView: textView, doCommandBy: commandSelector) ?? false
     }
+}
+
+/// 关闭 vibrancy 的输入框:玻璃背景的 vibrancy 会把浅色模式下半透明的深色文字混合成接近纯黑,
+/// 占位符的透明度失效。关掉后颜色按设定值原样绘制。
+final class NonVibrantTextField: NSTextField {
+    override var allowsVibrancy: Bool { false }
 }

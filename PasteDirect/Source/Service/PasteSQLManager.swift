@@ -10,6 +10,12 @@ import Foundation
 
 typealias Expression = SQLite.Expression
 
+struct TypeCounts: Sendable, Equatable {
+    var text = 0
+    var image = 0
+    var color = 0
+}
+
 actor PasteSQLManager {
     // MARK: - Column Definitions
 
@@ -148,6 +154,26 @@ extension PasteSQLManager {
             Log("获取总数失败：\(error)")
             return 0
         }
+    }
+
+    /// 顶栏分段按钮上显示的各类型条数。
+    /// 文本条数与「文本」筛选结果保持一致(含颜色值文本);
+    /// 颜色不是独立列,只扫描短文本行再用 HexColorValidator 判定。
+    func typeCounts() -> TypeCounts {
+        let textTypes = [PasteboardType.rtf, .rtfd, .string].map(\.rawValue)
+        let imageTypes = [PasteboardType.png, .tiff].map(\.rawValue)
+        let text = countRows(filter: makeTypeFilter(textTypes))
+        let image = countRows(filter: makeTypeFilter(imageTypes))
+        var color = 0
+        do {
+            let query = table.select(col_dataString).filter(makeTypeFilter(textTypes) && col_length <= 16)
+            for row in try db?.prepare(query) ?? AnySequence([]) {
+                if HexColorValidator.isValidHexColor(row[col_dataString]) != nil { color += 1 }
+            }
+        } catch {
+            Log("统计颜色条数失败：\(error)")
+        }
+        return TypeCounts(text: text, image: image, color: color)
     }
 
     func insert(item: PasteboardModel) {

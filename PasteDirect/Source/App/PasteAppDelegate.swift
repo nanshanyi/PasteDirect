@@ -82,6 +82,18 @@ extension PasteAppDelegate {
             showOrDismissWindow(curFrame)
         }
 
+#if DEBUG
+        /// 调试用:命令行发送分布式通知切换面板,便于自动化截图
+        /// swift -e 'import Foundation; DistributedNotificationCenter.default().postNotificationName(.init("com.nanshanyi.PasteDirect.debugToggle"), object: nil, userInfo: nil, deliverImmediately: true)'
+        DistributedNotificationCenter.default().addObserver(
+            forName: .init("com.nanshanyi.PasteDirect.debugToggle"), object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.showOrDismissWindow(NSScreen.main?.frame)
+            }
+        }
+#endif
+
         /// 启动自动更新（检查时机由 Sparkle 管理：启动后自动检查 + 周期检查）
         UpdateCoordinator.shared.startup()
     }

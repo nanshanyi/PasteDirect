@@ -188,8 +188,8 @@ final class PastePreviewViewController: NSViewController {
         $0.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
 
-    private lazy var infoLabel = NSlabel().then {
-        $0.textColor = .secondaryLabelColor
+    private lazy var infoLabel = NonVibrantLabel().then {
+        $0.textColor = AppColor.previewInfo
         $0.font = .systemFont(ofSize: 12)
         $0.alignment = .left
         $0.maximumNumberOfLines = 1
@@ -402,4 +402,9 @@ final class PastePreviewViewController: NSViewController {
         }
         infoLabel.stringValue = infoParts.joined(separator: "  ·  ")
     }
+}
+
+/// 关闭 vibrancy 的标签:popover 的半透明材质会改变文字实际亮度,关掉后按设定颜色原样绘制
+private final class NonVibrantLabel: NSlabel {
+    override var allowsVibrancy: Bool { false }
 }

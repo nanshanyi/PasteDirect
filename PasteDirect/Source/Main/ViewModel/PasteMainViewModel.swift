@@ -100,6 +100,10 @@ final class PasteMainViewModel {
         }
     }
 
+    func typeCounts() async -> TypeCounts {
+        await store.typeCounts()
+    }
+
     func topApps() async -> [(name: String, path: String)] {
         await store.topApps()
     }

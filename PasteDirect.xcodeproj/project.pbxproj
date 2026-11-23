@@ -13,19 +13,18 @@
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
 		CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */; };
 		CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */; };
+		CB5A1E000000000000000A03 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = CB5A1E000000000000000A02 /* Sparkle */; };
 		CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */; };
 		CB8423112FCD6DC100DCFDAA /* ImageOCRExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
 		CB9986FF29260015007E585C /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986FE29260015007E585C /* SQLite */; };
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
-		CB5A1E000000000000000A03 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = CB5A1E000000000000000A02 /* Sparkle */; };
 		CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */; };
 		CBAAAA0000000000DCFDAA03 /* ImageThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */; };
-		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
 		CBAAAA0000000000DCFDAA05 /* Data+ContentHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */; };
+		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
 		CBD1CACA2F87B2A6003ACBD7 /* UIImageColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */; };
 		CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA92F87B2A6003ACBD7 /* RulesDetailView.swift */; };
-		CBD1CACC2F87B2A6003ACBD7 /* PasteEffectImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA932F87B2A6003ACBD7 /* PasteEffectImageView.swift */; };
 		CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAAB2F87B2A6003ACBD7 /* SettingsView.swift */; };
 		CBD1CACE2F87B2A6003ACBD7 /* PasteSettingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA32F87B2A6003ACBD7 /* PasteSettingWindowController.swift */; };
 		CBD1CACF2F87B2A6003ACBD7 /* NSAttributeString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAB12F87B2A6003ACBD7 /* NSAttributeString+Extension.swift */; };
@@ -55,6 +54,7 @@
 		CBD1CAE72F87B2A6003ACBD7 /* PasteDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA02F87B2A6003ACBD7 /* PasteDataStore.swift */; };
 		CBD1CAE82F87B2A6003ACBD7 /* PasteFilterItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */; };
 		CBD1CAE92F87B2A6003ACBD7 /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CABE2F87B2A6003ACBD7 /* Layout.swift */; };
+		04E8E72CC5C047C89504A2EF /* AppColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E390B0B9BF1B42569699869A /* AppColor.swift */; };
 		CBD1CAEA2F87B2A6003ACBD7 /* SettingsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAAA2F87B2A6003ACBD7 /* SettingsModels.swift */; };
 		CBD1CAEB2F87B2A6003ACBD7 /* PrefKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */; };
 		CBD1CAEC2F87B2A6003ACBD7 /* PastePreviewPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */; };
@@ -122,8 +122,8 @@
 		CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOCRExtractor.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlobStore.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnail.swift; sourceTree = "<group>"; };
-		CBAAAA0000000000DCFDAB02 /* DataMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigration.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+ContentHash.swift"; sourceTree = "<group>"; };
+		CBAAAA0000000000DCFDAB02 /* DataMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigration.swift; sourceTree = "<group>"; };
 		CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionView.swift; sourceTree = "<group>"; };
 		CBD1CA862F87B2A6003ACBD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBD1CA872F87B2A6003ACBD7 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -135,7 +135,6 @@
 		CBD1CA8F2F87B2A6003ACBD7 /* PasteBoardType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteBoardType.swift; sourceTree = "<group>"; };
 		CBD1CA902F87B2A6003ACBD7 /* PasteboardWritingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardWritingItem.swift; sourceTree = "<group>"; };
 		CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
-		CBD1CA932F87B2A6003ACBD7 /* PasteEffectImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEffectImageView.swift; sourceTree = "<group>"; };
 		CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterItem.swift; sourceTree = "<group>"; };
 		CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterView.swift; sourceTree = "<group>"; };
 		CBD1CA962F87B2A6003ACBD7 /* PasteMainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteMainViewController.swift; sourceTree = "<group>"; };
@@ -169,6 +168,7 @@
 		CBD1CABC2F87B2A6003ACBD7 /* ImageColorExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageColorExtractor.swift; sourceTree = "<group>"; };
 		CBD1CABD2F87B2A6003ACBD7 /* KeyHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyHelper.swift; sourceTree = "<group>"; };
 		CBD1CABE2F87B2A6003ACBD7 /* Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
+		E390B0B9BF1B42569699869A /* AppColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColor.swift; sourceTree = "<group>"; };
 		CBD1CABF2F87B2A6003ACBD7 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUserDefaults.swift; sourceTree = "<group>"; };
 		CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefKey.swift; sourceTree = "<group>"; };
@@ -290,7 +290,6 @@
 			isa = PBXGroup;
 			children = (
 				CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */,
-				CBD1CA932F87B2A6003ACBD7 /* PasteEffectImageView.swift */,
 				CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */,
 				CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */,
 				CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */,
@@ -413,6 +412,7 @@
 				CBD1CABC2F87B2A6003ACBD7 /* ImageColorExtractor.swift */,
 				CBD1CABD2F87B2A6003ACBD7 /* KeyHelper.swift */,
 				CBD1CABE2F87B2A6003ACBD7 /* Layout.swift */,
+				E390B0B9BF1B42569699869A /* AppColor.swift */,
 				CBD1CABF2F87B2A6003ACBD7 /* Log.swift */,
 				CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */,
 				CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */,
@@ -525,7 +525,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1410;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					CB2CDEE92924E8D500E81836 = {
 						CreatedOnToolsVersion = 14.1;
@@ -602,7 +602,6 @@
 			files = (
 				CBD1CACA2F87B2A6003ACBD7 /* UIImageColors.swift in Sources */,
 				CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */,
-				CBD1CACC2F87B2A6003ACBD7 /* PasteEffectImageView.swift in Sources */,
 				CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */,
 				CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */,
 				CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */,
@@ -643,6 +642,7 @@
 				CBAAAA0000000000DCFDAA05 /* Data+ContentHash.swift in Sources */,
 				CBD1CAE82F87B2A6003ACBD7 /* PasteFilterItem.swift in Sources */,
 				CBD1CAE92F87B2A6003ACBD7 /* Layout.swift in Sources */,
+				04E8E72CC5C047C89504A2EF /* AppColor.swift in Sources */,
 				CBD1CAEA2F87B2A6003ACBD7 /* SettingsModels.swift in Sources */,
 				CBD1CAEB2F87B2A6003ACBD7 /* PrefKey.swift in Sources */,
 				CBD1CAEC2F87B2A6003ACBD7 /* PastePreviewPanel.swift in Sources */,
@@ -847,7 +847,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 3.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -896,7 +896,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 3.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -915,7 +915,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = nanshanyi.PasteDirectTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -933,7 +933,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = nanshanyi.PasteDirectTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -950,6 +950,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = nanshanyi.PasteDirectUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -966,6 +967,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = nanshanyi.PasteDirectUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1017,6 +1019,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 		CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -1041,17 +1051,14 @@
 				minimumVersion = 5.0.0;
 			};
 		};
-		CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sparkle-project/Sparkle";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.6.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CB5A1E000000000000000A02 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		CB9986F52925FF46007E585C /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
@@ -1066,11 +1073,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
-		};
-		CB5A1E000000000000000A02 /* Sparkle */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */;
-			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

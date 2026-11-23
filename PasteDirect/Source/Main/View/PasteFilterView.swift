@@ -299,6 +299,13 @@ final class PasteFilterView: NSView {
         rebuildData()
     }
 
+    /// 由顶栏类型分段按钮直接设置类型筛选(nil 表示全部)
+    func setType(_ type: PasteModelType?) {
+        guard filterState.selectedType != type else { return }
+        filterState.selectedType = type
+        rebuildData()
+    }
+
     private func dateTapped(_ idx: Int) {
         let d = DateRange.allCases[idx]
         filterState.selectedDateRange = (filterState.selectedDateRange == d) ? nil : d

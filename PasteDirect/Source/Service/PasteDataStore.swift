@@ -355,6 +355,10 @@ extension PasteDataStore {
 
 extension PasteDataStore {
     @discardableResult
+    func typeCounts() async -> TypeCounts {
+        await sqlManager.typeCounts()
+    }
+
     func extractColor(from model: PasteboardModel) async -> NSColor? {
         let icon = NSWorkspace.shared.icon(forFile: model.appPath)
         return await colorCache.getOrExtract(for: model, icon: icon)

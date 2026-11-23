@@ -77,6 +77,16 @@
         }
       }
     },
+    "All" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
+          }
+        }
+      }
+    },
     "Always paste as plain text" : {
       "localizations" : {
         "zh-Hans" : {
@@ -97,6 +107,16 @@
         }
       }
     },
+    "Auto-extract text from images" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动识别图片中的文字"
+          }
+        }
+      }
+    },
     "Automatically check for updates" : {
       "localizations" : {
         "zh-Hans" : {
@@ -113,26 +133,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自动下载更新"
-          }
-        }
-      }
-    },
-    "Auto-extract text from images" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自动识别图片中的文字"
-          }
-        }
-      }
-    },
-    "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开启后,复制的图片可通过搜索图中文字找到。关闭后不可搜索,但仍可在图片右键菜单中手动取用文字。"
           }
         }
       }
@@ -158,6 +158,7 @@
       }
     },
     "Check for updates on launch" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -254,6 +255,16 @@
         }
       }
     },
+    "Copy Text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制文字"
+          }
+        }
+      }
+    },
     "Current height" : {
       "localizations" : {
         "zh-Hans" : {
@@ -300,16 +311,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在状态栏显示"
-          }
-        }
-      }
-    },
-    "Copy Text" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "复制文字"
           }
         }
       }
@@ -405,6 +406,7 @@
       }
     },
     "Later" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -579,6 +581,16 @@
         }
       }
     },
+    "Pin" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "置顶"
+          }
+        }
+      }
+    },
     "pixels" : {
       "localizations" : {
         "zh-Hans" : {
@@ -719,6 +731,16 @@
         }
       }
     },
+    "Text Detected" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可识别文字"
+          }
+        }
+      }
+    },
     "This action cannot be undone. All clipboard data will be permanently deleted." : {
       "localizations" : {
         "zh-Hans" : {
@@ -789,6 +811,16 @@
         }
       }
     },
+    "Unpin" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消置顶"
+          }
+        }
+      }
+    },
     "Version %@" : {
       "comment" : "App version display",
       "localizations" : {
@@ -810,6 +842,16 @@
         }
       }
     },
+    "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后,复制的图片可通过搜索图中文字找到。关闭后不可搜索,但仍可在图片右键菜单中手动取用文字。"
+          }
+        }
+      }
+    },
     "Yesterday" : {
       "localizations" : {
         "zh-Hans" : {
@@ -826,26 +868,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您有比新的历史限制更旧的项目。是否要删除这些较旧的项目并应用新的限制？"
-          }
-        }
-      }
-    },
-    "Pin" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "置顶"
-          }
-        }
-      }
-    },
-    "Unpin" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消置顶"
           }
         }
       }

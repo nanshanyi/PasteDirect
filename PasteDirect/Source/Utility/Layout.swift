@@ -11,11 +11,11 @@ enum Layout {
     // MARK: - 屏幕 & 面板
     static let screenPadding: CGFloat = 6
     static let cornerRadius: CGFloat = 32
-    static let resizeHandleHeight: CGFloat = 8
+    /// 顶部可拖拽调整高度的区域(把手在其中居中)
+    static let resizeHandleHeight: CGFloat = 14
 
     // MARK: - 面板高度限制
     static let defaultViewHeight: CGFloat = 280
-    static let compactItemHeight: CGFloat = defaultViewHeight - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
     static let minViewHeight: CGFloat = defaultViewHeight - 30
     static let maxViewHeight: CGFloat = defaultViewHeight + 70
 
@@ -27,25 +27,27 @@ enum Layout {
     // MARK: - 列表
     static let scrollViewTop: CGFloat = 16
     static let scrollViewBottom: CGFloat = 16
+    /// 卡片之间的视觉间距
     static let lineSpacing: CGFloat = 20
-    static let spacing: CGFloat = 12
     static let padding: CGFloat = 20
 
     // MARK: - Item
-    static let itemSize = NSSize(width: 260, height: 260)
-    static let itemCornerRadius: CGFloat = 16
-    static let itemBorderWidth: CGFloat = 3
-    static let itemTopViewHeight: CGFloat = 60
-    static let itemBottomViewHeight: CGFloat = 24
-    static let itemBottomOffset: CGFloat = 24
-    /// 卡片上下内缩留白,给阴影(blur+offset)留出不被 scrollView 垂直裁切的空间。
-    /// 仅上下:水平滚动列表只在垂直方向裁切,左右贴边由 lineSpacing 控制间距。
-    static let itemShadowMargin: CGFloat = 6
-    static let headerFooterSize = NSSize(width: 0, height: itemSize.height)
-    static let edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: -20, right: 0)
+    static let itemCornerRadius: CGFloat = 18
+    /// 选中描边宽度,画在卡片外圈
+    static let itemBorderWidth: CGFloat = 2.5
+    /// 选中描边与卡片之间的间隙
+    static let itemRingGap: CGFloat = 4
+    static let itemHeaderHeight: CGFloat = 36
+    /// 卡片内容左右内边距
+    static let itemInset: CGFloat = 12
+    /// 卡片在 cell 内四周的留白:容纳阴影、选中外圈和悬停上浮,避免被裁切。
+    static let itemShadowMargin: CGFloat = 8
+    /// 悬停时卡片上浮的距离
+    static let itemHoverLift: CGFloat = 3
 
     // MARK: - 设置按钮
-    static let settingButtonSize: CGFloat = 30
+    /// 设置按钮:28pt 点击区域,图标 13pt(与设计稿一致)
+    static let settingButtonSize: CGFloat = 28
     static let settingButtonTrailing: CGFloat = 16
 
     // MARK: - 筛选弹窗
@@ -75,23 +77,15 @@ enum Layout {
     static func dynamicItemSize(for height: CGFloat) -> NSSize {
         // 卡片边长(正方形),与未加阴影留白前保持一致
         let cardSide = height - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
-        // cell 宽 = 卡片宽(左右贴边);cell 高 = 卡片高 + 上下阴影留白,cell 内卡片再内缩回正方形
-        return NSSize(width: cardSide, height: cardSide + itemShadowMargin * 2)
+        // cell = 卡片 + 四周留白,cell 内卡片再内缩回正方形
+        return NSSize(width: cardSide + itemShadowMargin * 2, height: cardSide + itemShadowMargin * 2)
     }
 
-    static func dynamicTopViewHeight(for itemHeight: CGFloat) -> CGFloat {
-        let height = itemHeight * 60 / 260
-        return min(max(height, 40), 60)
-    }
+    /// 卡片默认边长(面板默认高度时),作为各元素按高度缩放的基准
+    static let baseCardSide: CGFloat = defaultViewHeight - searchBarTop - searchBarHeight - scrollViewTop - scrollViewBottom
 
-    static func dynamicTypeFontSize(for itemHeight: CGFloat) -> CGFloat {
-        let size = itemHeight * 18 / 260
-        return min(max(size, 14), 18)
-    }
-
-    /// 置顶徽章尺寸随 item 高度缩放(基准 26pt @ 260),小面板时同比缩小
-    static func dynamicPinBadgeSize(for itemHeight: CGFloat) -> CGFloat {
-        let size = itemHeight * 26 / 260
-        return min(max(size, 16), 26)
+    /// 按卡片高度等比缩放某个基准尺寸,并限制在给定范围内
+    static func scaled(_ base: CGFloat, for cardHeight: CGFloat, in range: ClosedRange<CGFloat>) -> CGFloat {
+        min(max(base * cardHeight / baseCardSide, range.lowerBound), range.upperBound)
     }
 }
