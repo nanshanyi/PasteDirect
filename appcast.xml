@@ -8,8 +8,8 @@
         <item>
             <title>Version 4.0.0</title>
             <sparkle:shortVersionString>4.0.0</sparkle:shortVersionString>
-            <sparkle:version>20004</sparkle:version>
-            <pubDate>Mon, 23 Nov 2026 14:32:52 +0000</pubDate>
+            <sparkle:version>20006</sparkle:version>
+            <pubDate>Mon, 23 Nov 2026 15:27:30 +0000</pubDate>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <description>&lt;p&gt;首个 4.0 测试版（Beta）：界面整体重做，更新方式改为应用内自动更新。遇到问题请到 https://github.com/nanshanyi/PasteDirect/issues 反馈。&lt;/p&gt;
 &lt;h4&gt;全新 UI 设计&lt;/h4&gt;
@@ -28,10 +28,10 @@
 &lt;li&gt;悬停卡片直接出现置顶 / 删除按钮；置顶、取消置顶时卡片带动画移动到新位置。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;另外，开源协议由 MIT 改为 GNU AGPL-3.0。&lt;/p&gt;</description>
-            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="Pm/S8y9AsQLmg0Yz4mr409RsShWDNyuqH8dZSpECDP8tiqLppJxClLQD6m87vYGHCCx/yfaYxyG2T3nt+WUkBg==" length="4882877" type="application/octet-stream" />
+            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="LyBzeceAUn2SgVrVot972vpKvc9+07GloDOQZPt9Y4GXA4PPrChazAIcxKupZ0ZHk1jqygMvfe4JrYtU5NIyCw==" length="4882886" type="application/octet-stream" />
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: 4NQC8P8znylPrOsFB1kKakEViLQxBNUNwzg8HEBemDDlAHzBhE3cKZO32twITvpLaz7eNg3rvEVQxwd3oAwWAQ==
+edSignature: eL9ebjtyZ2RErH+eQRdVdx7dyY89FhKluXh5Mno8kSW8jrPnk9q+CkysZh7TuRzOq6cyz7GL71n2oyhxQp5PBw==
 length: 2429
 -->
