@@ -6,12 +6,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [4.0.0] - 2026-11-23
+## [4.0.0] - 2026-11-24
 
-First 4.0 beta: the interface has been rebuilt from the ground up and updates now happen inside the app. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
+First 4.0 beta: the interface has been rebuilt from the ground up, updates now happen inside the app, and there is a new Link category with fuller colour detection. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
 
 ### A brand-new UI
-- The main panel is completely redesigned: card headers take their colour from the source app, hover lift and selection outlines are clearer, and pinned items get their own group apart from regular history.
+- The main panel is completely redesigned: card headers take their colour from the source app, hover lift and selection outlines are clearer, and pinned items get their own group apart from regular history, with a stronger fill and outline.
 - The search field, preview popover and settings page now share one visual language; dark and light appearances are tuned separately, so switching themes no longer causes colour jumps.
 
 ### In-app automatic updates
@@ -19,7 +19,9 @@ First 4.0 beta: the interface has been rebuilt from the ground up and updates no
 - New "Automatically download updates": updates download silently in the background and install when you quit the app. You can still skip a version.
 
 ### Smoother everyday use
-- Filter the list by type from the toolbar (All / Text / Image / Colour), with counts for each type.
+- Filter the list by type from the toolbar (All / Text / Link / Image / Colour), with counts for each type. Links and colours are tagged when an item is saved, so filtering and counts are answered directly by the database and stay fast with large histories (existing history is tagged automatically on first launch after updating — nothing to do on your side).
+- Open links straight from a card: choose "Open in Browser" in the right-click menu, or hold ⌘ and click the card (the pointer turns into a hand while ⌘ is held).
+- Colour detection supports hex values starting with `#` or `0x` (3, 6 or 8 digits) as well as `rgb()` / `rgba()` / `hsl()` / `hsla()`; ordinary text such as `123456` or `deadbeef` is not mistaken for a colour. "Paste as Plain Text" only normalises hex values to `#RRGGBB`; rgb / hsl values are pasted as written.
 - Pin or delete straight from a hovered card; pinning and unpinning now animate the card into its new position.
 
 Also, the license changed from MIT to GNU AGPL-3.0.
