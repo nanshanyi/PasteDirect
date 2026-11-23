@@ -32,14 +32,15 @@
 ### 📋 Captures everything
 
 - **Many formats** — Text, images, HTML, RTF, rich text and code snippets
-- **Color detection** — Hex color values are recognized and shown as swatches with RGB values
+- **Color detection** — Hex values (with a `#` or `0x` prefix) and `rgb()` / `hsl()` colors are recognized and shown as swatches
+- **Link detection** — A single http(s) URL is classified as a link; open it in your browser from the right-click menu or with `⌘` + click
 - **Image text recognition (OCR)** — Text in images is recognized on-device with Apple's Vision framework, so images are searchable too
 - **Pinned items** — Pin frequently used items so they always stay first and are never auto-cleaned
 
 ### 🔍 Finds things fast
 
 - **Instant search** — Just start typing after opening the panel; text inside images is searchable as well
-- **Combined filters** — Switch by type with the segmented control (with item counts), and combine with source app and date range filters
+- **Combined filters** — Switch by type (text / link / image / color) with the segmented control (with item counts), and combine with source app and date range filters
 - **Space to preview** — Inspect text, images and colors at a larger size; Live Text lets you select and copy text right from image previews
 
 <picture>
@@ -96,6 +97,7 @@ Press `⌘⇧V` (customizable) to open the panel, then:
 | Type | Search; `Backspace` removes filter tags one by one |
 | `←` `→` | Move the selection |
 | `Return` / double-click | Paste the selected item |
+| `⌘` + click | Open a link card in your browser |
 | `⌘1` – `⌘9` | Paste the card with that number (hold `⌘` to show numbers) |
 | `Space` | Preview the selected item |
 | `Delete` | Delete the selected item |
