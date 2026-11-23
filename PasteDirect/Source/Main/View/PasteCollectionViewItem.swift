@@ -600,7 +600,7 @@ extension PasteCollectionViewItem {
         case .color: return "paintpalette"
         default:
             if model.pasteboardType != .string { return "textformat" }
-            if linkURL(in: model.dataString) != nil { return "link" }
+            if model.isLink { return "link" }
             if looksLikeCode(model.dataString) { return "chevron.left.forwardslash.chevron.right" }
             return "text.alignleft"
         }
@@ -622,7 +622,7 @@ extension PasteCollectionViewItem {
         surface = .standard
         cardView.fillColor = AppColor.cardBackground
 
-        if let url = Self.linkURL(in: model.dataString) {
+        if let url = PasteboardModel.linkURL(in: model.dataString) {
             let host = (url.host ?? "").replacingOccurrences(of: "^www\\.", with: "", options: .regularExpression)
             linkIconLabel.stringValue = host.first.map { String($0).uppercased() } ?? "🔗"
             linkHostLabel.stringValue = host
@@ -719,15 +719,6 @@ extension PasteCollectionViewItem {
         ])
     }
 
-    /// 单段、无空白的 http(s) 链接
-    private static func linkURL(in text: String) -> URL? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, trimmed.count < 2048, !trimmed.contains(where: \.isWhitespace),
-              let url = URL(string: trimmed), let scheme = url.scheme?.lowercased(),
-              scheme == "http" || scheme == "https", url.host?.isEmpty == false else { return nil }
-        return url
-    }
-
     /// 粗略判断是否为代码/命令:多行且符号密度较高,或以 shell 提示符开头
     private static func looksLikeCode(_ text: String) -> Bool {
         let sample = text.prefix(maxLength)
@@ -788,7 +779,7 @@ extension PasteCollectionViewItem {
             menu.addItem(item)
         }
         // "始终以纯文本粘贴"开启时,默认粘贴已是纯文本,该菜单项冗余,隐藏之。
-        if pModel?.type == .string, !PasteUserDefaults.pasteOnlyText {
+        if pModel?.type == .string || pModel?.type == .link, !PasteUserDefaults.pasteOnlyText {
             let item1 = NSMenuItem(title: String(localized: "Paste as Plain Text"), action: #selector(pasteTextClick), keyEquivalent: "")
             menu.addItem(item1)
         }
@@ -806,6 +797,10 @@ extension PasteCollectionViewItem {
             }
             let copyTextItem = NSMenuItem(title: String(localized: "Copy Text"), action: #selector(copyOCRTextClick), keyEquivalent: "")
             menu.addItem(copyTextItem)
+        }
+
+        if pModel?.type == .link {
+            menu.addItem(NSMenuItem(title: String(localized: "Open in Browser"), action: #selector(openLinkClick), keyEquivalent: ""))
         }
 
         let previewItem = NSMenuItem(title: String(localized: "Preview"), action: #selector(previewItemAction), keyEquivalent: " ")
@@ -871,6 +866,14 @@ extension PasteCollectionViewItem {
     private func deleteItem() {
         if let pModel, let indexPath = collectionView?.indexPath(for: self) {
             delegate?.deleteItem(pModel, indexPath: indexPath)
+        }
+    }
+
+    @objc
+    private func openLinkClick() {
+        guard let pModel, let url = PasteboardModel.linkURL(in: pModel.dataString) else { return }
+        AppContext.coordinator.dismissWindow {
+            NSWorkspace.shared.open(url)
         }
     }
 

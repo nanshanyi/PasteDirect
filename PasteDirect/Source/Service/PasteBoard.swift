@@ -80,7 +80,7 @@ final class PasteBoard {
         // "始终以纯文本粘贴"开关开启时,文本类型恒走纯文本(即使菜单选了"粘贴原文");
         // 开关关闭时维持原逻辑,仅 !isOriginal(菜单显式选纯文本)才去格式。
         let pasteAsPlainText = !isOriginal || PasteUserDefaults.pasteOnlyText
-        if updated.type == .string, pasteAsPlainText {
+        if updated.type == .string || updated.type == .link, pasteAsPlainText {
             pasteboard.setString(updated.dataString, forType: .string)
         } else if updated.type == .color {
             // 仅 hex 写法在纯文本粘贴时规范化为 #RRGGBB；rgb()/hsl() 保持原文

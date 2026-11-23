@@ -385,6 +385,16 @@
         }
       }
     },
+    "Link" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "链接"
+          }
+        }
+      }
+    },
     "Last 30 Days" : {
       "localizations" : {
         "zh-Hans" : {
@@ -493,6 +503,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "面板"
+          }
+        }
+      }
+    },
+    "Open in Browser" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在浏览器中打开"
           }
         }
       }

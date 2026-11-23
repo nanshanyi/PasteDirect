@@ -252,6 +252,7 @@ final class PasteFilterView: NSView {
 
         let types: [(String, String, PasteModelType)] = [
             (String(localized: "Text"), "doc.text", .string),
+            (String(localized: "Link"), "link", .link),
             (String(localized: "Image"), "photo", .image),
             (String(localized: "Color"), "paintpalette", .color),
         ]
@@ -293,7 +294,7 @@ final class PasteFilterView: NSView {
     }
 
     private func typeTapped(_ idx: Int) {
-        let types: [PasteModelType] = [.string, .image, .color]
+        let types: [PasteModelType] = [.string, .link, .image, .color]
         let t = types[idx]
         filterState.selectedType = (filterState.selectedType == t) ? nil : t
         rebuildData()

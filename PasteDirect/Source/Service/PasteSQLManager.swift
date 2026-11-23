@@ -13,6 +13,7 @@ typealias Expression = SQLite.Expression
 struct TypeCounts: Sendable, Equatable {
     var text = 0
     var image = 0
+    var link = 0
     var color = 0
 }
 
@@ -158,22 +159,29 @@ extension PasteSQLManager {
 
     /// 顶栏分段按钮上显示的各类型条数。
     /// 文本条数与「文本」筛选结果保持一致(含颜色值文本);
-    /// 颜色不是独立列,只扫描短文本行再用 HexColorValidator 判定。
+    /// 颜色/链接不是独立列,只扫描候选文本行再用 HexColorValidator / linkURL 判定。
     func typeCounts() -> TypeCounts {
         let textTypes = [PasteboardType.rtf, .rtfd, .string].map(\.rawValue)
         let imageTypes = [PasteboardType.png, .tiff].map(\.rawValue)
         let text = countRows(filter: makeTypeFilter(textTypes))
         let image = countRows(filter: makeTypeFilter(imageTypes))
         var color = 0
+        var link = 0
         do {
-            let query = table.select(col_dataString).filter(makeTypeFilter(textTypes) && col_length <= 40)
-            for row in try db?.prepare(query) ?? AnySequence([]) {
+            let colorQuery = table.select(col_dataString).filter(makeTypeFilter(textTypes) && col_length <= 40)
+            for row in try db?.prepare(colorQuery) ?? AnySequence([]) {
                 if HexColorValidator.isValidHexColor(row[col_dataString]) != nil { color += 1 }
             }
+            // 链接只可能是纯文本，用 :// 预筛后再精确判定
+            let linkQuery = table.select(col_dataString).filter(
+                col_type == PasteboardType.string.rawValue && col_length < 2048 && col_dataString.like("%://%"))
+            for row in try db?.prepare(linkQuery) ?? AnySequence([]) {
+                if PasteboardModel.linkURL(in: row[col_dataString]) != nil { link += 1 }
+            }
         } catch {
-            Log("统计颜色条数失败：\(error)")
+            Log("统计颜色/链接条数失败：\(error)")
         }
-        return TypeCounts(text: text, image: image, color: color)
+        return TypeCounts(text: text, image: image, link: link, color: color)
     }
 
     func insert(item: PasteboardModel) {
@@ -419,7 +427,7 @@ extension PasteSQLManager {
                 conditions.append(makeTypeFilter([PasteboardType.rtf.rawValue, PasteboardType.rtfd.rawValue, PasteboardType.string.rawValue]))
             case .image:
                 conditions.append(makeTypeFilter([PasteboardType.png.rawValue, PasteboardType.tiff.rawValue]))
-            case .color:
+            case .color, .link:
                 conditions.append(makeTypeFilter([PasteboardType.rtf.rawValue, PasteboardType.rtfd.rawValue, PasteboardType.string.rawValue]))
             case .none:
                 break

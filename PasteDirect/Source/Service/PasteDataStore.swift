@@ -34,9 +34,7 @@ final class PasteDataStore {
     /// 当前生效的筛选参数（Sendable，用于分页加载时复用）
     private var currentKeyword: String = ""
     private var currentFilterState: FilterState = .empty
-    /// 当前是否为颜色筛选（需要内存过滤）
-    private var isColorFilter = false
-    /// 已扫描过的 DB 行数（颜色筛选时与展示条数不同）
+    /// 已扫描过的 DB 行数（颜色/链接筛选时与展示条数不同）
     private var dbOffset = 0
 
     func setup() {
@@ -94,6 +92,25 @@ extension PasteDataStore {
 // MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
+    /// 从 offset 起取一页数据。颜色/链接需在内存中过滤，因此持续向后扫描直到凑满一页或数据库耗尽
+    private func fetchPage(keyword: String, state: FilterState, from start: Int) async throws
+        -> (models: [PasteboardModel], offset: Int, exhausted: Bool)
+    {
+        let derivedType = state.selectedType.flatMap { $0 == .color || $0 == .link ? $0 : nil }
+        let batchSize = derivedType == nil ? pageSize : pageSize * 3
+        var accumulated = [PasteboardModel]()
+        var offset = start
+        while accumulated.count < pageSize {
+            let batch = await sqlManager.searchWithParams(keyword: keyword, state: state, limit: batchSize, offset: offset)
+            try Task.checkCancellation()
+            accumulated.append(contentsOf: derivedType == nil ? batch : batch.filter { $0.type == derivedType })
+            offset += batch.count
+            if batch.count < batchSize { return (accumulated, offset, true) }
+            if derivedType == nil { break }
+        }
+        return (accumulated, offset, false)
+    }
+
     /// 加载下一页（支持筛选条件）
     func loadNextPage() {
         guard loadState == .idle else { return }
@@ -101,31 +118,13 @@ extension PasteDataStore {
         loadTask?.cancel()
         let keyword = currentKeyword
         let state = currentFilterState
-        let isColor = isColorFilter
         loadTask = Task {
             do {
-                var accumulated = [PasteboardModel]()
-                var offset = dbOffset
-                let batchSize = isColor ? pageSize * 3 : pageSize
-                let maxIterations = isColor ? 10 : 1
-                var iterations = 0
-                var dbExhausted = false
-                while accumulated.count < pageSize, iterations < maxIterations {
-                    iterations += 1
-                    Log("loadNextPage offset=\(offset)")
-                    let batch = await sqlManager.searchWithParams(keyword: keyword, state: state, limit: batchSize, offset: offset)
-                    let filtered = isColor ? batch.filter { $0.hexColorString != nil } : batch
-                    try Task.checkCancellation()
-                    accumulated.append(contentsOf: filtered)
-                    offset += batch.count
-                    if batch.count < batchSize {
-                        dbExhausted = true
-                        break
-                    }
-                }
-                dbOffset = offset
-                dataList.send(dataList.value + accumulated)
-                loadState = (accumulated.isEmpty || dbExhausted) ? .noMore : .idle
+                Log("loadNextPage offset=\(dbOffset)")
+                let page = try await fetchPage(keyword: keyword, state: state, from: dbOffset)
+                dbOffset = page.offset
+                dataList.send(dataList.value + page.models)
+                loadState = (page.models.isEmpty || page.exhausted) ? .noMore : .idle
             } catch {
                 loadState = .idle
             }
@@ -135,7 +134,6 @@ extension PasteDataStore {
     func resetDefaultList() {
         currentKeyword = ""
         currentFilterState = .empty
-        isColorFilter = false
         // 重置列表时同时取消进行中的搜索,避免旧搜索结果回来覆盖默认列表
         searchTask?.cancel()
         loadTask?.cancel()
@@ -160,15 +158,12 @@ extension PasteDataStore {
         loadState = .loading
         currentKeyword = keyWord
         currentFilterState = state
-        isColorFilter = state.selectedType == .color
         searchTask = Task {
             do {
-                let result = await sqlManager.searchWithParams(keyword: keyWord, state: state, limit: pageSize, offset: 0)
-                let filtered = isColorFilter ? result.filter { $0.hexColorString != nil } : result
-                try Task.checkCancellation()
-                dbOffset = pageSize
-                dataList.send(filtered)
-                loadState = .idle
+                let page = try await fetchPage(keyword: keyWord, state: state, from: 0)
+                dbOffset = page.offset
+                dataList.send(page.models)
+                loadState = (page.exhausted && state.selectedType != nil) ? .noMore : .idle
             } catch {
                 loadState = .idle
             }

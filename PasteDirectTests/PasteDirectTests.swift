@@ -44,6 +44,14 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(plainModel.hexColorString)
     }
 
+    func testLinkDetection() {
+        XCTAssertEqual(makeTextModel(string: "https://github.com/nanshanyi").type, .link)
+        XCTAssertEqual(makeTextModel(string: "  http://a.com/x?y=1 \n").type, .link)
+        XCTAssertEqual(makeTextModel(string: "see https://github.com").type, .string)
+        XCTAssertEqual(makeTextModel(string: "www.github.com").type, .string)
+        XCTAssertEqual(makeTextModel(string: "ftp://a.com").type, .string)
+    }
+
     func testImageType() {
         let data = Data([0x89, 0x50, 0x4E, 0x47]) // PNG header
         let model = PasteboardModel(

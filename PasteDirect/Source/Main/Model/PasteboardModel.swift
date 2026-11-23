@@ -13,6 +13,7 @@ enum PasteModelType: Sendable {
     case image
     case string
     case color
+    case link
 
     init(with type: PasteboardType) {
         switch type {
@@ -30,6 +31,7 @@ enum PasteModelType: Sendable {
         case .image: return String(localized: "Image")
         case .string: return String(localized: "Text")
         case .color: return String(localized: "Color")
+        case .link: return String(localized: "Link")
         default: return String(localized: "Unknown")
         }
     }
@@ -46,6 +48,8 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
     let dataString: String
     let length: Int
     let hexColorString: String?
+    /// 纯文本且整体是单个 http(s) 链接（富文本保留原样展示，不算链接）
+    let isLink: Bool
     /// 图片经 OCR 识别出的文本;仅图片类型可能非 nil,用于让图片内容可被搜索。非图片项为 nil
     let ocrText: String?
     /// 图片原图的像素尺寸。图片外置到文件后，不加载原图也能算预览尺寸和显示尺寸文案;非图片项为 nil
@@ -61,7 +65,19 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         if hexColorString != nil {
             return .color
         }
+        if isLink {
+            return .link
+        }
         return PasteModelType(with: pasteboardType)
+    }
+
+    /// 单段、无空白的 http(s) 链接
+    static func linkURL(in text: String) -> URL? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.count < 2048, !trimmed.contains(where: \.isWhitespace),
+              let url = URL(string: trimmed), let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https", url.host?.isEmpty == false else { return nil }
+        return url
     }
 
     @MainActor
@@ -109,6 +125,7 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         } else {
             self.hexColorString = nil
         }
+        self.isLink = pasteboardType == .string && Self.linkURL(in: dataString) != nil
     }
 
     /// 返回更新了日期的新实例
@@ -203,7 +220,7 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
             }
             guard let image else { return "" }
             return "\(Int(image.size.width)) × \(Int(image.size.height)) \(String(localized: "pixels"))"
-        case .string:
+        case .string, .link:
             return "\(Self.formatter.string(from: NSNumber(value: length)) ?? "")\(String(localized: "characters"))"
         case .color:
             return "\(String(localized: "Color"))\(String(localized: "colon"))\(hexColorString ?? String(localized: "Unknown"))"

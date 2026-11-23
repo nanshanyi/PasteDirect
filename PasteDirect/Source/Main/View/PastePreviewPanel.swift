@@ -62,7 +62,7 @@ final class PastePreviewPopover: NSPopover {
             // 按真实比例显示(像系统预览)，imageView 用此尺寸即贴合图片
             let display = imageDisplaySize(for: model)
             return NSSize(width: display.width, height: display.height)
-        case .string:
+        case .string, .link:
             return textFitSize(for: model)
         default:
             return NSSize(width: minWidth, height: miniHeight)
@@ -264,7 +264,7 @@ final class PastePreviewViewController: NSViewController {
         hideAll()
         typeLabel.stringValue = model.type.string
         switch model.type {
-        case .string:
+        case .string, .link:
             showText(model)
         case .image:
             showImage(model)

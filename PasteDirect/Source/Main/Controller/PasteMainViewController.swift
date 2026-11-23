@@ -63,8 +63,8 @@ final class PasteMainViewController: NSViewController {
 
     private lazy var settingButton = ToolbarIconButton(symbol: "gearshape", toolTip: String(localized: "Settings"))
 
-    /// 顶栏左侧的类型分段按钮:全部 / 文本 / 图片 / 颜色
-    private static let segmentTypes: [PasteModelType?] = [nil, .string, .image, .color]
+    /// 顶栏左侧的类型分段按钮:全部 / 文本 / 链接 / 图片 / 颜色
+    private static let segmentTypes: [PasteModelType?] = [nil, .string, .link, .image, .color]
 
     private lazy var typeSegment = PillSegmentedControl(
         titles: Self.segmentTypes.map { $0?.string ?? String(localized: "All") }
@@ -349,11 +349,11 @@ extension PasteMainViewController {
         filterView.setType(Self.segmentTypes[index])
     }
 
-    /// 刷新分段按钮上的条数(全部 / 文本 / 图片 / 颜色)
+    /// 刷新分段按钮上的条数(全部 / 文本 / 链接 / 图片 / 颜色)
     private func refreshTypeCounts() {
         Task {
             let counts = await viewModel.typeCounts()
-            typeSegment.setCounts([nil, counts.text, counts.image, counts.color])
+            typeSegment.setCounts([nil, counts.text, counts.link, counts.image, counts.color])
         }
     }
 
