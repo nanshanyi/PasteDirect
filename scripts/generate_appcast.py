@@ -91,6 +91,23 @@ def extract_changelog(changelog_path: Path, version: str) -> str:
     return match.group(1).strip()
 
 
+INLINE_LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+
+
+def inline_html(text: str) -> str:
+    """转义文本，并把 markdown 行内链接 [文字](url) 转成 <a>，供更新弹窗展示。"""
+    parts: list[str] = []
+    last = 0
+    for match in INLINE_LINK_RE.finditer(text):
+        parts.append(html.escape(text[last:match.start()]))
+        parts.append(
+            f'<a href="{html.escape(match.group(2), quote=True)}">{html.escape(match.group(1))}</a>'
+        )
+        last = match.end()
+    parts.append(html.escape(text[last:]))
+    return "".join(parts)
+
+
 def markdown_to_html(md: str) -> str:
     """把 changelog 小节转成 Sparkle 更新弹窗可展示的最小 HTML。"""
     html_lines: list[str] = []
@@ -107,18 +124,17 @@ def markdown_to_html(md: str) -> str:
         if not stripped:
             close_list()
             continue
-        escaped = html.escape(stripped)
         if stripped.startswith("- "):
             if not in_list:
                 html_lines.append("<ul>")
                 in_list = True
-            html_lines.append(f"<li>{escaped[2:]}</li>")
+            html_lines.append(f"<li>{inline_html(stripped[2:])}</li>")
         elif stripped.startswith("#"):
             close_list()
-            html_lines.append(f"<h4>{escaped.lstrip('#').strip()}</h4>")
+            html_lines.append(f"<h4>{inline_html(stripped.lstrip('#').strip())}</h4>")
         else:
             close_list()
-            html_lines.append(f"<p>{escaped}</p>")
+            html_lines.append(f"<p>{inline_html(stripped)}</p>")
     close_list()
     return "\n".join(html_lines)
 

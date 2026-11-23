@@ -8,25 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [4.0.0] - 2026-11-23
 
-First 4.0 beta. The in-app updater is a brand-new implementation — if you run into problems after upgrading, please report them at https://github.com/nanshanyi/PasteDirect/issues
+First 4.0 beta: the interface has been rebuilt from the ground up and updates now happen inside the app. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
 
-### Added
-- In-app automatic updates powered by [Sparkle](https://sparkle-project.org/): new versions can be downloaded and installed right inside the app with an automatic relaunch — no more manually downloading the dmg and dragging it into Applications.
-- New "Automatically download updates" toggle: updates found will be downloaded silently in the background and installed when the app quits.
-- New type segmented filter in the toolbar (All / Text / Image / Color) showing item counts for each type.
-- Hovering over a card reveals quick pin / delete buttons.
-- New GitHub Actions release workflow: pushing a `v*` tag automatically builds, signs, packages the dmg, generates the appcast, and publishes the Release (see `docs/RELEASE.md`).
+### A brand-new UI
+- The main panel is completely redesigned: card headers take their colour from the source app, hover lift and selection outlines are clearer, and pinned items get their own group apart from regular history.
+- The search field, preview popover and settings page now share one visual language; dark and light appearances are tuned separately, so switching themes no longer causes colour jumps.
 
-### Changed
-- Redesigned main panel: new card design with headers tinted by the source app's color, hover lift and clearer selection outline, and a distinct background for the pinned group.
-- Added a focused state to the search field; the preview popover info row is easier to read.
-- Pinning / unpinning now animates the card to its new position.
-- Update checking moved from a hand-rolled GitHub API checker to Sparkle's standard update UI, with skip-this-version support and localized update prompts; the v3.5.x "check on launch" and "ignored version" settings migrate automatically.
-- License changed from MIT to [GNU AGPL-3.0](LICENSE).
+### In-app automatic updates
+- Powered by [Sparkle](https://sparkle-project.org/): when a new version is available you can download, install and relaunch right inside the app — no more downloading the dmg and dragging it into Applications.
+- New "Automatically download updates": updates download silently in the background and install when you quit the app. You can still skip a version.
 
-### Fixed
-- Cards flickering (header turning black before getting its color) when toggling pins or switching the type filter.
-- Incorrect cursor on the panel's drag handle.
+### Smoother everyday use
+- Filter the list by type from the toolbar (All / Text / Image / Colour), with counts for each type.
+- Pin or delete straight from a hovered card; pinning and unpinning now animate the card into its new position.
+
+Also, the license changed from MIT to GNU AGPL-3.0.
 
 ## [3.5.0] - 2026-07-31
 
