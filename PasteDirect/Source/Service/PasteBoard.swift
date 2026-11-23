@@ -83,7 +83,10 @@ final class PasteBoard {
         if updated.type == .string, pasteAsPlainText {
             pasteboard.setString(updated.dataString, forType: .string)
         } else if updated.type == .color {
-            let string = isOriginal ? updated.dataString : updated.hexColorString
+            // 仅 hex 写法在纯文本粘贴时规范化为 #RRGGBB；rgb()/hsl() 保持原文
+            let isHexLiteral = updated.dataString.trimmingCharacters(in: .whitespacesAndNewlines)
+                .range(of: "^(#|0x)", options: [.regularExpression, .caseInsensitive]) != nil
+            let string = isOriginal || !isHexLiteral ? updated.dataString : updated.hexColorString
             pasteboard.setString(string ?? updated.dataString, forType: .string)
         } else {
             pasteboard.setData(updated.data, forType: updated.pasteboardType)

@@ -166,7 +166,7 @@ extension PasteSQLManager {
         let image = countRows(filter: makeTypeFilter(imageTypes))
         var color = 0
         do {
-            let query = table.select(col_dataString).filter(makeTypeFilter(textTypes) && col_length <= 16)
+            let query = table.select(col_dataString).filter(makeTypeFilter(textTypes) && col_length <= 40)
             for row in try db?.prepare(query) ?? AnySequence([]) {
                 if HexColorValidator.isValidHexColor(row[col_dataString]) != nil { color += 1 }
             }
