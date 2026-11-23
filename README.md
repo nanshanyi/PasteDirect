@@ -39,15 +39,15 @@
 - 🪟 **适配 macOS 26** — 全面支持液态玻璃（Liquid Glass）效果
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
-  <img width="2704" height="944" alt="主面板" src="docs/images/main-light.jpg">
+  <img alt="主面板" src="docs/images/main-light.jpg">
 </picture>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/filter-dark.jpg">
-  <img width="2704" height="1404" alt="筛选" src="docs/images/filter-light.jpg">
+  <img alt="筛选" src="docs/images/filter-light.jpg">
 </picture>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/preview-dark.jpg">
-  <img width="2704" height="1576" alt="预览" src="docs/images/preview-light.jpg">
+  <img alt="预览" src="docs/images/preview-light.jpg">
 </picture>
 
 ## 安装

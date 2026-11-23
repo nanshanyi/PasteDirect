@@ -40,15 +40,15 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
-  <img width="2704" height="944" alt="Main panel" src="docs/images/main-light.jpg">
+  <img alt="Main panel" src="docs/images/main-light.jpg">
 </picture>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/filter-dark.jpg">
-  <img width="2704" height="1404" alt="Filter" src="docs/images/filter-light.jpg">
+  <img alt="Filter" src="docs/images/filter-light.jpg">
 </picture>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/preview-dark.jpg">
-  <img width="2704" height="1576" alt="Preview" src="docs/images/preview-light.jpg">
+  <img alt="Preview" src="docs/images/preview-light.jpg">
 </picture>
 
 ## Installation
