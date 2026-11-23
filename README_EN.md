@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
   <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
   <img src="https://img.shields.io/badge/version-3.5.0-green" alt="Version 3.5.0">
-  <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License">
+  <img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License">
 </p>
 
 ## Features
@@ -38,9 +38,18 @@
 - 🚫 **App filtering** — Ignore clipboard content from specific apps, such as Keychain or password managers
 - 🪟 **macOS 26 ready** — Full support for the Liquid Glass visual effect
 
-<img width="2704" height="958" alt="2026_04_27_10_40_37" src="https://github.com/user-attachments/assets/27c5215e-8603-4f63-8413-42eb5f08329d" />
-<img width="2706" height="1404" alt="2026_04_27_10_41_07" src="https://github.com/user-attachments/assets/1cf3e03c-c9c5-442b-b909-ac82c2773ccc" />
-<img width="2704" height="1514" alt="2026_04_27_10_41_27" src="https://github.com/user-attachments/assets/ef2999b6-c240-4c3a-94a4-1849e1c5b42d" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
+  <img width="2704" height="944" alt="Main panel" src="docs/images/main-light.jpg">
+</picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/filter-dark.jpg">
+  <img width="2704" height="1404" alt="Filter" src="docs/images/filter-light.jpg">
+</picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/preview-dark.jpg">
+  <img width="2704" height="1576" alt="Preview" src="docs/images/preview-light.jpg">
+</picture>
 
 ## Installation
 
@@ -135,4 +144,4 @@ See the full version history in the [CHANGELOG](CHANGELOG_EN.md).
 
 ## License
 
-MIT License
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
