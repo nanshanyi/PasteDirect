@@ -21,6 +21,7 @@ final class PasteMainViewModel {
     enum DataChange {
         case reload(scrollToBeginning: Bool)
         case delete(IndexPath)
+        case move(from: IndexPath, to: IndexPath)
     }
 
     let dataChange = PassthroughSubject<DataChange, Never>()
@@ -129,8 +130,37 @@ final class PasteMainViewModel {
     }
 
     /// 切换某条目的置顶状态(置顶↔取消置顶)
+    /// 只有该条目换了位置时走 move 动画;列表有其他差异则退回整体 reload
     func togglePin(for model: PasteboardModel) {
+        let hash = model.hashValue
+        guard let from = items.firstIndex(where: { $0.hashValue == hash }),
+              store.dataList.value.contains(where: { $0.hashValue == hash }) else {
+            store.setPinned(!model.isPinned, for: model)
+            return
+        }
+        let selectedHash = item(at: selectedIndexPath)?.hashValue
+        suppressReload = true
         store.setPinned(!model.isPinned, for: model)
+        let newItems = store.dataList.value
+
+        var oldRest = items.map(\.hashValue)
+        oldRest.remove(at: from)
+        guard let to = newItems.firstIndex(where: { $0.hashValue == hash }) else {
+            items = newItems
+            dataChange.send(.reload(scrollToBeginning: false))
+            return
+        }
+        var newRest = newItems.map(\.hashValue)
+        newRest.remove(at: to)
+        items = newItems
+        guard oldRest == newRest else {
+            dataChange.send(.reload(scrollToBeginning: false))
+            return
+        }
+        if let selectedHash, let index = items.firstIndex(where: { $0.hashValue == selectedHash }) {
+            selectedIndexPath = IndexPath(item: index, section: 0)
+        }
+        dataChange.send(.move(from: IndexPath(item: from, section: 0), to: IndexPath(item: to, section: 0)))
     }
 
     func item(at indexPath: IndexPath) -> PasteboardModel? {

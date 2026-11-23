@@ -524,15 +524,28 @@ extension PasteCollectionViewItem {
 
         if !model.appPath.isEmpty {
             appIconView.image = NSWorkspace.shared.icon(forFile: model.appPath)
-            let hash = model.hashValue
-            Task { [weak self] in
-                let color = await PasteDataStore.main.extractColor(from: model)
-                guard let self, self.pModel?.hashValue == hash else { return }
-                self.applyAppTint(color)
+            if let cached = PasteDataStore.main.cachedColor(for: model) {
+                applyAppTint(cached)
+            } else {
+                let hash = model.hashValue
+                Task { [weak self] in
+                    let color = await PasteDataStore.main.extractColor(from: model)
+                    guard let self, self.pModel?.hashValue == hash else { return }
+                    self.applyAppTint(color)
+                }
             }
         } else {
             appIconView.image = NSImage(systemSymbolName: "doc.on.clipboard", accessibilityDescription: nil)
         }
+        setViewMenu()
+    }
+
+    /// 只刷新置顶相关状态,不重配整张卡片(避免置顶切换时内容和头部颜色闪烁)
+    func updatePinState(model: PasteboardModel) {
+        pModel = model
+        pinMark.isHidden = isHovering || !model.isPinned
+        pinButton.setIcon(model.isPinned ? .pinFilled : .pin,
+                          toolTip: model.isPinned ? String(localized: "Unpin") : String(localized: "Pin"))
         setViewMenu()
     }
 

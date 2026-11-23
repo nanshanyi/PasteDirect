@@ -28,6 +28,7 @@ final class PasteDataStore {
     private var searchTask: Task<Void, Error>?
     private var loadTask: Task<Void, Error>?
     private var colorCache = ColorCache()
+    private var resolvedAppColors = [String: NSColor?]()
     private var ocrCache = OCRCache()
 
     /// 当前生效的筛选参数（Sendable，用于分页加载时复用）
@@ -55,8 +56,7 @@ extension PasteDataStore {
             let list = await sqlManager.search(limit: pageSize, offset: 0)
             dataList.send(list)
             for item in list {
-                let icon = NSWorkspace.shared.icon(forFile: item.appPath)
-                Task { await self.colorCache.getOrExtract(for: item, icon: icon) }
+                Task { await self.extractColor(from: item) }
             }
         }
     }
@@ -359,9 +359,17 @@ extension PasteDataStore {
         await sqlManager.typeCounts()
     }
 
+    @discardableResult
     func extractColor(from model: PasteboardModel) async -> NSColor? {
         let icon = NSWorkspace.shared.icon(forFile: model.appPath)
-        return await colorCache.getOrExtract(for: model, icon: icon)
+        let color = await colorCache.getOrExtract(for: model, icon: icon)
+        resolvedAppColors[model.appPath] = .some(color)
+        return color
+    }
+
+    /// 已提取过的 App 主色,同步读取供卡片复用时立即上色(外层 nil 表示尚未提取)
+    func cachedColor(for model: PasteboardModel) -> NSColor?? {
+        resolvedAppColors[model.appPath]
     }
 }
 

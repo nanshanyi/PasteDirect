@@ -260,6 +260,8 @@ extension PasteMainViewController {
                     self.collectionView.animator().deleteItems(at: [indexPath])
                     self.resetSelectIndex(indexPath)
                     self.refreshTypeCounts()
+                case .move(let from, let to):
+                    self.moveItem(from: from, to: to)
                 }
                 self.updateEmptyState()
             }
@@ -530,6 +532,23 @@ extension PasteMainViewController {
             collectionView.selectionIndexPaths = [indexPath]
             scrollTo(indexPath: indexPath)
         }
+    }
+
+    /// 置顶/取消置顶:卡片动画移到新位置,只刷新它的置顶状态,其余卡片不重配
+    private func moveItem(from: IndexPath, to: IndexPath) {
+        if let model = viewModel.item(at: to) {
+            (collectionView.item(at: from) as? PasteCollectionViewItem)?.updatePinState(model: model)
+        }
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.35
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            collectionView.animator().performBatchUpdates {
+                collectionView.moveItem(at: from, to: to)
+            }
+        } completionHandler: { [weak self] in
+            MainActor.assumeIsolated { self?.refreshShortcutHints() }
+        }
+        collectionView.selectionIndexPaths = [viewModel.selectedIndexPath]
     }
 
     private func scrollTo(indexPath: IndexPath) {
