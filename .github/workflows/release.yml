@@ -155,7 +155,7 @@ jobs:
             gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md
           else
             gh release create "$GITHUB_REF_NAME" "$ZIP" "$DMG" \
-              --title "PasteDirect $VERSION" \
+              --title "$GITHUB_REF_NAME" \
               --notes-file release-notes.md
           fi
 
