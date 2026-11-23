@@ -3,7 +3,7 @@
 #
 # 用法:
 #   scripts/make-release.sh <版本号> <tag>
-#   例如: scripts/make-release.sh 3.6.0 v3.6.0
+#   例如: scripts/make-release.sh 4.0.0 v4.0.0
 #
 # 产物（输出到 dist/）:
 #   PasteDirect-<版本>.zip      Sparkle 自动更新主包（已 EdDSA 签名）
@@ -19,13 +19,13 @@
 
 set -euo pipefail
 
-VERSION="${1:?用法: make-release.sh <版本号，如 3.6.0> <tag，如 v3.6.0>}"
-TAG="${2:?用法: make-release.sh <版本号，如 3.6.0> <tag，如 v3.6.0>}"
+VERSION="${1:?用法: make-release.sh <版本号，如 4.0.0> <tag，如 v4.0.0>}"
+TAG="${2:?用法: make-release.sh <版本号，如 4.0.0> <tag，如 v4.0.0>}"
 cd "$(dirname "$0")/.."
 REPO_ROOT="$PWD"
 
 if [[ "$VERSION" != "${TAG#v}" ]]; then
-  echo "错误: 版本号 ($VERSION) 应与 tag ($TAG) 前缀一致（v3.6.0 ↔ 3.6.0）" >&2
+  echo "错误: 版本号 ($VERSION) 应与 tag ($TAG) 前缀一致（v4.0.0 ↔ 4.0.0）" >&2
   exit 1
 fi
 

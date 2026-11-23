@@ -6,15 +6,25 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [3.6.0] - 2026-08-31
+## [4.0.0] - Unreleased
 
 ### Added
 - In-app automatic updates powered by [Sparkle](https://sparkle-project.org/): new versions can be downloaded and installed right inside the app with an automatic relaunch — no more manually downloading the dmg and dragging it into Applications.
 - New "Automatically download updates" toggle: updates found will be downloaded silently in the background and installed when the app quits.
+- New type segmented filter in the toolbar (All / Text / Image / Color) showing item counts for each type.
+- Hovering over a card reveals quick pin / delete buttons.
 - New GitHub Actions release workflow: pushing a `v*` tag automatically builds, signs, packages the dmg, generates the appcast, and publishes the Release (see `docs/RELEASE.md`).
 
 ### Changed
+- Redesigned main panel: new card design with headers tinted by the source app's color, hover lift and clearer selection outline, and a distinct background for the pinned group.
+- Added a focused state to the search field; the preview popover info row is easier to read.
+- Pinning / unpinning now animates the card to its new position.
 - Update checking moved from a hand-rolled GitHub API checker to Sparkle's standard update UI, with skip-this-version support and localized update prompts; the v3.5.x "check on launch" and "ignored version" settings migrate automatically.
+- License changed from MIT to [GNU AGPL-3.0](LICENSE).
+
+### Fixed
+- Cards flickering (header turning black before getting its color) when toggling pins or switching the type filter.
+- Incorrect cursor on the panel's drag handle.
 
 ## [3.5.0] - 2026-07-31
 
@@ -214,7 +224,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Code cleanup.
 
-[Unreleased]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...HEAD
+[4.0.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.1.3...v3.2.0

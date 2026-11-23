@@ -6,15 +6,25 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [3.6.0] - 2026-08-31
+## [4.0.0] - 未发布
 
 ### 新增
 - 基于 [Sparkle](https://sparkle-project.org/) 的应用内自动更新:检测到新版本后可直接在应用内下载并自动安装重启，无需再手动下载 dmg 拖入「应用程序」。
 - 新增「自动下载更新」开关:开启后发现的更新将后台静默下载，退出应用时自动安装。
+- 顶栏新增类型分段筛选（全部 / 文本 / 图片 / 颜色），并显示各类型条数。
+- 鼠标悬停卡片时显示置顶 / 删除快捷按钮。
 - 新增 GitHub Actions 自动发版工作流:推送 `v*` tag 即自动构建、签名、打包 dmg、生成 appcast 并发布 Release（发版流程见 `docs/RELEASE.md`）。
 
 ### 变更
+- 主面板 UI 全面改版：卡片重新设计，头部取来源应用主色；悬停上浮、选中描边更清晰；置顶分组带背景区分。
+- 搜索框新增聚焦态，预览弹窗信息行更易读。
+- 置顶 / 取消置顶时卡片以动画移动到新位置。
 - 「检查更新」由自研 GitHub API 检查迁移至 Sparkle 标准更新界面，支持跳过版本与自动本地化的更新弹窗；v3.5.x 的「启动时自动检查」与「忽略版本」设置会自动迁移，无需重新配置。
+- 开源协议由 MIT 改为 [GNU AGPL-3.0](LICENSE)。
+
+### 修复
+- 置顶切换、切换筛选类型时卡片闪烁（头部先变黑再变色）。
+- 面板顶部拖拽把手的光标显示异常。
 
 ## [3.5.0] - 2026-07-31
 
@@ -214,7 +224,8 @@
 ### 优化
 - 代码优化。
 
-[未发布]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...HEAD
+[4.0.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/nanshanyi/PasteDirect/compare/v3.1.3...v3.2.0

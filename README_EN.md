@@ -5,122 +5,153 @@
 <h1 align="center">PasteDirect</h1>
 
 <p align="center">
+  A lightweight, secure, local-only clipboard history manager for macOS
+</p>
+
+<p align="center">
+  <a href="https://github.com/nanshanyi/PasteDirect/releases/latest"><img src="https://img.shields.io/github/v/release/nanshanyi/PasteDirect?label=version&color=green" alt="Latest Release"></a>
+  <a href="https://github.com/nanshanyi/PasteDirect/releases"><img src="https://img.shields.io/github/downloads/nanshanyi/PasteDirect/total?color=blue" alt="Downloads"></a>
+  <img src="https://img.shields.io/badge/macOS-13.0%2B-lightgrey" alt="macOS 13.0+">
+  <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/nanshanyi/PasteDirect" alt="License"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/nanshanyi/PasteDirect/releases/latest"><b>⬇️ Download the latest version</b></a>
+  ·
   <a href="README.md">简体中文</a> | English
 </p>
 
-<p align="center">
-  A lightweight, secure, fully local clipboard history manager for macOS
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/macOS-13.0%2B-blue" alt="macOS 13.0+">
-  <img src="https://img.shields.io/badge/Swift-6-orange" alt="Swift 6">
-  <img src="https://img.shields.io/badge/version-3.5.0-green" alt="Version 3.5.0">
-  <img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License">
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
+  <img alt="PasteDirect main panel" src="docs/images/main-light.jpg">
+</picture>
 
 ## Features
 
-- 🔒 **Fully local** — All data is stored in a local SQLite database, with zero network requests for better privacy
-- 📋 **Multiple formats** — Records text, images, HTML, RTF, rich text, and code snippets
-- 🎨 **Color detection** — Automatically detects Hex color values from the clipboard and displays visual previews
-- 🖼️ **Image OCR** — Recognizes text inside copied images locally (via the Vision framework, no network), so images can be found by searching the text they contain; you can also copy or paste an image's text directly from its right-click menu
-- 📝 **Live Text** — Select and copy text directly from images while previewing, just like the system Photos app; phone numbers, URLs, and more are tappable
-- ⌨️ **Global shortcut** — Default shortcut is `⌘⇧V`; custom shortcuts are supported
-- 🔍 **Fast search** — Type keywords to instantly filter clipboard history; the search field uses a pill-style design
-- 🏷️ **Multi-dimensional filters** — Combine filters by type (text/image/color), source app, and time range; active filters are shown as tags
-- 👁️ **Space preview** — Press Space to quickly preview the selected item, including text, images, and color details; text can be selected directly in the image preview
-- 🖱️ **Multiple paste methods** — Paste by double-clicking, pressing Enter, or dragging an item to the target location
-- 📌 **Pin items** — Pin frequently used items from the right-click menu; they always stay at the top of the list and are exempt from history cleanup
-- 📝 **Plain text mode** — Remove rich-text formatting with one click and paste as plain text; you can also enable "Always paste as plain text" in Settings
-- 📐 **Resizable panel** — Drag the top edge to adjust panel height; items scale proportionally
-- 🧹 **Auto cleanup** — Configure retention duration: 1 day / 1 week / 1 month / forever
-- 🚫 **App filtering** — Ignore clipboard content from specific apps, such as Keychain or password managers
-- 🪟 **macOS 26 ready** — Full support for the Liquid Glass visual effect
+### 📋 Captures everything
+
+- **Many formats** — Text, images, HTML, RTF, rich text and code snippets
+- **Color detection** — Hex color values are recognized and shown as swatches with RGB values
+- **Image text recognition (OCR)** — Text in images is recognized on-device with Apple's Vision framework, so images are searchable too
+- **Pinned items** — Pin frequently used items so they always stay first and are never auto-cleaned
+
+### 🔍 Finds things fast
+
+- **Instant search** — Just start typing after opening the panel; text inside images is searchable as well
+- **Combined filters** — Switch by type with the segmented control (with item counts), and combine with source app and date range filters
+- **Space to preview** — Inspect text, images and colors at a larger size; Live Text lets you select and copy text right from image previews
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
-  <img alt="Main panel" src="docs/images/main-light.jpg">
-</picture>
-<picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/filter-dark.jpg">
-  <img alt="Filter" src="docs/images/filter-light.jpg">
+  <img alt="Filters" src="docs/images/filter-light.jpg">
 </picture>
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/preview-dark.jpg">
   <img alt="Preview" src="docs/images/preview-light.jpg">
 </picture>
 
+### ⚡ Pastes without getting in the way
+
+- **Multiple ways to paste** — Double-click, press Return, or drag to the destination
+- **⌘1–9 quick paste** — Hold `⌘` to reveal card numbers, then press a number to paste
+- **Plain text** — Choose "Paste as Plain Text" from the context menu, or enable "Always paste as plain text" in Settings
+- **Direct paste** — Pastes straight into the previous app after you pick an item, no extra `⌘V` needed
+
+### 🔒 Privacy first
+
+- **Local storage only** — Everything stays in a local SQLite database and nothing is uploaded; the only network request is the update check
+- **Ignored apps** — Skip content copied from specific apps such as Keychain or password managers
+- **Auto cleanup** — Keep history for 1 day / 1 week / 1 month / forever, or clear it all at any time
+
+### 🪟 Feels native
+
+- Supports the macOS 26 Liquid Glass look and follows system dark / light mode
+- Card headers take the source app's accent color so you can tell where content came from at a glance
+- Drag the top edge of the panel to resize it; content scales proportionally
+- In-app updates powered by [Sparkle](https://sparkle-project.org/)
+
 ## Installation
 
-### Download
+1. Download the latest `.dmg` from [Releases](https://github.com/nanshanyi/PasteDirect/releases/latest) and drag `PasteDirect.app` into Applications.
+2. **First launch**: the app uses a self-signed certificate, so macOS will say the developer cannot be verified. Go to **System Settings → Privacy & Security** and click **Open Anyway**. Alternatively, run:
 
-Download the latest `.dmg` file from [Releases](https://github.com/nanshanyi/PasteDirect/releases), open it, and drag `PasteDirect.app` into the `/Applications` folder.
+   ```bash
+   xattr -cr /Applications/PasteDirect.app
+   ```
 
-### First launch
+3. **Grant Accessibility permission** when prompted. It is required to monitor the clipboard and simulate paste.
 
-Because the app uses a self-signed certificate, macOS requires manual authorization on the first launch:
+   <img width="530" alt="Accessibility permission prompt" src="https://github.com/user-attachments/assets/cf00f162-b4ff-4ddc-8c7c-974d5bc2caca" />
 
-1. Right-click `PasteDirect.app` and choose **Open**
-2. Click **Open** in the dialog that appears
-
-Or use Terminal:
-
-```bash
-xattr -cr /Applications/PasteDirect.app
-open /Applications/PasteDirect.app
-```
-
-After the first launch, macOS will ask you to grant **Accessibility** permission. This is required for clipboard monitoring and simulated paste operations.
-
-<img width="530" height="494" alt="image" src="https://github.com/user-attachments/assets/cf00f162-b4ff-4ddc-8c7c-974d5bc2caca" />
-
-If macOS shows a security warning for the self-signed certificate, go to **System Settings → Privacy & Security** and choose **Open Anyway**.
-
-### Smooth updates
-
-Starting from v2.2.0, PasteDirect uses a self-signed certificate mechanism so Accessibility permission is preserved during updates and does not need to be granted again.
-
-Starting from v3.6.0, the app ships with [Sparkle](https://sparkle-project.org/) automatic updates: when a new version is detected, it can be downloaded and installed right inside the app with an automatic relaunch — no more manually downloading the dmg. You can also enable "Automatically download updates" to download silently and install on quit.
+Future versions can be installed from within the app, and the Accessibility permission is kept across updates.
 
 ## Usage
 
+Press `⌘⇧V` (customizable) to open the panel, then:
+
 | Action | Description |
-|------|------|
-| `⌘⇧V` | Show / hide the clipboard panel (customizable) |
-| Double-click | Paste the selected item |
-| `Enter` | Paste the selected item |
+|--------|-------------|
+| Type | Search; `Backspace` removes filter tags one by one |
+| `←` `→` | Move the selection |
+| `Return` / double-click | Paste the selected item |
+| `⌘1` – `⌘9` | Paste the card with that number (hold `⌘` to show numbers) |
 | `Space` | Preview the selected item |
 | `Delete` | Delete the selected item |
-| `Esc` | Close preview / filter popover / clear search and filters / close panel in sequence |
-| Drag | Drag an item to the target location to paste directly |
-| Type text | Search and filter history; `Backspace` removes filters one by one |
+| `Esc` | Close preview / filter popover / clear search / close panel, in that order |
+| Drag | Drop a card onto the destination to paste it |
+| Right-click | Pin, paste as plain text, copy recognized text, and more |
+
+Hovering over a card reveals pin / delete buttons for quick access.
+
+## Settings
 
 <p align="center">
   <img width="629" alt="PasteDirect Settings" src="https://github.com/user-attachments/assets/a315da78-25d5-4382-8d93-4d827ec14a62" />
 </p>
 
-## Settings
+| Option | Description |
+|--------|-------------|
+| Launch at login | Start automatically when you log in |
+| Menu bar icon | Show / hide the menu bar icon |
+| Direct paste | Automatically paste into the current app after selection |
+| Always paste as plain text | Strip formatting and paste plain text only |
+| Recognize text in images | Run OCR on copied images; when off, text is still available from the context menu |
+| History retention | 1 day / 1 week / 1 month / forever |
+| Ignored apps | Don't record content copied from these apps |
+| Shortcut | Customize the global shortcut |
+| Automatic updates | Check for new versions automatically, optionally download in the background and install on quit |
 
-- **Launch at login** — Run automatically when you log in
-- **Menu bar icon** — Show / hide the menu bar icon
-- **Direct paste** — Automatically paste the selected item into the current app
-- **Plain text paste** — Remove formatting and paste plain text only
-- **Auto-extract text from images** — Run OCR on copied images so they can be found by searching their text; can be turned off (you can still extract text manually from an image's right-click menu)
-- **History retention** — 1 day / 1 week / 1 month / forever
-- **Ignored apps** — Configure apps whose clipboard content should not be recorded
-- **Shortcut** — Customize the global shortcut for opening the panel
-- **Automatic updates** — Powered by Sparkle: checks for new versions, downloads in-app, and installs with an automatic relaunch; optional silent "Automatically download updates"
+## Privacy & Data
 
-## Build from source
+- Clipboard history is stored only on your Mac: `~/Library/Containers/com.nanshanyi.PasteDirect/Data/Library/Application Support/paste/`
+- Apart from fetching update information from GitHub Pages ([appcast](https://nanshanyi.github.io/PasteDirect/appcast.xml)), the app makes no network requests.
+- To uninstall completely, delete `/Applications/PasteDirect.app` and `~/Library/Containers/com.nanshanyi.PasteDirect`.
 
-### Requirements
+## FAQ
 
-- macOS 13.0+
-- Xcode 16+
-- Swift 6
+<details>
+<summary><b>Nothing is pasted after pressing Return / double-clicking?</b></summary>
 
-### Build steps
+The Accessibility permission has most likely become invalid. Open **System Settings → Privacy & Security → Accessibility**; if PasteDirect is already listed, remove it with `−`, add it again and turn the switch on.
+</details>
+
+<details>
+<summary><b>macOS says the app is damaged or the developer cannot be verified?</b></summary>
+
+This is expected for self-signed apps. See step 2 of [Installation](#installation).
+</details>
+
+<details>
+<summary><b>Why wasn't something recorded?</b></summary>
+
+Check whether the source app is in "Ignored apps", or whether the item was removed by the history retention setting.
+</details>
+
+## Building from Source
+
+Requires macOS 13.0+ and Xcode 16+.
 
 ```bash
 git clone https://github.com/nanshanyi/PasteDirect.git
@@ -128,19 +159,25 @@ cd PasteDirect
 open PasteDirect.xcodeproj
 ```
 
-Select the `PasteDirect` scheme in Xcode and click Run. Dependencies are fetched automatically through Swift Package Manager.
+Select the `PasteDirect` scheme and run. Dependencies are fetched automatically by Swift Package Manager.
 
-### Dependencies
+> [!TIP]
+> Launching a Debug build with `-DemoData YES` uses a separate demo database seeded with sample data. It's handy for screenshots and UI work and never touches your real clipboard history.
+
+See [docs/RELEASE.md](docs/RELEASE.md) for the release process and the [CHANGELOG](CHANGELOG_EN.md) for version history.
+
+## Acknowledgements
 
 | Library | Purpose |
-|----|------|
+|---------|---------|
 | [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) | Global shortcuts |
-| [SQLite.swift](https://github.com/nicklama/SQLite.swift) | Local database |
+| [SQLite.swift](https://github.com/stephencelis/SQLite.swift) | Local database |
 | [SnapKit](https://github.com/SnapKit/SnapKit) | Auto Layout |
+| [Sparkle](https://github.com/sparkle-project/Sparkle) | In-app updates |
 
-## Changelog
+## Contributing
 
-See the full version history in the [CHANGELOG](CHANGELOG_EN.md).
+Bug reports and suggestions are welcome via [Issues](https://github.com/nanshanyi/PasteDirect/issues), and pull requests are appreciated. If you find PasteDirect useful, please give it a ⭐️.
 
 ## License
 

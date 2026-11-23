@@ -1,6 +1,6 @@
 # 发版指南
 
-应用自 v3.6.0 起使用 [Sparkle](https://sparkle-project.org/) 实现自动更新：
+应用自 v4.0.0 起使用 [Sparkle](https://sparkle-project.org/) 实现自动更新：
 
 - **ZIP**（`PasteDirect-x.y.z.zip`）是 Sparkle 自动更新的主包，appcast 指向它；
 - **DMG**（`PasteDirect-x.y.z.dmg`）仅用于 GitHub Release 页面给新用户手动安装。
@@ -25,7 +25,7 @@
 
 ## 构建号规则
 
-- `CFBundleShortVersionString`（`MARKETING_VERSION`）：用户可见版本，如 `3.6.0`；
+- `CFBundleShortVersionString`（`MARKETING_VERSION`）：用户可见版本，如 `4.0.0`；
 - `CFBundleVersion`（构建号）：GitHub Actions 以 `20000 + GITHUB_RUN_NUMBER` 计算，**每次发布严格递增**（大于历史值 `11002`）；本机演练脚本使用当前提交数作为临时构建号。Sparkle 用 appcast 的 `sparkle:version` 与本机 `CFBundleVersion` 比较判断是否有更新，固定不变会导致用户永远收不到更新。仓库里的 `CURRENT_PROJECT_VERSION = 11002` 是本地开发默认值，Release 构建通过 `CURRENT_PROJECT_VERSION` 参数注入真实构建号，不修改工作区文件。
 
 ## 一次性配置
@@ -45,7 +45,7 @@
 2. 跑一遍本地演练（构建号通过 Xcode build setting 注入，不修改工作区文件）：
 
    ```bash
-   scripts/make-release.sh 3.6.0 v3.6.0
+   scripts/make-release.sh 4.0.0 v4.0.0
    ```
 
 3. 按「升级测试矩阵」逐项验证。若不想真实发 Release，可把生成器的 `--download-url-prefix` 指向本地 `file://` 目录，并把旧版 App 的 `SUFeedURL` 指向本地 appcast。
@@ -84,8 +84,8 @@
 3. **打 tag**：
 
    ```bash
-   git tag v3.6.0
-   git push origin v3.6.0
+   git tag v4.0.0
+   git push origin v4.0.0
    ```
 
 ## 升级测试矩阵（每次大版本发布前过一遍）
