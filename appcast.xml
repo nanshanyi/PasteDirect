@@ -29,7 +29,7 @@
 &lt;li&gt;颜色识别支持带 `#` / `0x` 前缀的 hex（含 3、6、8 位）以及 `rgb()` / `rgba()` / `hsl()` / `hsla()`；不带前缀的 `123456`、`deadbeef` 等普通文本不会被误判。选择「粘贴为纯文本」时仅 hex 写法会规范为 `#RRGGBB`，rgb / hsl 保持原文。&lt;/li&gt;
 &lt;li&gt;悬停卡片直接出现置顶 / 删除按钮；置顶、取消置顶时卡片带动画移动到新位置。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;另外，开源协议由 MIT 改为 GNU AGPL-3.0。&lt;/p&gt;</description>
+</description>
             <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="GIZnmR1n4tikZ0xMNCRiPVzsmbAjzJQfPNYWQk99NuZpLJBgwe+T/M/yQOosZ+pv+Dw7u9mAHHssoNc1C6tmBg==" length="4902438" type="application/octet-stream" />
         </item>
     </channel>
