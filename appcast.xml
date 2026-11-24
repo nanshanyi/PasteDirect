@@ -1,5 +1,6 @@
-<?xml version='1.0' encoding='utf-8'?>
-<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>PasteDirect</title>
         <link>https://nanshanyi.github.io/PasteDirect/appcast.xml</link>
@@ -30,10 +31,10 @@
 &lt;li&gt;悬停卡片直接出现置顶 / 删除按钮；置顶、取消置顶时卡片带动画移动到新位置。&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="GIZnmR1n4tikZ0xMNCRiPVzsmbAjzJQfPNYWQk99NuZpLJBgwe+T/M/yQOosZ+pv+Dw7u9mAHHssoNc1C6tmBg==" length="4902438" type="application/octet-stream" />
+            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta/PasteDirect-4.0.0.zip" sparkle:edSignature="GIZnmR1n4tikZ0xMNCRiPVzsmbAjzJQfPNYWQk99NuZpLJBgwe+T/M/yQOosZ+pv+Dw7u9mAHHssoNc1C6tmBg==" length="4902438" type="application/octet-stream"></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: FTLNAInx5o8OHSeEZo4CrNtI5pddQQtyZ31nkQrFk8JM/2n+f+F3PsSRU9hNjrNySWHdI6D/tqdxHAYopIYcCw==
-length: 3216
+edSignature: /gXjk8+zlolCP9gKH20NRgjcc6O+wM2nCVVTfT2PAu3waB0DKR5poSL1y7rdoWW/tAeNQhjSCes+zNcDYJzyBA==
+length: 3408
 -->
