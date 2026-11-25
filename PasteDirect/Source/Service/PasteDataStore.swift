@@ -10,32 +10,25 @@ import Foundation
 import Combine
 import SwiftUI
 
-enum LoadState: Sendable {
-    case idle
-    case loading
-    case noMore
-}
-
 @MainActor
 final class PasteDataStore {
     static let main = PasteDataStore()
-    var needRefresh = false
     let pageSize = 20
 
-    private(set) var dataList = CurrentValueSubject<[PasteboardModel], Never>([])
-    @Published private(set) var loadState: LoadState = .idle
+    /// 数据库内容变化的原因
+    enum Change {
+        /// 用户删除了条目（列表可能变短，需要补页）
+        case userDeleted
+        /// 其他变化：写入、置顶、OCR 回写、清理等
+        case other
+    }
+
+    /// 数据库内容有变化，且已经写完。列表据此重新查询。
+    let didChange = PassthroughSubject<Change, Never>()
     private let sqlManager = PasteSQLManager()
-    private var searchTask: Task<Void, Error>?
-    private var loadTask: Task<Void, Error>?
     private var colorCache = ColorCache()
     private var resolvedAppColors = [String: NSColor?]()
     private var ocrCache = OCRCache()
-
-    /// 当前生效的筛选参数（Sendable，用于分页加载时复用）
-    private var currentKeyword: String = ""
-    private var currentFilterState: FilterState = .empty
-    /// 已扫描过的 DB 行数（颜色/链接筛选时与展示条数不同）
-    private var dbOffset = 0
 
     func setup() {
         setupData()
@@ -46,7 +39,6 @@ final class PasteDataStore {
 
 extension PasteDataStore {
     private func setupData() {
-        dbOffset = pageSize
         Task {
             await sqlManager.setup()
             #if DEBUG
@@ -54,9 +46,9 @@ extension PasteDataStore {
             #endif
             await updateTotalCount()
             await updateStorageSize()
-            let list = await sqlManager.search(limit: pageSize, offset: 0)
-            dataList.send(list)
-            for item in list {
+            didChange.send(.other)
+            // 预先提取首屏 App 主色，避免第一次打开时卡片头部颜色闪变
+            for item in await sqlManager.fetchPage(limit: pageSize).items {
                 Task { await self.extractColor(from: item) }
             }
         }
@@ -92,65 +84,14 @@ extension PasteDataStore {
 // MARK: - 数据操作 对外接口
 
 extension PasteDataStore {
-    /// 加载下一页（支持筛选条件）
-    func loadNextPage() {
-        guard loadState == .idle else { return }
-        loadState = .loading
-        loadTask?.cancel()
-        let keyword = currentKeyword
-        let state = currentFilterState
-        loadTask = Task {
-            do {
-                Log("loadNextPage offset=\(dbOffset)")
-                let batch = await sqlManager.searchWithParams(keyword: keyword, state: state, limit: pageSize, offset: dbOffset)
-                try Task.checkCancellation()
-                dbOffset += batch.count
-                dataList.send(dataList.value + batch)
-                loadState = batch.count < pageSize ? .noMore : .idle
-            } catch {
-                loadState = .idle
-            }
-        }
+    /// 取 cursor 之后的一页，cursor 为 nil 时取第一页
+    func fetchPage(keyword: String, state: FilterState, after cursor: PageCursor?) async -> PastePage {
+        await sqlManager.fetchPage(keyword: keyword, state: state, after: cursor, limit: pageSize)
     }
 
-    func resetDefaultList() {
-        currentKeyword = ""
-        currentFilterState = .empty
-        // 重置列表时同时取消进行中的搜索,避免旧搜索结果回来覆盖默认列表
-        searchTask?.cancel()
-        loadTask?.cancel()
-        loadState = .loading
-        dbOffset = pageSize
-        Task {
-            let list = await sqlManager.search(limit: pageSize, offset: 0)
-            dataList.send(list)
-            loadState = .idle
-        }
-    }
-
-    /// 数据搜索
-    func searchData(_ keyWord: String) {
-        searchData(keyWord, filter: .empty)
-    }
-
-    /// 带筛选条件的搜索
-    func searchData(_ keyWord: String, filter state: FilterState) {
-        searchTask?.cancel()
-        loadTask?.cancel()
-        loadState = .loading
-        currentKeyword = keyWord
-        currentFilterState = state
-        searchTask = Task {
-            do {
-                let result = await sqlManager.searchWithParams(keyword: keyWord, state: state, limit: pageSize, offset: 0)
-                try Task.checkCancellation()
-                dbOffset = pageSize
-                dataList.send(result)
-                loadState = .idle
-            } catch {
-                loadState = .idle
-            }
-        }
+    /// 重新取从第一条到 cursor（含）的所有行；cursor 为 nil 时取全部匹配行
+    func fetchThrough(keyword: String, state: FilterState, cursor: PageCursor?) async -> [PasteboardModel] {
+        await sqlManager.fetchThrough(keyword: keyword, state: state, cursor: cursor)
     }
 
     /// 增加新数据
@@ -193,61 +134,27 @@ extension PasteDataStore {
         }
     }
 
-    /// 插入数据
+    /// 插入数据（同内容已存在时更新为最新一次，置顶状态由数据库保留）
     func insertModel(_ model: PasteboardModel) {
-        needRefresh = true
-        var list = dataList.value
-        // 同内容旧条目若已置顶,新捕获的条目继承置顶状态,避免去重替换时顶掉用户的置顶
-        // (与 PasteSQLManager.insert 的 DB 侧继承保持一致)。
-        var newModel = model
-        if let existing = list.first(where: { $0 == model }),
-           let pinned = existing.pinnedDate {
-            newModel = model.withPinnedDate(pinned)
-        }
-        list.removeAll(where: { $0 == model })
-        list.insert(newModel, at: 0)
-        // 按置顶优先重排,保证新条目落在置顶区之后而非盖到置顶项上面
-        list = sortedByPinThenDate(list)
-        list = Array(list.prefix(pageSize))
-        dataList.send(list)
         Task {
-            await sqlManager.insert(item: newModel)
+            if await sqlManager.insert(item: model) {
+                didChange.send(.other)
+            }
             await updateTotalCount()
         }
     }
 
-    /// 列表排序规则(与 DB 查询一致):置顶项在前(按 pinnedDate 倒序),其余按 date 倒序。
-    private func sortedByPinThenDate(_ list: [PasteboardModel]) -> [PasteboardModel] {
-        list.sorted { a, b in
-            switch (a.pinnedDate, b.pinnedDate) {
-            case let (l?, r?): return l > r          // 都置顶,按置顶时间倒序
-            case (_?, nil): return true              // 仅 a 置顶,a 在前
-            case (nil, _?): return false             // 仅 b 置顶,b 在前
-            case (nil, nil): return a.date > b.date   // 都不置顶,按时间倒序
-            }
-        }
-    }
-
-    /// 设置/取消某条目的置顶状态。更新内存列表并异步回写 DB。
+    /// 设置/取消某条目的置顶状态
     func setPinned(_ pinned: Bool, for model: PasteboardModel) {
         let newDate: Date? = pinned ? Date() : nil
-        var list = dataList.value
-        if let idx = list.firstIndex(where: { $0.hashValue == model.hashValue }) {
-            list[idx] = list[idx].withPinnedDate(newDate)
-            list = sortedByPinThenDate(list)
-            dataList.send(list)
-        }
         Task {
             await sqlManager.updatePinned(newDate, forHash: model.hashValue)
+            didChange.send(.other)
         }
     }
 
     /// 删除单条数据
     func deleteItems(_ items: PasteboardModel...) {
-        var list = dataList.value
-        list.removeAll(where: { items.contains($0) })
-        dataList.send(list)
-        dbOffset = max(0, dbOffset - items.count)
         Task {
             for item in items {
                 await sqlManager.deleteByHash(item.hashValue)
@@ -256,19 +163,9 @@ extension PasteDataStore {
                     await ImageBlobStore.shared.delete(for: item.hashValue)
                 }
             }
+            didChange.send(.userDeleted)
             await updateTotalCount()
-            // 删除后列表可能不足一屏,导致横向列表无法滚动、再也触发不了分页加载;
-            // 这里主动补加载,把可见列表补回至少一页(DB 仍有数据时)。
-            refillIfNeeded()
         }
-    }
-
-    /// 当前展示条数不足一页且仍可加载时,主动加载下一页补满。
-    /// loadNextPage 内部会在 DB 耗尽时置 .noMore,故无需在此预判总数。
-    private func refillIfNeeded() {
-        guard loadState == .idle else { return }
-        guard dataList.value.count < pageSize else { return }
-        loadNextPage()
     }
 
     /// 删除过期数据
@@ -298,23 +195,17 @@ extension PasteDataStore {
             return
         }
         if let deadDate = Calendar.current.date(byAdding: dateCom, to: Date()) {
-            // 置顶项豁免过期清理
-            let filtered = dataList.value.filter { $0.date > deadDate || $0.isPinned }
-            let hasExpired = filtered.count < dataList.value.count
-            if hasExpired {
-                dataList.send(filtered)
-                needRefresh = true
-            }
             Task {
                 // 先取得将被删除的图片 hash，删 DB 后再清理对应的外置原图文件
                 let imageHashes = await sqlManager.imageHashesBeforeDate(deadDate)
-                await sqlManager.deleteBeforeDate(deadDate)
+                let removed = await sqlManager.deleteBeforeDate(deadDate)
                 for hash in imageHashes {
                     await ImageBlobStore.shared.delete(for: hash)
                 }
                 // 过期清理是低频时机(每天最多一次)，且常删掉大量数据，
                 // 顺手 VACUUM 把空闲页还给磁盘，避免库文件只增不减。
-                if hasExpired || !imageHashes.isEmpty {
+                if removed > 0 {
+                    didChange.send(.other)
                     await sqlManager.vacuum()
                 }
                 await updateTotalCount()
@@ -330,7 +221,7 @@ extension PasteDataStore {
             await ImageBlobStore.shared.deleteAll()
             await updateTotalCount()
             await updateStorageSize()
-            resetDefaultList()
+            didChange.send(.other)
         }
     }
 
@@ -407,14 +298,8 @@ extension PasteDataStore {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        // 回写内存列表中对应的图片项(若仍在当前列表中)
-        var list = dataList.value
-        if let idx = list.firstIndex(where: { $0.hashValue == model.hashValue }) {
-            list[idx] = list[idx].withOCRText(trimmed)
-            dataList.send(list)
-        }
-        // 回写数据库
         await sqlManager.updateOCRText(trimmed, forHash: model.hashValue)
+        didChange.send(.other)
         return trimmed
     }
 }

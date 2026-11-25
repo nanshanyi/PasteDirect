@@ -32,7 +32,6 @@ final class PasteMainViewController: NSViewController {
                                                right: Layout.lineSpacing - Layout.itemShadowMargin)
         $0.wantsLayer = true
         $0.delegate = self
-        $0.dataSource = self
         $0.keyDelegate = self
         $0.allowsEmptySelection = false
         $0.backgroundColors = [.clear]
@@ -45,6 +44,11 @@ final class PasteMainViewController: NSViewController {
         $0.registerForDraggedTypes(PasteboardType.supportTypes)
         $0.setDraggingSourceOperationMask(.every, forLocal: true)
         $0.setDraggingSourceOperationMask(.every, forLocal: false)
+    }
+
+    /// 以条目 hash 为标识，列表变化时自动计算插入/删除/移动动画
+    private lazy var dataSource = NSCollectionViewDiffableDataSource<Int, Int>(collectionView: collectionView) { [weak self] collectionView, indexPath, _ in
+        self?.makeItem(collectionView, at: indexPath)
     }
 
     private lazy var scrollView = PasteScrollView().then {
@@ -129,7 +133,9 @@ extension PasteMainViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         initSubviews()
+        _ = dataSource
         bindViewModel()
+        viewModel.start()
         setupKeyEventMonitor()
         updateEmptyState()
     }
@@ -245,25 +251,10 @@ extension PasteMainViewController {
             }
             .store(in: &cancellables)
 
-        // 数据变化
-        viewModel.dataChange
-            .sink { [weak self] change in
-                guard let self else { return }
-                switch change {
-                case .reload(let scrollToBeginning):
-                    self.collectionView.reloadData()
-                    self.refreshTypeCounts()
-                    if scrollToBeginning {
-                        self.collectionView.scroll(.zero)
-                    }
-                case .delete(let indexPath):
-                    self.collectionView.animator().deleteItems(at: [indexPath])
-                    self.resetSelectIndex(indexPath)
-                    self.refreshTypeCounts()
-                case .move(let from, let to):
-                    self.moveItem(from: from, to: to)
-                }
-                self.updateEmptyState()
+        // 列表变化
+        viewModel.listUpdate
+            .sink { [weak self] update in
+                self?.applyListUpdate(update)
             }
             .store(in: &cancellables)
 
@@ -535,21 +526,45 @@ extension PasteMainViewController {
         }
     }
 
-    /// 置顶/取消置顶:卡片动画移到新位置,只刷新它的置顶状态,其余卡片不重配
-    private func moveItem(from: IndexPath, to: IndexPath) {
-        if let model = viewModel.item(at: to) {
-            (collectionView.item(at: from) as? PasteCollectionViewItem)?.updatePinState(model: model)
-        }
-        NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.35
-            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            collectionView.animator().performBatchUpdates {
-                collectionView.moveItem(at: from, to: to)
+    private func applyListUpdate(_ update: PasteMainViewModel.ListUpdate) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(viewModel.items.map(\.hashValue))
+        snapshot.reloadItems(update.reloaded)
+        // 只换了置顶状态的卡片：先刷新图钉，再交给 diffable 做移动动画，其余内容不重配
+        for model in update.pinChanged {
+            if let indexPath = dataSource.indexPath(for: model.hashValue),
+               let item = collectionView.item(at: indexPath) as? PasteCollectionViewItem {
+                item.updatePinState(model: model)
             }
-        } completionHandler: { [weak self] in
-            MainActor.assumeIsolated { self?.refreshShortcutHints() }
         }
-        collectionView.selectionIndexPaths = [viewModel.selectedIndexPath]
+        if update.animated {
+            NSAnimationContext.runAnimationGroup { ctx in
+                ctx.duration = 0.35
+                ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                dataSource.apply(snapshot, animatingDifferences: true)
+            } completionHandler: { [weak self] in
+                MainActor.assumeIsolated { self?.refreshShortcutHints() }
+            }
+        } else {
+            dataSource.apply(snapshot, animatingDifferences: false)
+            refreshShortcutHints()
+        }
+
+        let selected = viewModel.selectedIndexPath
+        for indexPath in collectionView.indexPathsForVisibleItems() {
+            collectionView.item(at: indexPath)?.isSelected = indexPath == selected
+        }
+        collectionView.selectionIndexPaths = viewModel.items.isEmpty ? [] : [selected]
+        if update.scrollToBeginning {
+            collectionView.scroll(.zero)
+        } else if update.scrollToSelection {
+            scrollTo(indexPath: selected)
+        }
+        if update.dataChanged {
+            refreshTypeCounts()
+        }
+        updateEmptyState()
     }
 
     private func scrollTo(indexPath: IndexPath) {
@@ -635,18 +650,10 @@ extension PasteMainViewController: NSCollectionViewDelegate {
     }
 }
 
-// MARK: - NSCollectionViewDataSource
+// MARK: - 卡片配置
 
-extension PasteMainViewController: NSCollectionViewDataSource {
-    func numberOfSections(in collectionView: NSCollectionView) -> Int {
-        return 1
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.items.count
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
+extension PasteMainViewController {
+    private func makeItem(_ collectionView: NSCollectionView, at indexPath: IndexPath) -> NSCollectionViewItem {
         let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
         guard let cItem = item as? PasteCollectionViewItem else { return item }
         cItem.delegate = self
@@ -657,12 +664,7 @@ extension PasteMainViewController: NSCollectionViewDataSource {
             // itemSize.height 含上下阴影留白,扣除后才是卡片高度
             cItem.updateLayout(cardHeight: flowLayout.itemSize.height - Layout.itemShadowMargin * 2)
         }
-        if viewModel.selectedIndexPath == indexPath {
-            cItem.isSelected = true
-            collectionView.selectionIndexPaths = [indexPath]
-        } else {
-            cItem.isSelected = false
-        }
+        cItem.isSelected = viewModel.selectedIndexPath == indexPath
         return cItem
     }
 }

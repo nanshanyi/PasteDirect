@@ -196,25 +196,6 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         )
     }
 
-    /// 返回更新了置顶状态的新实例。置顶传 `Date()`,取消置顶传 `nil`。
-    func withPinnedDate(_ date: Date?) -> PasteboardModel {
-        PasteboardModel(
-            pasteboardType: pasteboardType,
-            data: data,
-            showData: showData,
-            hashValue: hashValue,
-            date: self.date,
-            appPath: appPath,
-            appName: appName,
-            dataString: dataString,
-            length: length,
-            ocrText: ocrText,
-            imageWidth: imageWidth,
-            imageHeight: imageHeight,
-            pinnedDate: date
-        )
-    }
-
     /// 用一段纯文本构造一条 `.string` model(用于把图片 OCR 出的文字当作文本复制/粘贴)。
     /// 继承来源图片的 app 信息,日期取当前时间。
     @MainActor
