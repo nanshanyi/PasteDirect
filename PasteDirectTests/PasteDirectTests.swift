@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import SQLite3
 import XCTest
 @testable import PasteDirect
 
@@ -530,5 +531,163 @@ final class PasteDirectTests: XCTestCase {
         let fetched = results.filter { $0.hashValue == hash }
         XCTAssertEqual(fetched.count, 1, "去重插入后应只有一行")
         XCTAssertNotNil(fetched.first?.pinnedDate, "去重插入应继承旧行的置顶状态")
+    }
+
+    // MARK: - 表结构修复（清空数据后仍可写入）
+
+    /// 回归：清空所有数据后新内容仍能写入（曾因重建的表缺 kindCode 列而全部插入失败）。
+    func testClearAllDataThenInsertStillWorks() async {
+        let manager = await makeTempManager()
+        await manager.insert(item: makeTextModel(string: "清空前 \(UUID().uuidString)"))
+        let before = await manager.totalCount
+        XCTAssertEqual(before, 1)
+
+        await manager.clearAllData()
+        let afterClear = await manager.totalCount
+        XCTAssertEqual(afterClear, 0)
+
+        let newItem = makeTextModel(string: "#123456")
+        let inserted = await manager.insert(item: newItem)
+        XCTAssertTrue(inserted, "清空数据后仍应能写入")
+
+        let afterInsert = await manager.totalCount
+        XCTAssertEqual(afterInsert, 1)
+
+        let results = await manager.search(limit: 10, offset: 0)
+        XCTAssertEqual(results.first?.hashValue, newItem.hashValue, "清空后写入的条目应能读回")
+        XCTAssertEqual(results.first?.type, .color, "kindCode 应随写入落库")
+    }
+
+    /// 回归：清空后重启应用（同一路径重新 setup）仍能写入。
+    func testClearAllDataThenRestartStillWorks() async {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+
+        let first = PasteSQLManager(dbPath: path)
+        await first.setup()
+        await first.insert(item: makeTextModel(string: "重启前"))
+        await first.clearAllData()
+
+        // 模拟重启：同一路径新建 manager 并 setup
+        let second = PasteSQLManager(dbPath: path)
+        await second.setup()
+
+        let inserted = await second.insert(item: makeTextModel(string: "重启后"))
+        XCTAssertTrue(inserted, "重启后仍应能写入")
+
+        let count = await second.totalCount
+        XCTAssertEqual(count, 1)
+    }
+
+    /// 幂等：重复 setup 不应因「列已存在 / 索引已存在」而失败。
+    func testSetupIsIdempotent() async {
+        let manager = await makeTempManager()
+        await manager.setup()
+        await manager.setup()
+
+        let inserted = await manager.insert(item: makeTextModel(string: "幂等"))
+        XCTAssertTrue(inserted)
+    }
+
+    /// 自愈：历史 bug 留下「表缺 kindCode、user_version 却已是 2」的库，
+    /// setup 应按 PRAGMA 自检补列并回填，之后可正常写入。
+    func testSetupRepairsLegacyDatabaseMissingKindCode() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        try makeLegacyBrokenDatabase(at: path, text: "#FF5733")
+
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+
+        // 补列后应回填旧数据的 kindCode(#FF5733 是颜色)
+        let legacyRows = await manager.search(limit: 10, offset: 0)
+        XCTAssertEqual(legacyRows.count, 1)
+        XCTAssertEqual(legacyRows.first?.type, .color, "旧数据应被回填为颜色类型")
+
+        // 新写入不再触发「no such column: kindCode」
+        let inserted = await manager.insert(item: makeTextModel(string: "修复后新内容"))
+        XCTAssertTrue(inserted)
+
+        let count = await manager.totalCount
+        XCTAssertEqual(count, 2)
+    }
+
+    // MARK: - 写入事务
+
+    /// 回归：去重插入是「先删旧行再插新行」，插入失败时必须整体回滚，旧行不能丢。
+    func testInsertFailureRollsBackAndKeepsOldRow() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+
+        let hash = 424_242
+        let original = PasteboardModel(
+            pasteboardType: .string, data: Data("原始内容".utf8), showData: nil,
+            hashValue: hash, date: Date(), appPath: "", appName: "Test",
+            dataString: "原始内容", length: 4
+        )
+        let firstInsert = await manager.insert(item: original)
+        XCTAssertTrue(firstInsert)
+
+        // 用触发器让后续 INSERT 必然失败，而 DELETE 仍会正常执行：
+        // 不包事务时旧行就已被删掉，复现「旧行没了、新行没插上」的净丢失。
+        try executeSQL(at: path, """
+            CREATE TRIGGER fail_insert BEFORE INSERT ON pasteContent
+            BEGIN SELECT RAISE(ABORT, 'insert blocked for test'); END;
+            """)
+        defer { try? executeSQL(at: path, "DROP TRIGGER IF EXISTS fail_insert;") }
+
+        let recaptured = PasteboardModel(
+            pasteboardType: .string, data: Data("新内容".utf8), showData: nil,
+            hashValue: hash, date: Date(), appPath: "", appName: "Test",
+            dataString: "新内容", length: 3
+        )
+        let failed = await manager.insert(item: recaptured)
+        XCTAssertFalse(failed, "被触发器拦截时应报告写入失败")
+
+        let count = await manager.totalCount
+        XCTAssertEqual(count, 1, "事务回滚后应仍有一条")
+
+        let rows = await manager.search(limit: 10, offset: 0)
+        XCTAssertEqual(rows.first?.dataString, "原始内容", "旧行必须保留，不能被删掉")
+    }
+
+    // MARK: - 测试辅助（造坏库 / 直连 SQL）
+
+    /// 造一个「历史 bug 遗留」的坏库：表缺 kindCode 列，但 user_version 已是 2。
+    /// 用系统 SQLite C API 直接建库，模拟旧版本 clearAllData 留下的真实状态。
+    private func makeLegacyBrokenDatabase(at path: String, text: String) throws {
+        let dir = (path as NSString).deletingLastPathComponent
+        try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+
+        let stringType = NSPasteboard.PasteboardType.string.rawValue
+        // date / pinnedDate 由 SQLite.swift 以 TEXT 存储(yyyy-MM-dd'T'HH:mm:ss.SSS)，
+        // 这里必须写同格式字符串，否则读回时 Date 解码失败、整行被丢弃。
+        try executeSQL(at: path, """
+            PRAGMA user_version = 2;
+            CREATE TABLE pasteContent(
+                id INTEGER PRIMARY KEY, hashKey INTEGER, type TEXT, data BLOB, showData BLOB,
+                date TEXT, appPath TEXT, appName TEXT, dataString TEXT, length INTEGER,
+                ocrText TEXT, imgW INTEGER, imgH INTEGER, pinnedDate TEXT
+            );
+            INSERT INTO pasteContent(hashKey, type, data, date, appPath, appName, dataString, length)
+            VALUES (123456, '\(stringType)', x'00', '2026-11-01T10:00:00.000', '', 'Legacy', '\(text)', 7);
+            """)
+    }
+
+    /// 直接对库执行 SQL（造触发器、写 PRAGMA 等测试专用操作）。
+    private func executeSQL(at path: String, _ sql: String) throws {
+        var handle: OpaquePointer?
+        guard sqlite3_open(path, &handle) == SQLITE_OK, let handle else {
+            throw NSError(domain: "PasteDirectTests", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "无法打开测试数据库"])
+        }
+        defer { sqlite3_close(handle) }
+
+        var errorPointer: UnsafeMutablePointer<CChar>?
+        guard sqlite3_exec(handle, sql, nil, nil, &errorPointer) == SQLITE_OK else {
+            let message = errorPointer.map { String(cString: $0) } ?? "unknown"
+            if let errorPointer { sqlite3_free(errorPointer) }
+            throw NSError(domain: "PasteDirectTests", code: 2,
+                          userInfo: [NSLocalizedDescriptionKey: message])
+        }
     }
 }

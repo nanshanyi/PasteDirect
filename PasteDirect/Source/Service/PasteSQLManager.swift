@@ -49,9 +49,13 @@ actor PasteSQLManager {
 
     // MARK: - DB
 
+    private static let tableName = "pasteContent"
+    /// 表结构与规则版本。调整颜色/链接识别规则时递增，低于此版本的库启动时会重新回填 kindCode。
+    private static let schemaVersion: Int32 = 3
+
     private let dbPath: String
     private var db: Connection?
-    private var table: Table
+    private let table: Table
 
     /// - Parameter dbPath: 数据库文件路径。默认 nil 走生产路径(Application Support/paste/paste.sqlite3);
     ///   测试可传入临时路径,避免污染用户的真实剪贴板历史库。
@@ -81,97 +85,74 @@ actor PasteSQLManager {
             Log("Connection Error\(error)")
             self.db = nil
         }
-        self.table = Table("pasteContent")
+        self.table = Table(Self.tableName)
     }
 
     /// 初始化表结构，需在首次使用前调用
     func setup() {
-        createTable()
-    }
-
-    private func createTable() {
+        guard let db else { return }
         do {
-            try db?.run(table.create(ifNotExists: true, withoutRowid: false) { [col_id, col_hashKey, col_type, col_data, col_showData, col_date, col_appPath, col_appName, col_dataString, col_length, col_ocrText, col_imgW, col_imgH, col_pinnedDate] t in
+            try db.run(table.create(ifNotExists: true, withoutRowid: false) { t in
                 t.column(col_id, primaryKey: true)
                 t.column(col_hashKey); t.column(col_type); t.column(col_data)
                 t.column(col_showData); t.column(col_date); t.column(col_appPath)
                 t.column(col_appName); t.column(col_dataString); t.column(col_length)
                 t.column(col_ocrText); t.column(col_imgW); t.column(col_imgH)
-                t.column(col_pinnedDate)
+                t.column(col_pinnedDate); t.column(col_kind)
             })
-            migrateAddOCRTextColumn()
-            migrateAddImageSizeColumns()
-            migrateAddPinnedColumn()
-            migrateAddKindColumn()
-            try db?.run(table.createIndex(col_date, ifNotExists: true))
-            try db?.run(table.createIndex(col_appName, ifNotExists: true))
-            try db?.run(table.createIndex(col_type, ifNotExists: true))
-            try db?.run(table.createIndex(col_hashKey, ifNotExists: true))
-            try db?.run(table.createIndex(col_pinnedDate, ifNotExists: true))
-            try db?.run(table.createIndex(col_kind, ifNotExists: true))
+            try addMissingColumns(on: db)
+            try db.run(table.createIndex(col_date, ifNotExists: true))
+            try db.run(table.createIndex(col_appName, ifNotExists: true))
+            try db.run(table.createIndex(col_type, ifNotExists: true))
+            try db.run(table.createIndex(col_hashKey, ifNotExists: true))
+            try db.run(table.createIndex(col_pinnedDate, ifNotExists: true))
+            try db.run(table.createIndex(col_kind, ifNotExists: true))
+            if Int(db.userVersion ?? 0) < Int(Self.schemaVersion) {
+                try backfillKindCodes(on: db)
+                db.userVersion = Self.schemaVersion
+                Log("Migrated: backfilled kindCode, user_version=\(Self.schemaVersion)")
+            }
             Log("Create Table Success")
         } catch {
             Log("Create Table Error: \(error)")
         }
     }
 
-    /// 旧库可能没有 ocrText 列,显式 ALTER TABLE;已存在则忽略
-    private func migrateAddOCRTextColumn() {
-        do {
-            try db?.run(table.addColumn(col_ocrText))
-            Log("Migrated: added ocrText column")
-        } catch {
-            // 列已存在,符合预期
+    /// 按实际表结构补齐后加的列。不依赖 user_version，
+    /// 版本号已推进但缺列的库（旧版「清空所有数据」DROP 重建后缺 kindCode）也能补回。
+    private func addMissingColumns(on db: Connection) throws {
+        var existing = Set<String>()
+        for row in try db.prepare("PRAGMA table_info(\(Self.tableName))") {
+            if let name = row[1] as? String { existing.insert(name) }
+        }
+        let columns: [(name: String, sql: String)] = [
+            ("ocrText", table.addColumn(col_ocrText)),
+            ("imgW", table.addColumn(col_imgW)),
+            ("imgH", table.addColumn(col_imgH)),
+            ("pinnedDate", table.addColumn(col_pinnedDate)),
+            ("kindCode", table.addColumn(col_kind)),
+        ]
+        for column in columns where !existing.contains(column.name) {
+            try db.run(column.sql)
+            Log("Migrated: added \(column.name) column")
         }
     }
 
-    /// 旧库可能没有 imgW/imgH 列(图片外置特性引入),显式 ALTER TABLE;已存在则忽略
-    private func migrateAddImageSizeColumns() {
-        do {
-            try db?.run(table.addColumn(col_imgW))
-            try db?.run(table.addColumn(col_imgH))
-            Log("Migrated: added imgW/imgH columns")
-        } catch {
-            // 列已存在,符合预期
-        }
-    }
-
-    /// 旧库可能没有 pinnedDate 列(置顶特性引入),显式 ALTER TABLE;已存在则忽略
-    private func migrateAddPinnedColumn() {
-        do {
-            try db?.run(table.addColumn(col_pinnedDate))
-            Log("Migrated: added pinnedDate column")
-        } catch {
-            // 列已存在,符合预期
-        }
-    }
-
-    /// 旧库没有 kind 列(颜色/链接分类引入):加列并按现有文本行回填一次。
-    /// 以 user_version 记录规则版本;日后调整颜色/链接识别规则时递增版本号即可触发重新回填。
-    private static let kindRulesVersion = 2
-
-    private func migrateAddKindColumn() {
-        guard let db else { return }
-        do {
-            let current = Int(db.userVersion ?? 0)
-            guard current < Self.kindRulesVersion else { return }
-            _ = try? db.run(table.addColumn(col_kind))
-            let textTypes = [PasteboardType.rtf, .rtfd, .string].map(\.rawValue)
-            let query = table.select(col_id, col_type, col_dataString, col_length)
-                .filter(makeTypeFilter(textTypes))
-            let rows = try Array(db.prepare(query))
-            try db.transaction {
-                _ = try db.run(table.update(col_kind <- nil))
-                for row in rows {
-                    let kind = PasteboardModel.derivedType(forText: row[col_dataString], type: PasteboardType(row[col_type]))
-                    guard let kind else { continue }
-                    _ = try db.run(table.filter(col_id == row[col_id]).update(col_kind <- kind.rawValue))
-                }
+    /// 按当前规则重算文本行的派生类型并回写 kindCode，只更新结果有变化的行
+    private func backfillKindCodes(on db: Connection) throws {
+        let textTypes = [PasteboardType.rtf, .rtfd, .string].map(\.rawValue)
+        let query = table.select(col_id, col_type, col_dataString, col_kind)
+            .filter(makeTypeFilter(textTypes))
+        let rows = try Array(db.prepare(query))
+        try db.transaction {
+            for row in rows {
+                let kind = PasteboardModel.derivedType(
+                    forText: row[col_dataString],
+                    type: PasteboardType(row[col_type])
+                )
+                guard row[col_kind] != kind?.rawValue else { continue }
+                _ = try db.run(table.filter(col_id == row[col_id]).update(col_kind <- kind?.rawValue))
             }
-            db.userVersion = Int32(Self.kindRulesVersion)
-            Log("Migrated: backfilled kind column")
-        } catch {
-            Log("回填 kind 失败：\(error)")
         }
     }
 }
@@ -223,40 +204,47 @@ extension PasteSQLManager {
         )
     }
 
-    func insert(item: PasteboardModel) {
-        // 重新捕获相同内容时先删旧行再插新行;旧行若已置顶则继承置顶状态,
-        // 否则去重一旦命中,用户的置顶项会被无置顶的新行顶掉。
-        var pinnedDate = item.pinnedDate
-        if let oldRow = try? db?.pluck(table.filter(col_hashKey == item.hashValue).select(col_pinnedDate)),
-           let oldPinnedDate = try? oldRow.get(col_pinnedDate) {
-            pinnedDate = oldPinnedDate
-        }
-
-        // 先删除同 hash 的旧记录
-        let deleteQuery = table.filter(col_hashKey == item.hashValue)
-        _ = try? db?.run(deleteQuery.delete())
-
-        let insertQuery = table.insert(
-            col_hashKey <- item.hashValue,
-            col_type <- item.pasteboardType.rawValue,
-            col_data <- item.data,
-            col_showData <- item.showData,
-            col_date <- item.date,
-            col_appPath <- item.appPath,
-            col_appName <- item.appName,
-            col_dataString <- item.dataString,
-            col_length <- item.length,
-            col_ocrText <- item.ocrText,
-            col_imgW <- item.imageWidth,
-            col_imgH <- item.imageHeight,
-            col_pinnedDate <- pinnedDate,
-            col_kind <- item.derivedType?.rawValue
-        )
+    /// 插入一条记录，同 hashKey 的旧行会被替换。删旧行和插新行放在同一事务里，插入失败时旧行不丢。
+    /// - Returns: 是否写入成功
+    @discardableResult
+    func insert(item: PasteboardModel) -> Bool {
+        guard let db else { return false }
         do {
-            let rowId = try db?.run(insertQuery)
-            Log("插入成功：\(String(describing: rowId))")
+            try db.transaction {
+                // 重新捕获相同内容时先删旧行再插新行;旧行若已置顶则继承置顶状态,
+                // 否则去重一旦命中,用户的置顶项会被无置顶的新行顶掉。
+                var pinnedDate = item.pinnedDate
+                if let oldRow = try db.pluck(
+                    table.filter(col_hashKey == item.hashValue).select(col_pinnedDate)
+                ), let oldPinnedDate = try oldRow.get(col_pinnedDate) {
+                    pinnedDate = oldPinnedDate
+                }
+
+                try db.run(table.filter(col_hashKey == item.hashValue).delete())
+
+                let insertQuery = table.insert(
+                    col_hashKey <- item.hashValue,
+                    col_type <- item.pasteboardType.rawValue,
+                    col_data <- item.data,
+                    col_showData <- item.showData,
+                    col_date <- item.date,
+                    col_appPath <- item.appPath,
+                    col_appName <- item.appName,
+                    col_dataString <- item.dataString,
+                    col_length <- item.length,
+                    col_ocrText <- item.ocrText,
+                    col_imgW <- item.imageWidth,
+                    col_imgH <- item.imageHeight,
+                    col_pinnedDate <- pinnedDate,
+                    col_kind <- item.derivedType?.rawValue
+                )
+                let rowId = try db.run(insertQuery)
+                Log("插入成功：\(rowId)")
+            }
+            return true
         } catch {
             Log("插入失败：\(error)")
+            return false
         }
     }
 
@@ -318,15 +306,17 @@ extension PasteSQLManager {
         }
     }
 
+    /// 清空所有数据。用 DELETE 而不是 DROP 重建，保留表结构和索引。
     func clearAllData() {
+        guard let db else { return }
         do {
-            _ = try db?.run(table.drop())
-            try db?.execute("VACUUM")
-            createTable()
-            Log("删除所有数据")
+            let removed = try db.run(table.delete())
+            Log("删除所有数据：\(removed) 行")
         } catch {
             Log("删除失败：\(error)")
+            return
         }
+        vacuum()
     }
 
     /// 整理数据库文件，把删除留下的空闲页真正还给磁盘。

@@ -29,7 +29,7 @@ enum PasteModelType: Int, Sendable {
 
     /// 由内容推出、存库时打标签(kindCode 列,值为 rawValue)的类型,按此顺序依次匹配。
     /// 新增派生类型:加 case、在此登记、在 PasteboardModel.derivedType 里补规则,
-    /// 并递增 PasteSQLManager.kindRulesVersion 触发旧数据回填。
+    /// 并递增 PasteSQLManager.schemaVersion 触发旧数据回填。
     static let derivedTypes: [PasteModelType] = [.color, .link]
 
     /// 顶栏分段与筛选弹窗展示的类型(顺序即界面顺序)
