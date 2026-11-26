@@ -6,9 +6,17 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [4.0.0] - 2026-11-24
+## [4.0.0] - 2026-11-26
 
-First 4.0 beta: the interface has been rebuilt from the ground up, updates now happen inside the app, and there is a new Link category with fuller colour detection. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
+Second 4.0 beta: fixes new clips becoming unsavable after "Clear All Data", and polishes the panel shadow and list scrolling; this release includes everything from beta1. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
+
+### Fixed (Beta 2)
+- Fixed new clips not being saved after "Clear All Data": in beta1, once that button had been used, nothing copied afterwards could be written to the database and restarting did not help. It is fixed now, and the database is checked and repaired on launch — no need to delete the database or reinstall after updating; copying works again right away. (Cleared history does not come back; that step was a clear.)
+- Fixed the panel's corner shadow being cut off by the window edge, which left hard right-angle edges outside the rounded corners.
+
+### List and performance (Beta 2)
+- The list now resumes from your position when scrolling: clips copied while paging through no longer cause entries to be skipped or shown twice.
+- List ordering now uses an index that covers the sort columns, so opening and scrolling stay fast even with a long history.
 
 ### A brand-new UI
 - The main panel is completely redesigned: card headers take their colour from the source app, hover lift and selection outlines are clearer, and pinned items get their own group apart from regular history, with a stronger fill and outline.
@@ -23,8 +31,6 @@ First 4.0 beta: the interface has been rebuilt from the ground up, updates now h
 - Open links straight from a card: choose "Open in Browser" in the right-click menu, or hold ⌘ and click the card (the pointer turns into a hand while ⌘ is held).
 - Colour detection supports hex values starting with `#` or `0x` (3, 6 or 8 digits) as well as `rgb()` / `rgba()` / `hsl()` / `hsla()`; ordinary text such as `123456` or `deadbeef` is not mistaken for a colour. "Paste as Plain Text" only normalises hex values to `#RRGGBB`; rgb / hsl values are pasted as written.
 - Pin or delete straight from a hovered card; pinning and unpinning now animate the card into its new position.
-
-Also, the license changed from MIT to GNU AGPL-3.0.
 
 ## [3.5.0] - 2026-07-31
 
