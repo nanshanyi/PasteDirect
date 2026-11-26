@@ -298,7 +298,96 @@ extension PasteMainViewController {
     }
 }
 
-// MARK: - 私有方法
+// MARK: - 列表更新与选中
+
+extension PasteMainViewController {
+    private func applyListUpdate(_ update: PasteMainViewModel.ListUpdate) {
+        var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
+        snapshot.appendSections([0])
+        snapshot.appendItems(viewModel.items.map(\.hashValue))
+        snapshot.reloadItems(update.reloaded)
+        // 只换了置顶状态的卡片：先刷新图钉，再交给 diffable 做移动动画，其余内容不重配
+        for model in update.pinChanged {
+            if let indexPath = dataSource.indexPath(for: model.hashValue),
+               let item = collectionView.item(at: indexPath) as? PasteCollectionViewItem {
+                item.updatePinState(model: model)
+            }
+        }
+        if update.animated {
+            NSAnimationContext.runAnimationGroup { ctx in
+                ctx.duration = 0.35
+                ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                dataSource.apply(snapshot, animatingDifferences: true)
+            } completionHandler: { [weak self] in
+                MainActor.assumeIsolated { self?.refreshShortcutHints() }
+            }
+        } else {
+            dataSource.apply(snapshot, animatingDifferences: false)
+            refreshShortcutHints()
+        }
+
+        let selected = viewModel.selectedIndexPath
+        for indexPath in collectionView.indexPathsForVisibleItems() {
+            collectionView.item(at: indexPath)?.isSelected = indexPath == selected
+        }
+        collectionView.selectionIndexPaths = viewModel.items.isEmpty ? [] : [selected]
+        if update.scrollToBeginning {
+            collectionView.scroll(.zero)
+        } else if update.scrollToSelection {
+            scrollTo(indexPath: selected)
+        }
+        if update.dataChanged {
+            refreshTypeCounts()
+        }
+        updateEmptyState()
+    }
+
+    private func makeItem(_ collectionView: NSCollectionView, at indexPath: IndexPath) -> NSCollectionViewItem {
+        let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
+        guard let cItem = item as? PasteCollectionViewItem else { return item }
+        cItem.delegate = self
+        if let model = viewModel.item(at: indexPath) {
+            cItem.updateItem(model: model)
+        }
+        if let flowLayout = collectionView.collectionViewLayout as? NSCollectionViewFlowLayout {
+            // itemSize.height 含上下阴影留白,扣除后才是卡片高度
+            cItem.updateLayout(cardHeight: flowLayout.itemSize.height - Layout.itemShadowMargin * 2)
+        }
+        cItem.isSelected = viewModel.selectedIndexPath == indexPath
+        return cItem
+    }
+
+    private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
+        let old = viewModel.selectedIndexPath
+        collectionView.item(at: old)?.isSelected = false
+        viewModel.resetSelection(to: indexPath)
+        if !viewModel.items.isEmpty {
+            collectionView.selectionIndexPaths = [indexPath]
+            scrollTo(indexPath: indexPath)
+        }
+    }
+
+    private func scrollTo(indexPath: IndexPath) {
+        if let item = collectionView.layoutAttributesForItem(at: indexPath) {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.25
+                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
+            }
+        }
+    }
+
+    private func updateEmptyState() {
+        let isEmpty = viewModel.items.isEmpty
+        emptyStateView.isHidden = !isEmpty
+        scrollView.isHidden = isEmpty
+        if isEmpty {
+            let hasQuery = !searchBar.text.isEmpty || viewModel.filterIsActive
+            emptyStateView.configure(hasQuery ? .noResults : .noHistory)
+        }
+    }
+}
+
+// MARK: - 数字快捷键
 
 extension PasteMainViewController {
     private func setupKeyEventMonitor() {
@@ -333,24 +422,6 @@ extension PasteMainViewController {
             }
             return event
         }
-    }
-
-    private func typeSegmentChanged() {
-        let index = typeSegment.selectedIndex
-        guard Self.segmentTypes.indices.contains(index) else { return }
-        filterView.setType(Self.segmentTypes[index])
-    }
-
-    /// 刷新分段按钮上的条数(全部 + PasteModelType.filterable 中的各类型)
-    private func refreshTypeCounts() {
-        Task {
-            let counts = await viewModel.typeCounts()
-            typeSegment.setCounts(Self.segmentTypes.map { $0.flatMap(counts.count(for:)) })
-        }
-    }
-
-    private func syncTypeSegment(with state: FilterState) {
-        typeSegment.selectedIndex = Self.segmentTypes.firstIndex(of: state.selectedType) ?? 0
     }
 
     private static let digitKeyCodes: [Int] = [
@@ -396,6 +467,28 @@ extension PasteMainViewController {
         setShortcutHintsVisible(false)
         viewModel.pasteItem(at: targets[number - 1])
     }
+}
+
+// MARK: - 顶栏（类型分段、筛选、设置）
+
+extension PasteMainViewController {
+    private func typeSegmentChanged() {
+        let index = typeSegment.selectedIndex
+        guard Self.segmentTypes.indices.contains(index) else { return }
+        filterView.setType(Self.segmentTypes[index])
+    }
+
+    /// 刷新分段按钮上的条数(全部 + PasteModelType.filterable 中的各类型)
+    private func refreshTypeCounts() {
+        Task {
+            let counts = await viewModel.typeCounts()
+            typeSegment.setCounts(Self.segmentTypes.map { $0.flatMap(counts.count(for:)) })
+        }
+    }
+
+    private func syncTypeSegment(with state: FilterState) {
+        typeSegment.selectedIndex = Self.segmentTypes.firstIndex(of: state.selectedType) ?? 0
+    }
 
     private func showFilterPopover() {
         if filterPopover.isShown {
@@ -415,16 +508,6 @@ extension PasteMainViewController {
         searchBar.filterButton.contentTintColor = viewModel.filterIsActive ? .controlAccentColor : .secondaryLabelColor
     }
 
-    private func updateEmptyState() {
-        let isEmpty = viewModel.items.isEmpty
-        emptyStateView.isHidden = !isEmpty
-        scrollView.isHidden = isEmpty
-        if isEmpty {
-            let hasQuery = !searchBar.text.isEmpty || viewModel.filterIsActive
-            emptyStateView.configure(hasQuery ? .noResults : .noHistory)
-        }
-    }
-
     private func activeTags(for state: FilterState) -> [(text: String, icon: NSImage?)] {
         var tags: [(String, NSImage?)] = []
         if let app = state.selectedApp {
@@ -442,7 +525,28 @@ extension PasteMainViewController {
     private func settingAction() {
         AppContext.coordinator.showSettings()
     }
+}
 
+// MARK: - 预览弹窗
+
+extension PasteMainViewController {
+    private func showPreviewPopover(for model: PasteboardModel, relativeTo view: NSView) {
+        closePreviewPopover()
+        let popover = PastePreviewPopover(model: model)
+        popover.delegate = self
+        previewPopover = popover
+        popover.show(relativeTo: view.bounds, of: view, preferredEdge: .maxY)
+    }
+
+    private func closePreviewPopover() {
+        previewPopover?.close()
+        previewPopover = nil
+    }
+}
+
+// MARK: - 拖动调整面板高度
+
+extension PasteMainViewController {
     private func setupResizeHandle() {
         resizeHandle.onResize = { [weak self] targetHeight in
             guard let self, let window = self.view.window else { return }
@@ -515,79 +619,6 @@ extension PasteMainViewController {
             }
         }
     }
-
-    private func resetSelectIndex(_ indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
-        let old = viewModel.selectedIndexPath
-        collectionView.item(at: old)?.isSelected = false
-        viewModel.resetSelection(to: indexPath)
-        if !viewModel.items.isEmpty {
-            collectionView.selectionIndexPaths = [indexPath]
-            scrollTo(indexPath: indexPath)
-        }
-    }
-
-    private func applyListUpdate(_ update: PasteMainViewModel.ListUpdate) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(viewModel.items.map(\.hashValue))
-        snapshot.reloadItems(update.reloaded)
-        // 只换了置顶状态的卡片：先刷新图钉，再交给 diffable 做移动动画，其余内容不重配
-        for model in update.pinChanged {
-            if let indexPath = dataSource.indexPath(for: model.hashValue),
-               let item = collectionView.item(at: indexPath) as? PasteCollectionViewItem {
-                item.updatePinState(model: model)
-            }
-        }
-        if update.animated {
-            NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.35
-                ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                dataSource.apply(snapshot, animatingDifferences: true)
-            } completionHandler: { [weak self] in
-                MainActor.assumeIsolated { self?.refreshShortcutHints() }
-            }
-        } else {
-            dataSource.apply(snapshot, animatingDifferences: false)
-            refreshShortcutHints()
-        }
-
-        let selected = viewModel.selectedIndexPath
-        for indexPath in collectionView.indexPathsForVisibleItems() {
-            collectionView.item(at: indexPath)?.isSelected = indexPath == selected
-        }
-        collectionView.selectionIndexPaths = viewModel.items.isEmpty ? [] : [selected]
-        if update.scrollToBeginning {
-            collectionView.scroll(.zero)
-        } else if update.scrollToSelection {
-            scrollTo(indexPath: selected)
-        }
-        if update.dataChanged {
-            refreshTypeCounts()
-        }
-        updateEmptyState()
-    }
-
-    private func scrollTo(indexPath: IndexPath) {
-        if let item = collectionView.layoutAttributesForItem(at: indexPath) {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.25
-                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
-            }
-        }
-    }
-
-    private func showPreviewPopover(for model: PasteboardModel, relativeTo view: NSView) {
-        closePreviewPopover()
-        let popover = PastePreviewPopover(model: model)
-        popover.delegate = self
-        previewPopover = popover
-        popover.show(relativeTo: view.bounds, of: view, preferredEdge: .maxY)
-    }
-
-    private func closePreviewPopover() {
-        previewPopover?.close()
-        previewPopover = nil
-    }
 }
 
 // MARK: - PasteCollectionViewKeyDelegate
@@ -647,25 +678,6 @@ extension PasteMainViewController: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? {
         return viewModel.item(at: indexPath)?.writeItem
-    }
-}
-
-// MARK: - 卡片配置
-
-extension PasteMainViewController {
-    private func makeItem(_ collectionView: NSCollectionView, at indexPath: IndexPath) -> NSCollectionViewItem {
-        let item = collectionView.makeItem(withIdentifier: PasteCollectionViewItem.identifier, for: indexPath)
-        guard let cItem = item as? PasteCollectionViewItem else { return item }
-        cItem.delegate = self
-        if let model = viewModel.item(at: indexPath) {
-            cItem.updateItem(model: model)
-        }
-        if let flowLayout = collectionView.collectionViewLayout as? NSCollectionViewFlowLayout {
-            // itemSize.height 含上下阴影留白,扣除后才是卡片高度
-            cItem.updateLayout(cardHeight: flowLayout.itemSize.height - Layout.itemShadowMargin * 2)
-        }
-        cItem.isSelected = viewModel.selectedIndexPath == indexPath
-        return cItem
     }
 }
 

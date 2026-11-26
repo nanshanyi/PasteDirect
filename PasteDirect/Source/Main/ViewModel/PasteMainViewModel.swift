@@ -63,7 +63,11 @@ final class PasteMainViewModel {
             .sink { [weak self] change in self?.handleStoreChange(change) }
             .store(in: &cancellables)
     }
+}
 
+// MARK: - 列表加载
+
+extension PasteMainViewModel {
     /// 加载首页。由界面在订阅 listUpdate 之后调用，保证第一次结果不会因为还没人订阅而丢掉
     func start() {
         reload()
@@ -72,8 +76,6 @@ final class PasteMainViewModel {
     private func updateCanLoadMore() {
         canLoadMore = hasMore && !isLoading
     }
-
-    // MARK: - 列表加载
 
     /// 按查询条件从第一页重新加载
     private func reload(keyword: String = "", state: FilterState = .empty) {
@@ -189,9 +191,11 @@ final class PasteMainViewModel {
         }
         listUpdate.send(update)
     }
+}
 
-    // MARK: - 搜索 & 筛选
+// MARK: - 搜索与筛选
 
+extension PasteMainViewModel {
     func performSearch(keyword: String) {
         if keyword.isEmpty && !filterIsActive {
             resetToDefaultList()
@@ -230,8 +234,15 @@ final class PasteMainViewModel {
     func allApps() async -> [(name: String, path: String)] {
         await store.allApps()
     }
+}
 
-    // MARK: - 数据操作
+// MARK: - 条目操作与选中
+
+extension PasteMainViewModel {
+    func item(at indexPath: IndexPath) -> PasteboardModel? {
+        guard indexPath.item < items.count else { return nil }
+        return items[indexPath.item]
+    }
 
     func deleteItem(at indexPath: IndexPath) {
         guard let item = item(at: indexPath) else { return }
@@ -243,19 +254,14 @@ final class PasteMainViewModel {
         store.setPinned(!model.isPinned, for: model)
     }
 
-    func item(at indexPath: IndexPath) -> PasteboardModel? {
-        guard indexPath.item < items.count else { return nil }
-        return items[indexPath.item]
-    }
-
-    // MARK: - 选中
-
     func resetSelection(to indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
         selectedIndexPath = indexPath
     }
+}
 
-    // MARK: - 粘贴
+// MARK: - 粘贴与复制
 
+extension PasteMainViewModel {
     func pasteItem(at indexPath: IndexPath, isOriginal: Bool = true) {
         guard let model = item(at: indexPath) else { return }
         pasteModel(model, isOriginal: isOriginal)
@@ -301,15 +307,6 @@ final class PasteMainViewModel {
         return original == model.data ? model : model.replacingData(original)
     }
 
-    // MARK: - OCR
-
-    /// 取得图片的 OCR 文字:已识别过直接返回,未识别则当场识别。
-    /// 图中确无文字时返回 nil。
-    private func resolveOCRText(for model: PasteboardModel) async -> String? {
-        if let text = model.ocrText, !text.isEmpty { return text }
-        return await PasteDataStore.main.extractOCRText(from: model)
-    }
-
     /// 复制图片中的文字到剪贴板(并进入历史)
     func copyOCRText(from model: PasteboardModel) {
         Task {
@@ -328,8 +325,17 @@ final class PasteMainViewModel {
         }
     }
 
-    // MARK: - 生命周期
+    /// 取得图片的 OCR 文字:已识别过直接返回,未识别则当场识别。
+    /// 图中确无文字时返回 nil。
+    private func resolveOCRText(for model: PasteboardModel) async -> String? {
+        if let text = model.ocrText, !text.isEmpty { return text }
+        return await PasteDataStore.main.extractOCRText(from: model)
+    }
+}
 
+// MARK: - 生命周期
+
+extension PasteMainViewModel {
     func handleViewDidAppear() {
         isVisible = true
     }

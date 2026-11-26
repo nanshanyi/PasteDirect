@@ -80,7 +80,7 @@ extension PasteDataStore {
     }
 }
 
-// MARK: - 数据操作 对外接口
+// MARK: - 查询
 
 extension PasteDataStore {
     /// 取 cursor 之后的一页，cursor 为 nil 时取第一页
@@ -93,6 +93,25 @@ extension PasteDataStore {
         await sqlManager.fetchThrough(keyword: keyword, state: state, cursor: cursor)
     }
 
+    @discardableResult
+    func typeCounts() async -> TypeCounts {
+        await sqlManager.typeCounts()
+    }
+
+    /// 获取常用应用列表（前5个）
+    func topApps() async -> [(name: String, path: String)] {
+        await sqlManager.distinctApps(limit: 5)
+    }
+
+    /// 获取所有应用列表
+    func allApps() async -> [(name: String, path: String)] {
+        await sqlManager.allDistinctApps()
+    }
+}
+
+// MARK: - 新增与修改
+
+extension PasteDataStore {
     /// 增加新数据
     func addNewItem(_ item: NSPasteboardItem) {
         guard let model = PasteboardModel(with: item) else { return }
@@ -151,7 +170,11 @@ extension PasteDataStore {
             didChange.send(.other)
         }
     }
+}
 
+// MARK: - 删除与清理
+
+extension PasteDataStore {
     /// 删除单条数据
     func deleteItems(_ items: PasteboardModel...) {
         Task {
@@ -223,26 +246,11 @@ extension PasteDataStore {
             didChange.send(.other)
         }
     }
-
-    /// 获取常用应用列表（前5个）
-    func topApps() async -> [(name: String, path: String)] {
-        await sqlManager.distinctApps(limit: 5)
-    }
-
-    /// 获取所有应用列表
-    func allApps() async -> [(name: String, path: String)] {
-        await sqlManager.allDistinctApps()
-    }
 }
 
 // MARK: - 颜色处理
 
 extension PasteDataStore {
-    @discardableResult
-    func typeCounts() async -> TypeCounts {
-        await sqlManager.typeCounts()
-    }
-
     @discardableResult
     func extractColor(from model: PasteboardModel) async -> NSColor? {
         let icon = NSWorkspace.shared.icon(forFile: model.appPath)
