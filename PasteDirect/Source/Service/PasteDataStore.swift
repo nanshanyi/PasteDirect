@@ -8,7 +8,6 @@
 import AppKit
 import Foundation
 import Combine
-import SwiftUI
 
 @MainActor
 final class PasteDataStore {

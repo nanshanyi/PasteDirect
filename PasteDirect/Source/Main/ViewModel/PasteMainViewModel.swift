@@ -13,8 +13,8 @@ import KeyboardShortcuts
 final class PasteMainViewModel {
     // MARK: - 输出状态
 
-    @Published private(set) var items: [PasteboardModel] = []
-    @Published var selectedIndexPath = IndexPath(item: 0, section: 0)
+    private(set) var items: [PasteboardModel] = []
+    var selectedIndexPath = IndexPath(item: 0, section: 0)
     @Published private(set) var canLoadMore = false
 
     /// 列表更新事件。列表本身由 diffable 数据源按 hash 计算差异，这里只带额外信息。
@@ -249,10 +249,6 @@ final class PasteMainViewModel {
     }
 
     // MARK: - 选中
-
-    func selectItem(at indexPath: IndexPath) {
-        selectedIndexPath = indexPath
-    }
 
     func resetSelection(to indexPath: IndexPath = IndexPath(item: 0, section: 0)) {
         selectedIndexPath = indexPath

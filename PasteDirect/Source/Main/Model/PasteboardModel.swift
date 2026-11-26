@@ -177,25 +177,6 @@ struct PasteboardModel: Sendable, Equatable, Hashable {
         )
     }
 
-    /// 返回写入了 OCR 文本的新实例(图片专属)
-    func withOCRText(_ text: String) -> PasteboardModel {
-        PasteboardModel(
-            pasteboardType: pasteboardType,
-            data: data,
-            showData: showData,
-            hashValue: hashValue,
-            date: date,
-            appPath: appPath,
-            appName: appName,
-            dataString: dataString,
-            length: length,
-            ocrText: text,
-            imageWidth: imageWidth,
-            imageHeight: imageHeight,
-            pinnedDate: pinnedDate
-        )
-    }
-
     /// 用一段纯文本构造一条 `.string` model(用于把图片 OCR 出的文字当作文本复制/粘贴)。
     /// 继承来源图片的 app 信息,日期取当前时间。
     @MainActor
