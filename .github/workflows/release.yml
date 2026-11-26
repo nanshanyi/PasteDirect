@@ -150,13 +150,19 @@ jobs:
         run: |
           ZIP="dist/PasteDirect-$VERSION.zip"
           DMG="dist/PasteDirect-$VERSION.dmg"
+          # tag 带 - 后缀（v4.0.0-beta2 这类）视为预发布。否则 GitHub 会把它标成 Latest，
+          # README 里三处 /releases/latest 就会把 beta 当成稳定版推给新用户。
+          PRERELEASE_FLAG=""
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" "$ZIP" "$DMG" --clobber
-            gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md
+            gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md $PRERELEASE_FLAG
           else
             gh release create "$GITHUB_REF_NAME" "$ZIP" "$DMG" \
               --title "$GITHUB_REF_NAME" \
-              --notes-file release-notes.md
+              --notes-file release-notes.md $PRERELEASE_FLAG
           fi
 
       # Release 资产就位后、公开 appcast 前的最后确认
