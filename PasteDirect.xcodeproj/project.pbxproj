@@ -60,6 +60,7 @@
 		CBD1CAEC2F87B2A6003ACBD7 /* PastePreviewPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */; };
 		CBD1CAED2F87B2A6003ACBD7 /* PasteMainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA962F87B2A6003ACBD7 /* PasteMainViewController.swift */; };
 		CBD1CAEE2F87B2A6003ACBD7 /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */; };
+		BEFBB8E86259F69BC24175C4 /* PasteCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F188785B5FE75F05B260DF /* PasteCardComponents.swift */; };
 		CBD1CAEF2F87B2A6003ACBD7 /* Helps.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CABA2F87B2A6003ACBD7 /* Helps.swift */; };
 		CBD1CAF02F87B2A6003ACBD7 /* PasteAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA8A2F87B2A6003ACBD7 /* PasteAppDelegate.swift */; };
 		CBD1CAF12F87B2A6003ACBD7 /* NSCollectionView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAB22F87B2A6003ACBD7 /* NSCollectionView+Extension.swift */; };
@@ -136,6 +137,7 @@
 		CBD1CA8F2F87B2A6003ACBD7 /* PasteBoardType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteBoardType.swift; sourceTree = "<group>"; };
 		CBD1CA902F87B2A6003ACBD7 /* PasteboardWritingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardWritingItem.swift; sourceTree = "<group>"; };
 		CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
+		D4F188785B5FE75F05B260DF /* PasteCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCardComponents.swift; sourceTree = "<group>"; };
 		CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterItem.swift; sourceTree = "<group>"; };
 		CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterView.swift; sourceTree = "<group>"; };
 		CBD1CA962F87B2A6003ACBD7 /* PasteMainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteMainViewController.swift; sourceTree = "<group>"; };
@@ -292,6 +294,7 @@
 			isa = PBXGroup;
 			children = (
 				CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */,
+				D4F188785B5FE75F05B260DF /* PasteCardComponents.swift */,
 				CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */,
 				CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */,
 				CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */,
@@ -653,6 +656,7 @@
 				CBD1CAED2F87B2A6003ACBD7 /* PasteMainViewController.swift in Sources */,
 				CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */,
 				CBD1CAEE2F87B2A6003ACBD7 /* PasteCollectionViewItem.swift in Sources */,
+				BEFBB8E86259F69BC24175C4 /* PasteCardComponents.swift in Sources */,
 				CBD1CAEF2F87B2A6003ACBD7 /* Helps.swift in Sources */,
 				CBD1CAF02F87B2A6003ACBD7 /* PasteAppDelegate.swift in Sources */,
 				CBD1CAF12F87B2A6003ACBD7 /* NSCollectionView+Extension.swift in Sources */,
