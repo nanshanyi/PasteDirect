@@ -24,7 +24,6 @@
 		CBAAAA0000000000DCFDAA03 /* ImageThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */; };
 		CBAAAA0000000000DCFDAA05 /* Data+ContentHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */; };
 		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
-		CBD1CACA2F87B2A6003ACBD7 /* UIImageColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */; };
 		CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA92F87B2A6003ACBD7 /* RulesDetailView.swift */; };
 		CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAAB2F87B2A6003ACBD7 /* SettingsView.swift */; };
 		CBD1CACE2F87B2A6003ACBD7 /* PasteSettingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA32F87B2A6003ACBD7 /* PasteSettingWindowController.swift */; };
@@ -174,7 +173,6 @@
 		CBD1CABF2F87B2A6003ACBD7 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUserDefaults.swift; sourceTree = "<group>"; };
 		CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefKey.swift; sourceTree = "<group>"; };
-		CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageColors.swift; sourceTree = "<group>"; };
 		CBD1CAC32F87B2A6003ACBD7 /* UserInterfaceItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceItemIdentifier.swift; sourceTree = "<group>"; };
 		CBD1CAC62F87B2A6003ACBD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBD1CAC72F87B2A6003ACBD7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -329,17 +327,28 @@
 		CBD1CAA22F87B2A6003ACBD7 /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
+				7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */,
+				CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */,
+				CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */,
+				CBD1CABB2F87B2A6003ACBD7 /* HexColorValidator.swift */,
+				CBD1CABC2F87B2A6003ACBD7 /* ImageColorExtractor.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		DA7A0000000000000000D001 /* Data */ = {
+			isa = PBXGroup;
+			children = (
 				CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */,
 				DE30DA7A0000000000000002 /* DemoData.swift */,
 				CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */,
 				CBAAAA0000000000DCFDAB02 /* DataMigration.swift */,
 				CBD1CA9E2F87B2A6003ACBD7 /* ColorCache.swift */,
-				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
 				CBD1CAA02F87B2A6003ACBD7 /* PasteDataStore.swift */,
 				CBD1CAA12F87B2A6003ACBD7 /* PasteSQLManager.swift */,
-				7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */,
 			);
-			path = Service;
+			path = Data;
 			sourceTree = "<group>";
 		};
 		CBD1CAA42F87B2A6003ACBD7 /* Controller */ = {
@@ -409,20 +418,15 @@
 		CBD1CAC42F87B2A6003ACBD7 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */,
-				CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */,
 				CBD1CAB72F87B2A6003ACBD7 /* Extension */,
 				CBD1CAB92F87B2A6003ACBD7 /* UIComponent */,
 				CBD1CABA2F87B2A6003ACBD7 /* Helps.swift */,
-				CBD1CABB2F87B2A6003ACBD7 /* HexColorValidator.swift */,
-				CBD1CABC2F87B2A6003ACBD7 /* ImageColorExtractor.swift */,
 				CBD1CABD2F87B2A6003ACBD7 /* KeyHelper.swift */,
 				CBD1CABE2F87B2A6003ACBD7 /* Layout.swift */,
 				E390B0B9BF1B42569699869A /* AppColor.swift */,
 				CBD1CABF2F87B2A6003ACBD7 /* Log.swift */,
 				CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */,
 				CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */,
-				CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */,
 				CBD1CAC32F87B2A6003ACBD7 /* UserInterfaceItemIdentifier.swift */,
 			);
 			path = Utility;
@@ -433,6 +437,7 @@
 			children = (
 				CBD1CA8D2F87B2A6003ACBD7 /* App */,
 				CBD1CA9D2F87B2A6003ACBD7 /* Main */,
+				DA7A0000000000000000D001 /* Data */,
 				CBD1CAA22F87B2A6003ACBD7 /* Service */,
 				CBD1CAAE2F87B2A6003ACBD7 /* Setting */,
 				CBD1CAC42F87B2A6003ACBD7 /* Utility */,
@@ -606,7 +611,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBD1CACA2F87B2A6003ACBD7 /* UIImageColors.swift in Sources */,
 				CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */,
 				CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */,
 				CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */,
