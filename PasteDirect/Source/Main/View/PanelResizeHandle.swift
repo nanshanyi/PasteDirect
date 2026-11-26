@@ -80,7 +80,8 @@ final class PanelResizeHandle: NSView {
     override func mouseDown(with event: NSEvent) {
         isDragging = true
         initialMouseY = NSEvent.mouseLocation.y
-        initialHeight = window?.frame.height ?? 0
+        // 取面板高度(把手所在的内容视图铺满面板)，不用窗口高度：窗口四周还有阴影边距
+        initialHeight = superview?.frame.height ?? 0
     }
 
     override func mouseDragged(with event: NSEvent) {

@@ -109,11 +109,12 @@ extension PasteMainViewController {
     override func loadView() {
         let contentView = NSView()
         contentView.wantsLayer = true
+        let panelView: NSView
         if #available(macOS 26.0, *) {
             let glassView = NSGlassEffectView()
             glassView.cornerRadius = Layout.cornerRadius
             glassView.contentView = contentView
-            view = glassView
+            panelView = glassView
         } else {
             let effectView = NSVisualEffectView()
             effectView.wantsLayer = true
@@ -125,8 +126,15 @@ extension PasteMainViewController {
             contentView.snp.makeConstraints { make in
                 make.edges.equalToSuperview()
             }
-            view = effectView
+            panelView = effectView
         }
+        // 窗口四周比面板大出 panelShadowMargin 的透明边距，给玻璃的阴影留出淡出空间
+        let container = NSView()
+        container.addSubview(panelView)
+        panelView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(Layout.panelShadowMargin)
+        }
+        view = container
         self.contentView = contentView
     }
 
@@ -143,7 +151,7 @@ extension PasteMainViewController {
     override func viewDidLayout() {
         super.viewDidLayout()
         if isBouncingBack, let window = view.window {
-            updateItemSize(for: window.frame.height)
+            updateItemSize(for: Self.panelHeight(of: window))
         }
     }
 
@@ -563,19 +571,19 @@ extension PasteMainViewController {
                 newHeight = targetHeight
             }
 
-            frame.size.height = newHeight
+            frame.size.height = newHeight + Layout.panelShadowMargin * 2
             window.setFrame(frame, display: true)
             self.updateItemSize(for: newHeight)
             Log("Panel height: \(newHeight)")
         }
         resizeHandle.onResizeEnd = { [weak self] in
             guard let self, let window = self.view.window else { return }
-            let currentHeight = window.frame.height
+            let currentHeight = Self.panelHeight(of: window)
             let clampedHeight = min(max(currentHeight, Layout.minViewHeight), Layout.maxViewHeight)
             if currentHeight != clampedHeight {
                 self.isBouncingBack = true
                 var frame = window.frame
-                frame.size.height = clampedHeight
+                frame.size.height = clampedHeight + Layout.panelShadowMargin * 2
                 Task {
                     await NSAnimationContext.runAnimationGroup { context in
                         context.duration = 0.15
@@ -587,6 +595,11 @@ extension PasteMainViewController {
             }
             PasteUserDefaults.panelHeight = Double(clampedHeight)
         }
+    }
+
+    /// 面板本身的高度：窗口高度去掉上下的阴影边距
+    private static func panelHeight(of window: NSWindow) -> CGFloat {
+        window.frame.height - Layout.panelShadowMargin * 2
     }
 
     private func updateItemSize(for height: CGFloat) {

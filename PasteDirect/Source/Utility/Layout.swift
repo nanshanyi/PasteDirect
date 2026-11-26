@@ -11,6 +11,10 @@ enum Layout {
     // MARK: - 屏幕 & 面板
     static let screenPadding: CGFloat = 6
     static let cornerRadius: CGFloat = 32
+    /// 窗口比面板四周各大出的透明边距。玻璃(NSGlassEffectView)会在圆角外画一圈阴影，
+    /// 窗口和面板一样大时阴影来不及淡出就被窗口边界切成直角，所以要给它留出空间。
+    /// 实测 24pt 处上方阴影不透明度约 0.4%，已看不出边界；再小上边缘会重新出现直边
+    static let panelShadowMargin: CGFloat = 24
     /// 顶部可拖拽调整高度的区域(把手在其中居中)
     static let resizeHandleHeight: CGFloat = 14
 

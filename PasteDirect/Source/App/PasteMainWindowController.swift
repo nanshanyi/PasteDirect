@@ -33,13 +33,14 @@ final class PasteMainWindowController: NSWindowController {
         let screen = screenFrame ?? .zero
         let height = Layout.viewHeight
 
-        // 目标位置：屏幕底部，四周留 screenPadding
+        // 面板位置：屏幕底部，四周留 screenPadding。窗口再往外扩出阴影边距，可以超出屏幕边缘
         let inset = Layout.screenPadding
-        targetFrame = NSRect(x: screen.origin.x + inset, y: screen.origin.y + inset, width: screen.width - inset * 2, height: height)
+        let panelFrame = NSRect(x: screen.origin.x + inset, y: screen.origin.y + inset, width: screen.width - inset * 2, height: height)
+        targetFrame = panelFrame.insetBy(dx: -Layout.panelShadowMargin, dy: -Layout.panelShadowMargin)
 
         // 起始位置：在屏幕下方（不可见）
         var startFrame = targetFrame
-        startFrame.origin.y -= height
+        startFrame.origin.y -= targetFrame.height
         window.setFrame(startFrame, display: true)
         window.makeKeyAndOrderFront(nil)
 
