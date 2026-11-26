@@ -10,6 +10,7 @@ import SnapKit
 
 /// 置顶折叠条：固定在列表左侧的窄条，收起时置顶项只在这里显示数量和来源 App，
 /// 让最近复制的条目始终从第一张卡开始。点击展开/收起，悬停弹出置顶清单。
+/// 底色不在这里画：收起和展开都是同一块 PinnedGroupBackgroundView，只是宽窄不同。
 final class PastePinRailView: NSView {
     static let width: CGFloat = 56
     /// 折叠条与第一张卡片之间的距离
@@ -20,8 +21,7 @@ final class PastePinRailView: NSView {
     var onClick: (() -> Void)?
     var onHoverChange: ((Bool) -> Void)?
 
-    private var isHovered = false { didSet { needsDisplay = true } }
-    private var isPressed = false { didSet { needsDisplay = true } }
+    private var isPressed = false
 
     private let pinView = NSImageView().then {
         $0.image = CardIcon.pinFilled.image
@@ -49,7 +49,6 @@ final class PastePinRailView: NSView {
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        wantsLayer = true
         addSubview(pinView)
         addSubview(countLabel)
         addSubview(appStack)
@@ -95,20 +94,6 @@ final class PastePinRailView: NSView {
         }
     }
 
-    // MARK: - 绘制
-
-    override var wantsUpdateLayer: Bool { true }
-
-    override func updateLayer() {
-        guard let layer else { return }
-        layer.cornerRadius = Layout.itemCornerRadius
-        layer.cornerCurve = .continuous
-        let alpha: CGFloat = isPressed ? 0.34 : isHovered ? 0.28 : 0.22
-        layer.backgroundColor = NSColor.systemOrange.withAlphaComponent(alpha).cgColor
-        layer.borderColor = AppColor.pinnedGroupBorder.cgColor
-        layer.borderWidth = 1
-    }
-
     // MARK: - 鼠标
 
     override func updateTrackingAreas() {
@@ -118,12 +103,10 @@ final class PastePinRailView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        isHovered = true
         onHoverChange?(true)
     }
 
     override func mouseExited(with event: NSEvent) {
-        isHovered = false
         isPressed = false
         onHoverChange?(false)
     }

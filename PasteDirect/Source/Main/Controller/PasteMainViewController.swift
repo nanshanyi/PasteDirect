@@ -108,6 +108,9 @@ final class PasteMainViewController: NSViewController {
 
     /// 列表左边缘：有置顶折叠条时让出它的位置
     private var scrollLeading: Constraint?
+    /// 展开时竖条和置顶卡片共用的那块底色：还是列表原来那个置顶分组装饰视图，
+    /// 只是 frame 由控制器从竖条左边缘算起（布局算的那块够不到竖条，会被列表左缘裁掉）
+    private let pinnedGroupBackground = PinnedGroupBackgroundView(frame: .zero)
     private var pinPeekPopover: NSPopover?
     private var isRailHovered = false
     private var isPeekHovered = false
@@ -167,6 +170,8 @@ extension PasteMainViewController {
         if isBouncingBack, let window = view.window {
             updateItemSize(for: Self.panelHeight(of: window))
         }
+        // 面板高度变化会改卡片尺寸，分组底色跟着重算
+        updatePinnedGroupBackground()
     }
 
     override func viewDidAppear() {
@@ -198,6 +203,9 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func initSubviews() {
+        // 置顶分组底色要铺在列表下面：先加它，再加滚动视图和竖条
+        pinnedGroupBackground.isHidden = true
+        contentView.addSubview(pinnedGroupBackground)
         contentView.addSubview(scrollView)
         contentView.addSubview(pinRail)
         contentView.addSubview(emptyStateView)
@@ -361,7 +369,11 @@ extension PasteMainViewController {
                 ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 dataSource.apply(snapshot, animatingDifferences: true)
             } completionHandler: { [weak self] in
-                MainActor.assumeIsolated { self?.refreshShortcutHints() }
+                MainActor.assumeIsolated {
+                    self?.refreshShortcutHints()
+                    // 动画期间卡片还在移动，等落位后再把分组底色收拢到最后一张置顶卡
+                    self?.updatePinnedGroupBackground()
+                }
             }
         } else {
             dataSource.apply(snapshot, animatingDifferences: false)
@@ -382,6 +394,7 @@ extension PasteMainViewController {
             refreshTypeCounts()
         }
         updateEmptyState()
+        updatePinnedGroupBackground()
     }
 
     private func makeItem(_ collectionView: NSCollectionView, at indexPath: IndexPath) -> NSCollectionViewItem {
@@ -581,6 +594,15 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func setupPinRail() {
+        // 分组底色的右边缘跟着置顶卡片走，横向滚动时要重算
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            forName: NSView.boundsDidChangeNotification,
+            object: scrollView.contentView,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.updatePinnedGroupBackground() }
+        }
         pinRail.onClick = { [weak self] in
             guard let self else { return }
             self.closePinPeek()
@@ -603,14 +625,43 @@ extension PasteMainViewController {
         let visible = !items.isEmpty
         pinRail.isHidden = !visible
         pinRail.configure(items: items, expanded: viewModel.pinsExpanded)
+        // 收起和展开铺的是同一块底色（PinnedGroupBackgroundView），收起时只有竖条那么宽；
+        // 展开时它连置顶卡片一起框住，列表自带的置顶分组底色就不用再画了
+        let coversCards = visible && viewModel.pinsExpanded
+        pinnedGroupBackground.isHidden = !visible
+        if let layout = collectionView.collectionViewLayout as? PasteFlowLayout,
+           layout.showsPinnedBackground != !coversCards {
+            layout.showsPinnedBackground = !coversCards
+            layout.invalidateLayout()
+        }
         let leading = visible ? Layout.padding + PastePinRailView.width + PastePinRailView.gap - Layout.lineSpacing : 0
         scrollLeading?.update(offset: leading)
+        updatePinnedGroupBackground()
         if !visible {
             closePinPeek()
         } else if let controller = pinPeekPopover?.contentViewController as? PastePinPeekViewController {
             controller.configure(items: items)
             pinPeekPopover?.contentSize = controller.preferredContentSize
         }
+    }
+
+    /// 竖条 + 置顶卡片的外接矩形，右边缘跟着最后一张置顶卡片走（横向滚动时实时更新）。
+    /// 收起时只框住竖条，上下补到与装饰视图一样高，两种状态下底色完全一致
+    private func updatePinnedGroupBackground() {
+        guard !pinnedGroupBackground.isHidden, pinRail.frame.width > 0 else { return }
+        var rect = pinRail.frame.insetBy(dx: 0, dy: -Layout.itemShadowMargin)
+        if viewModel.pinsExpanded {
+            // 只算列表开头连续的置顶卡片：展开刚触发、新数据还没回来时这里是 0，
+            // 底色先跟竖条重合，不会错误地铺到普通卡片上
+            let pinnedCount = viewModel.items.prefix { $0.isPinned }.count
+            for index in 0..<pinnedCount {
+                guard let attributes = collectionView.layoutAttributesForItem(at: IndexPath(item: index, section: 0)) else { continue }
+                rect = rect.union(collectionView.convert(attributes.frame, to: contentView))
+            }
+        }
+        // 置顶卡片滚出列表后不要把底色露到列表外面
+        rect.size.width = max(0, min(rect.width, scrollView.frame.maxX - rect.minX))
+        pinnedGroupBackground.frame = rect
     }
 
     private func schedulePinPeek() {

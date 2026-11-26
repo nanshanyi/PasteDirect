@@ -44,6 +44,8 @@ final class PasteFlowLayout: NSCollectionViewFlowLayout {
     /// 返回列表开头连续置顶条目的数量,0 表示不显示分组底色。
     /// 每次布局时主动读取,不依赖外部推送:数据可能在控制器订阅变化之前就已加载。
     var pinnedCountProvider: (() -> Int)?
+    /// 折叠条展开时,这块底色由外层统一容器绘制(它要连竖条一起包住),这里关掉避免两层圆角叠在一起
+    var showsPinnedBackground = true
 
     override init() {
         super.init()
@@ -72,6 +74,7 @@ final class PasteFlowLayout: NSCollectionViewFlowLayout {
 
     /// 底色铺满置顶 cell 的并集;cell 已包含卡片四周留白,所以底色比卡片外扩一圈
     private func pinnedBackgroundAttributes() -> NSCollectionViewLayoutAttributes? {
+        guard showsPinnedBackground else { return nil }
         let itemCount = (collectionView?.numberOfSections ?? 0) > 0 ? collectionView?.numberOfItems(inSection: 0) ?? 0 : 0
         let count = min(pinnedCountProvider?() ?? 0, itemCount)
         guard count > 0,
