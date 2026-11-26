@@ -676,6 +676,25 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertEqual(Array(unpinned), (0..<24).map { "item-\($0)" }, "未置顶项应按时间倒序")
     }
 
+    /// 置顶折叠时默认列表排除置顶项，翻页照常衔接；置顶项单独按置顶时间倒序取
+    func testPinScopeSplitsPinnedAndRecent() async {
+        let manager = await makeTempManager()
+        for i in 0..<25 {
+            await manager.insert(item: makeDatedModel("item-\(i)", minutesAgo: Double(i)))
+        }
+        await manager.updatePinned(Date(timeIntervalSinceNow: -60), forHash: makeDatedModel("item-3", minutesAgo: 3).hashValue)
+        await manager.updatePinned(Date(), forHash: makeDatedModel("item-20", minutesAgo: 20).hashValue)
+
+        let first = await manager.fetchPage(pins: .excluded, limit: 20)
+        let second = await manager.fetchPage(pins: .excluded, after: first.cursor, limit: 20)
+        let recent = (first.items + second.items).map(\.dataString)
+        XCTAssertEqual(recent, (0..<25).filter { $0 != 3 && $0 != 20 }.map { "item-\($0)" }, "未置顶项应从最新一条开始、按时间倒序且不含置顶项")
+        XCTAssertFalse(second.hasMore)
+
+        let pinned = await manager.fetchThrough(keyword: "", state: .empty, pins: .only, cursor: nil)
+        XCTAssertEqual(pinned.map(\.dataString), ["item-20", "item-3"], "置顶项应按置顶时间倒序")
+    }
+
     /// 回归：翻页中途有新内容进来，下一页不能跳过或重复（OFFSET 分页会错位）
     func testCursorPaginationStableWhenNewItemInserted() async {
         let manager = await makeTempManager()

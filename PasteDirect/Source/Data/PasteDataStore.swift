@@ -84,13 +84,18 @@ extension PasteDataStore {
 
 extension PasteDataStore {
     /// 取 cursor 之后的一页，cursor 为 nil 时取第一页
-    func fetchPage(keyword: String, state: FilterState, after cursor: PageCursor?) async -> PastePage {
-        await sqlManager.fetchPage(keyword: keyword, state: state, after: cursor, limit: pageSize)
+    func fetchPage(keyword: String, state: FilterState, pins: PinScope = .all, after cursor: PageCursor?) async -> PastePage {
+        await sqlManager.fetchPage(keyword: keyword, state: state, pins: pins, after: cursor, limit: pageSize)
     }
 
     /// 重新取从第一条到 cursor（含）的所有行；cursor 为 nil 时取全部匹配行
-    func fetchThrough(keyword: String, state: FilterState, cursor: PageCursor?) async -> [PasteboardModel] {
-        await sqlManager.fetchThrough(keyword: keyword, state: state, cursor: cursor)
+    func fetchThrough(keyword: String, state: FilterState, pins: PinScope = .all, cursor: PageCursor?) async -> [PasteboardModel] {
+        await sqlManager.fetchThrough(keyword: keyword, state: state, pins: pins, cursor: cursor)
+    }
+
+    /// 全部置顶项，最近置顶的在前
+    func fetchPinned() async -> [PasteboardModel] {
+        await sqlManager.fetchThrough(keyword: "", state: .empty, pins: .only, cursor: nil)
     }
 
     @discardableResult

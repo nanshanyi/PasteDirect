@@ -33,6 +33,16 @@ struct PageCursor: Sendable, Equatable {
     fileprivate let id: Int
 }
 
+/// 列表查询里置顶项的取舍
+enum PinScope: Sendable {
+    /// 置顶项和其他项一起，置顶在前
+    case all
+    /// 只要未置顶的（置顶项收在折叠条里时的默认列表）
+    case excluded
+    /// 只要置顶的
+    case only
+}
+
 struct PastePage: Sendable {
     let items: [PasteboardModel]
     /// 本页最后一行的游标，空页为 nil
@@ -217,16 +227,16 @@ extension PasteSQLManager {
 
 extension PasteSQLManager {
     /// 取 cursor 之后的一页；cursor 为 nil 时取第一页
-    func fetchPage(keyword: String = "", state: FilterState = .empty, after cursor: PageCursor? = nil, limit: Int) -> PastePage {
-        var conditions = [buildFilterInternal(keyword: keyword, state: state)].compactMap { $0 }
+    func fetchPage(keyword: String = "", state: FilterState = .empty, pins: PinScope = .all, after cursor: PageCursor? = nil, limit: Int) -> PastePage {
+        var conditions = [buildFilterInternal(keyword: keyword, state: state), pinFilter(pins)].compactMap { $0 }
         if let cursor { conditions.append(cursorFilter("<", cursor)) }
         return query(filter: combine(conditions), limit: limit)
     }
 
     /// 重新取从第一条到 cursor（含）为止的所有行，用于数据变化后原地刷新已加载的范围。
     /// cursor 为 nil 时取全部匹配行。
-    func fetchThrough(keyword: String, state: FilterState, cursor: PageCursor?) -> [PasteboardModel] {
-        var conditions = [buildFilterInternal(keyword: keyword, state: state)].compactMap { $0 }
+    func fetchThrough(keyword: String, state: FilterState, pins: PinScope = .all, cursor: PageCursor?) -> [PasteboardModel] {
+        var conditions = [buildFilterInternal(keyword: keyword, state: state), pinFilter(pins)].compactMap { $0 }
         if let cursor { conditions.append(cursorFilter(">=", cursor)) }
         return query(filter: combine(conditions), limit: nil).items
     }
@@ -296,6 +306,15 @@ extension PasteSQLManager {
             "(COALESCE(\"pinnedDate\", ''), \"date\", \"id\") \(op) (?, ?, ?)",
             [cursor.pinnedKey, cursor.dateKey, Int64(cursor.id)]
         )
+    }
+
+    /// 排除置顶时剩下的行置顶键都是 ''，游标比较照常成立，翻页不受影响
+    private func pinFilter(_ pins: PinScope) -> Expression<Bool>? {
+        switch pins {
+        case .all: return nil
+        case .excluded: return (col_pinnedDate === Date?.none) ?? false
+        case .only: return (col_pinnedDate !== Date?.none) ?? false
+        }
     }
 
     private func combine(_ conditions: [Expression<Bool>]) -> Expression<Bool>? {
