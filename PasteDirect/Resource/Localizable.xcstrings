@@ -44,6 +44,46 @@
         }
       }
     },
+    "Click the pinned bar to show all" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击置顶栏展开全部 · ⌥1–9 直接粘贴"
+          }
+        }
+      }
+    },
+    "Click the pinned bar to show all %lld" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击置顶栏展开全部 %lld 条 · ⌥1–9 直接粘贴"
+          }
+        }
+      }
+    },
+    "Hide Pinned" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收起置顶"
+          }
+        }
+      }
+    },
+    "Show Pinned" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "展开置顶"
+          }
+        }
+      }
+    },
     "© 2022-2026 南山忆" : {
 
     },

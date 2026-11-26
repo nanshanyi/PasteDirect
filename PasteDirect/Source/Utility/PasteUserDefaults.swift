@@ -29,6 +29,8 @@ enum PasteUserDefaults {
     static var panelHeight: Double
     @UserDefaultsWrapper(.autoOCRImages, defaultValue: true)
     static var autoOCRImages
+    @UserDefaultsWrapper(.pinsExpanded, defaultValue: false)
+    static var pinsExpanded
 
     static func setValue<T>(for key: PrefKey, value: T) {
         UserDefaults.standard.set(value, forKey: key.rawValue)

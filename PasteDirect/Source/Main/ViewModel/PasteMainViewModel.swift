@@ -16,6 +16,10 @@ final class PasteMainViewModel {
     private(set) var items: [PasteboardModel] = []
     var selectedIndexPath = IndexPath(item: 0, section: 0)
     @Published private(set) var canLoadMore = false
+    /// 全部置顶项，给置顶折叠条用。只在默认列表（无搜索、无筛选）时有值，其余时候置顶项照常混在结果里
+    @Published private(set) var pinnedItems: [PasteboardModel] = []
+    /// 置顶折叠条是否展开：展开时置顶卡片排在列表开头，收起时列表只有未置顶的条目
+    private(set) var pinsExpanded = PasteUserDefaults.pinsExpanded
 
     /// 列表更新事件。列表本身由 diffable 数据源按 hash 计算差异，这里只带额外信息。
     struct ListUpdate {
@@ -45,6 +49,9 @@ final class PasteMainViewModel {
     /// 当前列表对应的查询条件
     private var keyword = ""
     private var queryState = FilterState.empty
+    private var isDefaultQuery: Bool { keyword.isEmpty && !queryState.isActive }
+    /// 收起时默认列表不含置顶项，最近复制的条目从第一张开始
+    private var pinScope: PinScope { isDefaultQuery && !pinsExpanded ? .excluded : .all }
     /// 已加载部分最后一条的位置，下一页从它之后查
     private var cursor: PageCursor?
     private var hasMore = true
@@ -86,9 +93,13 @@ extension PasteMainViewModel {
         let gen = generation
         fetchTask?.cancel()
         isLoading = true
+        let pins = pinScope
+        let loadsPinned = isDefaultQuery
         fetchTask = Task {
-            let page = await store.fetchPage(keyword: keyword, state: state, after: nil)
+            let page = await store.fetchPage(keyword: keyword, state: state, pins: pins, after: nil)
+            let pinned = loadsPinned ? await store.fetchPinned() : []
             guard gen == generation else { return }
+            pinnedItems = pinned
             cursor = page.cursor
             hasMore = page.hasMore
             isLoading = false
@@ -100,8 +111,9 @@ extension PasteMainViewModel {
         guard hasMore, !isLoading, let cursor else { return }
         let gen = generation
         isLoading = true
+        let pins = pinScope
         fetchTask = Task {
-            let page = await store.fetchPage(keyword: keyword, state: queryState, after: cursor)
+            let page = await store.fetchPage(keyword: keyword, state: queryState, pins: pins, after: cursor)
             guard gen == generation else { return }
             hasMore = page.hasMore
             if let next = page.cursor { self.cursor = next }
@@ -123,19 +135,23 @@ extension PasteMainViewModel {
         fetchTask?.cancel()
         isLoading = true
         let wasComplete = !hasMore
+        let pins = pinScope
+        let loadsPinned = isDefaultQuery
         fetchTask = Task {
-            var list = await store.fetchThrough(keyword: keyword, state: queryState, cursor: bound)
+            var list = await store.fetchThrough(keyword: keyword, state: queryState, pins: pins, cursor: bound)
             var nextCursor = bound
             var more = true
             if wasComplete {
                 // 已经全部加载完时不会再翻页，cursor 之后多出来的条目（如取消置顶落到末尾）要在这里接住。
                 // 只多取一页，单次刷新的量不随历史总数增长
-                let tail = await store.fetchPage(keyword: keyword, state: queryState, after: bound)
+                let tail = await store.fetchPage(keyword: keyword, state: queryState, pins: pins, after: bound)
                 list += tail.items
                 nextCursor = tail.cursor ?? bound
                 more = tail.hasMore
             }
+            let pinned = loadsPinned ? await store.fetchPinned() : []
             guard gen == generation else { return }
+            pinnedItems = pinned
             cursor = nextCursor
             hasMore = more
             isLoading = false
@@ -209,6 +225,13 @@ extension PasteMainViewModel {
         reload()
     }
 
+    /// 展开/收起置顶折叠条，按新的取舍从第一页重新加载
+    func togglePinsExpanded() {
+        pinsExpanded.toggle()
+        PasteUserDefaults.pinsExpanded = pinsExpanded
+        reload(keyword: keyword, state: queryState)
+    }
+
     func updateFilter(_ state: FilterState) {
         filterState = state
     }
@@ -265,6 +288,12 @@ extension PasteMainViewModel {
     func pasteItem(at indexPath: IndexPath, isOriginal: Bool = true) {
         guard let model = item(at: indexPath) else { return }
         pasteModel(model, isOriginal: isOriginal)
+    }
+
+    /// ⌥1–9：按折叠条里的顺序粘贴置顶项
+    func pastePinned(at index: Int) {
+        guard pinnedItems.indices.contains(index) else { return }
+        pasteModel(pinnedItems[index], isOriginal: true)
     }
 
     func pasteModel(_ model: PasteboardModel, isOriginal: Bool) {

@@ -101,6 +101,20 @@ final class PasteMainViewController: NSViewController {
     }
 
     private lazy var resizeHandle = PanelResizeHandle()
+
+    private lazy var pinRail = PastePinRailView().then {
+        $0.isHidden = true
+    }
+
+    /// 列表左边缘：有置顶折叠条时让出它的位置
+    private var scrollLeading: Constraint?
+    private var pinPeekPopover: NSPopover?
+    private var isRailHovered = false
+    private var isPeekHovered = false
+    /// 按住 ⌥ 时弹出置顶清单显示 ⌥1–9
+    private var isOptionHeld = false
+    /// 悬停一小会儿才弹出清单，鼠标只是划过时不打扰
+    private var peekShowTask: Task<Void, Never>?
 }
 
 // MARK: - 生命周期
@@ -166,6 +180,8 @@ extension PasteMainViewController {
     override func viewDidDisappear() {
         super.viewDidDisappear()
         closePreviewPopover()
+        isOptionHeld = false
+        closePinPeek()
         let hadSearchOrFilter = !searchBar.text.isEmpty || viewModel.filterIsActive
         searchBar.stringValue = ""
         filterView.resetFilter()
@@ -183,6 +199,7 @@ extension PasteMainViewController {
 extension PasteMainViewController {
     private func initSubviews() {
         contentView.addSubview(scrollView)
+        contentView.addSubview(pinRail)
         contentView.addSubview(emptyStateView)
         contentView.addSubview(searchBar)
         contentView.addSubview(settingButton)
@@ -196,7 +213,8 @@ extension PasteMainViewController {
         }
 
         scrollView.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview()
+            scrollLeading = make.leading.equalToSuperview().constraint
+            make.trailing.equalToSuperview()
             // 上下各收 itemShadowMargin,抵消卡片内缩带来的额外间距,回到原视觉间距
             make.bottom.equalToSuperview().offset(-Layout.scrollViewBottom + Layout.itemShadowMargin)
             make.top.equalTo(searchBar.snp.bottom).offset(Layout.scrollViewTop - Layout.itemShadowMargin)
@@ -205,6 +223,15 @@ extension PasteMainViewController {
         emptyStateView.snp.makeConstraints { make in
             make.edges.equalTo(scrollView)
         }
+
+        // 和卡片上下对齐：cell 上下各有 itemShadowMargin 的留白
+        pinRail.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(Layout.padding)
+            make.width.equalTo(PastePinRailView.width)
+            make.top.equalTo(scrollView).offset(Layout.itemShadowMargin)
+            make.bottom.equalTo(scrollView).offset(-Layout.itemShadowMargin)
+        }
+        setupPinRail()
 
         searchBar.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
@@ -263,6 +290,13 @@ extension PasteMainViewController {
         viewModel.listUpdate
             .sink { [weak self] update in
                 self?.applyListUpdate(update)
+            }
+            .store(in: &cancellables)
+
+        // 置顶折叠条
+        viewModel.$pinnedItems
+            .sink { [weak self] items in
+                self?.updatePinRail(items: items)
             }
             .store(in: &cancellables)
 
@@ -404,12 +438,20 @@ extension PasteMainViewController {
             if event.type == .flagsChanged {
                 let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
                 self.setShortcutHintsVisible(flags == .command)
+                self.setOptionHeld(flags == .option)
                 PasteCollectionViewItem.refreshLinkCursor()
                 return event
             }
             if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
                let number = Self.shortcutNumber(for: event) {
                 self.pasteShortcutItem(number)
+                return nil
+            }
+            if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .option,
+               !self.viewModel.pinnedItems.isEmpty,
+               let number = Self.shortcutNumber(for: event) {
+                self.closePinPeek()
+                self.viewModel.pastePinned(at: number - 1)
                 return nil
             }
             if self.previewPopover?.isShown == true {
@@ -532,6 +574,99 @@ extension PasteMainViewController {
 
     private func settingAction() {
         AppContext.coordinator.showSettings()
+    }
+}
+
+// MARK: - 置顶折叠条
+
+extension PasteMainViewController {
+    private func setupPinRail() {
+        pinRail.onClick = { [weak self] in
+            guard let self else { return }
+            self.closePinPeek()
+            self.viewModel.togglePinsExpanded()
+            self.updatePinRail(items: self.viewModel.pinnedItems)
+        }
+        pinRail.onHoverChange = { [weak self] hovered in
+            guard let self else { return }
+            self.isRailHovered = hovered
+            if hovered {
+                self.schedulePinPeek()
+            } else {
+                self.peekShowTask?.cancel()
+                self.closePinPeekIfIdle()
+            }
+        }
+    }
+
+    private func updatePinRail(items: [PasteboardModel]) {
+        let visible = !items.isEmpty
+        pinRail.isHidden = !visible
+        pinRail.configure(items: items, expanded: viewModel.pinsExpanded)
+        let leading = visible ? Layout.padding + PastePinRailView.width + PastePinRailView.gap - Layout.lineSpacing : 0
+        scrollLeading?.update(offset: leading)
+        if !visible {
+            closePinPeek()
+        } else if let controller = pinPeekPopover?.contentViewController as? PastePinPeekViewController {
+            controller.configure(items: items)
+            pinPeekPopover?.contentSize = controller.preferredContentSize
+        }
+    }
+
+    private func schedulePinPeek() {
+        peekShowTask?.cancel()
+        peekShowTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(250))
+            guard !Task.isCancelled, let self, self.isRailHovered, !self.viewModel.pinsExpanded else { return }
+            self.showPinPeek()
+        }
+    }
+
+    private func setOptionHeld(_ held: Bool) {
+        guard held != isOptionHeld else { return }
+        isOptionHeld = held
+        if held {
+            showPinPeek()
+        } else {
+            closePinPeekIfIdle()
+        }
+    }
+
+    private func showPinPeek() {
+        guard pinPeekPopover?.isShown != true, !pinRail.isHidden, view.window?.isVisible == true else { return }
+        let controller = PastePinPeekViewController()
+        controller.configure(items: viewModel.pinnedItems)
+        controller.onSelect = { [weak self] model in
+            self?.closePinPeek()
+            self?.viewModel.pasteModel(model, isOriginal: true)
+        }
+        controller.onHoverChange = { [weak self] hovered in
+            self?.isPeekHovered = hovered
+            if !hovered { self?.closePinPeekIfIdle() }
+        }
+        let popover = NSPopover()
+        popover.behavior = .applicationDefined
+        popover.animates = true
+        popover.contentViewController = controller
+        popover.contentSize = controller.preferredContentSize
+        pinPeekPopover = popover
+        popover.show(relativeTo: pinRail.bounds, of: pinRail, preferredEdge: .maxX)
+    }
+
+    /// 鼠标从折叠条移到清单上要经过两者之间的空隙，稍等一下再判断是否真的离开了
+    private func closePinPeekIfIdle() {
+        Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(150))
+            guard let self, !self.isRailHovered, !self.isPeekHovered, !self.isOptionHeld else { return }
+            self.closePinPeek()
+        }
+    }
+
+    private func closePinPeek() {
+        peekShowTask?.cancel()
+        isPeekHovered = false
+        pinPeekPopover?.close()
+        pinPeekPopover = nil
     }
 }
 
