@@ -120,8 +120,13 @@ actor PasteSQLManager {
             try db.run(table.createIndex(col_appName, ifNotExists: true))
             try db.run(table.createIndex(col_type, ifNotExists: true))
             try ensureUniqueHashKey(on: db)
-            try db.run(table.createIndex(col_pinnedDate, ifNotExists: true))
+            // 单列 pinnedDate 索引已被下面的 (pinnedDate, date) 复合索引覆盖，老库里的删掉，免得每次写入多维护一个
+            try db.run(table.dropIndex(col_pinnedDate, ifExists: true))
             try db.run(table.createIndex(col_kind, ifNotExists: true))
+            // 列表排序 (pinnedDate DESC, date DESC, id DESC) 按这个索引顺序读，不用扫全表再临时排序（id 是 rowid，索引里自带）。
+            // 游标条件里的 COALESCE(pinnedDate, '') 不是裸列，没法用索引定位到游标处：翻页仍从索引开头扫过已加载的那些项，
+            // 但只读索引、命中后才回表，开销随已加载条数增长，不随表大小增长
+            try db.run(table.createIndex(col_pinnedDate, col_date, ifNotExists: true))
             if Int(db.userVersion ?? 0) < Int(Self.schemaVersion) {
                 try backfillKindCodes(on: db)
                 db.userVersion = Self.schemaVersion

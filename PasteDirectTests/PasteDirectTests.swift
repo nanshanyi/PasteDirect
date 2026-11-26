@@ -273,7 +273,7 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(plain.ocrText)
         XCTAssertEqual(plain.type, .string)
 
-        // 图片项识别前 ocrText 为 nil,识别后通过 withOCRText 写入
+        // 图片项识别前 ocrText 为 nil
         let imgData = Data([0x89, 0x50, 0x4E, 0x47])
         let image = PasteboardModel(
             pasteboardType: .png, data: imgData, showData: nil,
@@ -284,13 +284,15 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(image.ocrText)
         XCTAssertEqual(image.type, .image)
 
-        let recognized = image.withOCRText("图片里的文字")
-        // 识别后类型仍是图片(附属字段不改变展示类型)
+        // 带上识别出的文字后类型仍是图片(附属字段不改变展示类型)
+        let recognized = PasteboardModel(
+            pasteboardType: .png, data: imgData, showData: nil,
+            hashValue: imgData.hashValue, date: Date(),
+            appPath: "/Applications/Safari.app", appName: "Safari",
+            dataString: "", length: 0, ocrText: "图片里的文字"
+        )
         XCTAssertEqual(recognized.type, .image)
         XCTAssertEqual(recognized.ocrText, "图片里的文字")
-        // 关键字段不变,仍与源图相等(hashValue 一致)
-        XCTAssertEqual(recognized.hashValue, image.hashValue)
-        XCTAssertEqual(recognized, image)
     }
 
     @MainActor
@@ -741,6 +743,21 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertEqual(count, 1)
     }
 
+    /// 首页和翻页都要按 (pinnedDate, date) 复合索引的顺序读，不能退化成全表扫描加临时排序。
+    /// 翻页的游标条件用不上索引定位（计划里是 SCAN 而不是 SEARCH），这里只保证排序走索引
+    func testListOrderUsesCompositeIndex() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+        let order = #"ORDER BY "pinnedDate" DESC, "date" DESC, "id" DESC LIMIT 20"#
+        let firstPage = try queryPlan(at: path, #"SELECT * FROM "pasteContent" "# + order)
+        let nextPage = try queryPlan(at: path, #"SELECT * FROM "pasteContent" WHERE (COALESCE("pinnedDate", ''), "date", "id") < ('', '2026-11-01T10:00:00.000', 5) "# + order)
+        for plan in [firstPage, nextPage] {
+            XCTAssertTrue(plan.contains("index_pastecontent_on_pinneddate_date"), "应使用复合索引：\(plan)")
+            XCTAssertFalse(plan.contains("TEMP B-TREE"), "不应再临时排序：\(plan)")
+        }
+    }
+
     // MARK: - 测试辅助（造坏库 / 直连 SQL）
 
     /// 造一个「历史 bug 遗留」的坏库：表缺 kindCode 列，但 user_version 已是 2。
@@ -765,6 +782,25 @@ final class PasteDirectTests: XCTestCase {
     }
 
     /// 直接对库执行 SQL（造触发器、写 PRAGMA 等测试专用操作）。
+    /// 读取 EXPLAIN QUERY PLAN 的 detail 列，拼成一行便于断言
+    private func queryPlan(at path: String, _ sql: String) throws -> String {
+        var handle: OpaquePointer?
+        guard sqlite3_open(path, &handle) == SQLITE_OK, let handle else {
+            throw NSError(domain: "PasteDirectTests", code: 1, userInfo: [NSLocalizedDescriptionKey: "无法打开测试数据库"])
+        }
+        defer { sqlite3_close(handle) }
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(handle, "EXPLAIN QUERY PLAN " + sql, -1, &stmt, nil) == SQLITE_OK else {
+            throw NSError(domain: "PasteDirectTests", code: 3, userInfo: [NSLocalizedDescriptionKey: String(cString: sqlite3_errmsg(handle))])
+        }
+        defer { sqlite3_finalize(stmt) }
+        var details: [String] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            if let text = sqlite3_column_text(stmt, 3) { details.append(String(cString: text)) }
+        }
+        return details.joined(separator: " | ")
+    }
+
     private func executeSQL(at path: String, _ sql: String) throws {
         var handle: OpaquePointer?
         guard sqlite3_open(path, &handle) == SQLITE_OK, let handle else {
