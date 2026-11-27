@@ -32,8 +32,6 @@ PasteDirect 4.0: the interface has been rebuilt from the ground up and updates n
 
 ### Fixed
 - Fixed new clips not being saved after "Clear All Data"; the database is checked and repaired on launch, so no need to delete data or reinstall after updating (cleared history does not come back).
-
-Also, the license changed from MIT to GNU AGPL-3.0.
 ## [3.5.0] - 2026-07-31
 
 ### Added
