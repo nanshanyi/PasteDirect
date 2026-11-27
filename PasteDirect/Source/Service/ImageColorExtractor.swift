@@ -30,25 +30,39 @@ struct ImageColorExtractor {
         return  DominantColor(dominantColor: colors.first, secondary: colors.count > 1 ? colors[1] : nil)
     }
     
-    static func extractAverageColor(from image: NSImage) async -> NSColor {
+    /// 卡片头部用的强调色:把图标像素聚成 5 类,忽略近白/近黑/低饱和的类,
+    /// 按「像素占比 × 饱和度」挑最有代表性的颜色。
+    /// 图标没有明显彩色(如终端、黑白图标)时返回 nil,由调用方使用中性色。
+    /// 取平均色会把 Chrome 这类多彩图标混成灰色,所以不用平均值。
+    static func extractAccentColor(from image: NSImage) async -> NSColor? {
         guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
-              let resizedImage = resizeImageForProcessing(cgImage) else {
-            return NSColor.black
+              let resizedImage = resizeImageForProcessing(cgImage) else { return nil }
+        let pixels = extractPixelData(from: resizedImage)
+        guard !pixels.isEmpty else { return nil }
+
+        let colors = performKMeansClustering(pixels: pixels, clusterCount: 5)
+        var best: (color: NSColor, score: CGFloat)?
+        for color in colors {
+            guard let hsb = color.usingColorSpace(.sRGB) else { continue }
+            let saturation = hsb.saturationComponent
+            let brightness = hsb.brightnessComponent
+            guard saturation > 0.35, brightness > 0.3 else { continue }
+            let share = CGFloat(pixels.filter { nearest(to: $0, in: colors) === color }.count) / CGFloat(pixels.count)
+            guard share > 0.06 else { continue }
+            let score = share * saturation
+            if score > (best?.score ?? 0) { best = (hsb, score) }
         }
-        
-        let pixelData = extractPixelData(from: resizedImage)
-        
-        guard !pixelData.isEmpty else { return NSColor.black }
-        
-        let totalColors = pixelData.reduce(SIMD3<Float>(0, 0, 0)) { $0 + $1 }
-        let averageColor = totalColors / Float(pixelData.count)
-                
-        return NSColor(red: CGFloat(averageColor.x),
-                       green: CGFloat(averageColor.y),
-                       blue: CGFloat(averageColor.z),
-                       alpha: 1.0)
+        return best?.color
     }
-    
+
+    private static func nearest(to pixel: SIMD3<Float>, in colors: [NSColor]) -> NSColor? {
+        colors.min { a, b in
+            let da = pixel - SIMD3<Float>(Float(a.redComponent), Float(a.greenComponent), Float(a.blueComponent))
+            let db = pixel - SIMD3<Float>(Float(b.redComponent), Float(b.greenComponent), Float(b.blueComponent))
+            return simd_dot(da, da) < simd_dot(db, db)
+        }
+    }
+
     private static  func adjustColorBrightness(_ color: SIMD3<Float>) -> SIMD3<Float> {
         let brightness = (color.x * 0.299 + color.y * 0.587 + color.z * 0.114)
         

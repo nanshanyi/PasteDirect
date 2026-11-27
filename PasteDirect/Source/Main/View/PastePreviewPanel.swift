@@ -62,7 +62,7 @@ final class PastePreviewPopover: NSPopover {
             // 按真实比例显示(像系统预览)，imageView 用此尺寸即贴合图片
             let display = imageDisplaySize(for: model)
             return NSSize(width: display.width, height: display.height)
-        case .string:
+        case .string, .link:
             return textFitSize(for: model)
         default:
             return NSSize(width: minWidth, height: miniHeight)
@@ -188,8 +188,8 @@ final class PastePreviewViewController: NSViewController {
         $0.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
 
-    private lazy var infoLabel = NSlabel().then {
-        $0.textColor = .secondaryLabelColor
+    private lazy var infoLabel = NonVibrantLabel().then {
+        $0.textColor = AppColor.previewInfo
         $0.font = .systemFont(ofSize: 12)
         $0.alignment = .left
         $0.maximumNumberOfLines = 1
@@ -264,7 +264,7 @@ final class PastePreviewViewController: NSViewController {
         hideAll()
         typeLabel.stringValue = model.type.string
         switch model.type {
-        case .string:
+        case .string, .link:
             showText(model)
         case .image:
             showImage(model)
@@ -402,4 +402,9 @@ final class PastePreviewViewController: NSViewController {
         }
         infoLabel.stringValue = infoParts.joined(separator: "  ·  ")
     }
+}
+
+/// 关闭 vibrancy 的标签:popover 的半透明材质会改变文字实际亮度,关掉后按设定颜色原样绘制
+private final class NonVibrantLabel: NSlabel {
+    override var allowsVibrancy: Bool { false }
 }

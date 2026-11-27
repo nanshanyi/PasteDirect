@@ -13,7 +13,7 @@ struct AboutView: View {
         return "\(version)"
     }()
 
-    @AppStorage(PrefKey.autoCheckUpdate.rawValue) private var autoCheckUpdate: Bool = true
+    @ObservedObject private var updateCoordinator = UpdateCoordinator.shared
 
     var body: some View {
         VStack(spacing: 24) {
@@ -37,18 +37,32 @@ struct AboutView: View {
 
             VStack(spacing: 10) {
                 Button {
-                    UpdateCoordinator.shared.checkManually()
+                    UpdateCoordinator.shared.checkForUpdates()
                 } label: {
                     Text("Check for Updates...")
                         .font(.system(size: 13))
                 }
 
-                Toggle(isOn: $autoCheckUpdate) {
-                    Text("Check for updates on launch")
+                Toggle(isOn: Binding(
+                    get: { updateCoordinator.automaticallyChecksForUpdates },
+                    set: { updateCoordinator.setAutomaticallyChecksForUpdates($0) }
+                )) {
+                    Text("Automatically check for updates")
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }
                 .toggleStyle(.checkbox)
+
+                Toggle(isOn: Binding(
+                    get: { updateCoordinator.automaticallyDownloadsUpdates },
+                    set: { updateCoordinator.setAutomaticallyDownloadsUpdates($0) }
+                )) {
+                    Text("Automatically download updates")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                .toggleStyle(.checkbox)
+                .disabled(!updateCoordinator.automaticallyChecksForUpdates)
             }
 
             VStack(spacing: 12) {

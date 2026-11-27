@@ -250,11 +250,7 @@ final class PasteFilterView: NSView {
             appItems.append(FilterItemModel(title: String(localized: "More"), icon: moreIcon, isMoreButton: true))
         }
 
-        let types: [(String, String, PasteModelType)] = [
-            (String(localized: "Text"), "doc.text", .string),
-            (String(localized: "Image"), "photo", .image),
-            (String(localized: "Color"), "paintpalette", .color),
-        ]
+        let types = PasteModelType.filterable.map { ($0.string, $0.symbolName, $0) }
         let typeItems: [FilterItemModel] = types.map {
             FilterItemModel(title: $0.0,
                             icon: NSImage(systemSymbolName: $0.1, accessibilityDescription: nil),
@@ -293,9 +289,15 @@ final class PasteFilterView: NSView {
     }
 
     private func typeTapped(_ idx: Int) {
-        let types: [PasteModelType] = [.string, .image, .color]
-        let t = types[idx]
+        let t = PasteModelType.filterable[idx]
         filterState.selectedType = (filterState.selectedType == t) ? nil : t
+        rebuildData()
+    }
+
+    /// 由顶栏类型分段按钮直接设置类型筛选(nil 表示全部)
+    func setType(_ type: PasteModelType?) {
+        guard filterState.selectedType != type else { return }
+        filterState.selectedType = type
         rebuildData()
     }
 

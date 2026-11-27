@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import SQLite3
 import XCTest
 @testable import PasteDirect
 
@@ -42,6 +43,14 @@ final class PasteDirectTests: XCTestCase {
         let plainModel = makeTextModel(string: "hello world")
         XCTAssertEqual(plainModel.type, .string)
         XCTAssertNil(plainModel.hexColorString)
+    }
+
+    func testLinkDetection() {
+        XCTAssertEqual(makeTextModel(string: "https://github.com/nanshanyi").type, .link)
+        XCTAssertEqual(makeTextModel(string: "  http://a.com/x?y=1 \n").type, .link)
+        XCTAssertEqual(makeTextModel(string: "see https://github.com").type, .string)
+        XCTAssertEqual(makeTextModel(string: "www.github.com").type, .string)
+        XCTAssertEqual(makeTextModel(string: "ftp://a.com").type, .string)
     }
 
     func testImageType() {
@@ -107,7 +116,17 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNotNil(HexColorValidator.isValidHexColor("#FFF"))
         XCTAssertNotNil(HexColorValidator.isValidHexColor("#FF5733"))
         XCTAssertNotNil(HexColorValidator.isValidHexColor("0xFF5733"))
-        XCTAssertNotNil(HexColorValidator.isValidHexColor("FF5733"))
+        XCTAssertNil(HexColorValidator.isValidHexColor("FF5733"))
+        XCTAssertNil(HexColorValidator.isValidHexColor("deadbeef"))
+        XCTAssertNil(HexColorValidator.isValidHexColor("123456"))
+        XCTAssertEqual(HexColorValidator.isValidHexColor("rgb(255, 87, 51)"), "#FF5733")
+        XCTAssertEqual(HexColorValidator.isValidHexColor("rgba(255,87,51,0.5)"), "#FF5733")
+        XCTAssertEqual(HexColorValidator.isValidHexColor("rgb(100% 0% 0% / 50%)"), "#FF0000")
+        XCTAssertEqual(HexColorValidator.isValidHexColor("hsl(120, 100%, 50%)"), "#00FF00")
+        XCTAssertEqual(HexColorValidator.isValidHexColor("hsla(240deg 100% 50% / 0.3)"), "#0000FF")
+        XCTAssertNil(HexColorValidator.isValidHexColor("rgb(1, 2)"))
+        XCTAssertNil(HexColorValidator.isValidHexColor("rgb(a, b, c)"))
+        XCTAssertNil(HexColorValidator.isValidHexColor("hsl(120, 100, 50)"))
         XCTAssertNil(HexColorValidator.isValidHexColor("hello"))
         XCTAssertNil(HexColorValidator.isValidHexColor(""))
         XCTAssertNil(HexColorValidator.isValidHexColor("#GGG"))
@@ -141,7 +160,7 @@ final class PasteDirectTests: XCTestCase {
         let model = makeTextModel(string: "unit test item \(UUID().uuidString)")
 
         await manager.insert(item: model)
-        let results = await manager.search(limit: 1, offset: 0)
+        let results = await manager.fetchPage(limit: 1).items
         XCTAssertFalse(results.isEmpty, "插入后应能搜索到数据")
     }
 
@@ -152,9 +171,9 @@ final class PasteDirectTests: XCTestCase {
         await manager.insert(item: model)
         await manager.deleteByHash(model.hashValue)
 
-        let results = await manager.searchWithParams(
-            keyword: model.dataString, state: .empty, limit: 10, offset: 0
-        )
+        let results = await manager.fetchPage(
+            keyword: model.dataString, state: .empty, limit: 10
+        ).items
         let found = results.contains(where: { $0.hashValue == model.hashValue })
         XCTAssertFalse(found, "删除后不应找到该条目")
     }
@@ -167,17 +186,17 @@ final class PasteDirectTests: XCTestCase {
         await manager.insert(item: model)
 
         // 按关键词搜索
-        let byKeyword = await manager.searchWithParams(
-            keyword: unique, state: .empty, limit: 10, offset: 0
-        )
+        let byKeyword = await manager.fetchPage(
+            keyword: unique, state: .empty, limit: 10
+        ).items
         XCTAssertTrue(byKeyword.contains(where: { $0.dataString == unique }))
 
         // 按应用筛选
         var state = FilterState.empty
         state.selectedApp = "TestApp"
-        let byApp = await manager.searchWithParams(
-            keyword: "", state: state, limit: 10, offset: 0
-        )
+        let byApp = await manager.fetchPage(
+            keyword: "", state: state, limit: 10
+        ).items
         XCTAssertTrue(byApp.contains(where: { $0.dataString == unique }))
     }
 
@@ -199,9 +218,9 @@ final class PasteDirectTests: XCTestCase {
 
         // 搜 "50%":未转义时 % 会通配,plain 那条也可能被 "50" 前缀匹配到;
         // 正确行为是只命中真正含 "50%" 字面的那条
-        let results = await manager.searchWithParams(
-            keyword: "50%", state: .empty, limit: 100, offset: 0
-        )
+        let results = await manager.fetchPage(
+            keyword: "50%", state: .empty, limit: 100
+        ).items
         let hashes = Set(results.map { $0.hashValue })
         XCTAssertTrue(hashes.contains(withPercent.hashValue), "应命中含字面 50% 的条目")
         XCTAssertFalse(hashes.contains(plain.hashValue), "不应把 % 当通配符匹配到无关条目")
@@ -216,23 +235,12 @@ final class PasteDirectTests: XCTestCase {
         await manager.insert(item: withUnderscore)
         await manager.insert(item: plain)
 
-        let results = await manager.searchWithParams(
-            keyword: "file_name", state: .empty, limit: 100, offset: 0
-        )
+        let results = await manager.fetchPage(
+            keyword: "file_name", state: .empty, limit: 100
+        ).items
         let hashes = Set(results.map { $0.hashValue })
         XCTAssertTrue(hashes.contains(withUnderscore.hashValue), "应命中含字面下划线的条目")
         XCTAssertFalse(hashes.contains(plain.hashValue), "不应把 _ 当作任意单字符通配符")
-    }
-
-    // MARK: - LoadState
-
-    func testLoadStateSendable() {
-        // 编译通过即验证 Sendable
-        let state: LoadState = .idle
-        Task {
-            let _ = state // 跨 Task 传递
-        }
-        XCTAssertEqual(state, .idle)
     }
 
     // MARK: - Helpers
@@ -265,7 +273,7 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(plain.ocrText)
         XCTAssertEqual(plain.type, .string)
 
-        // 图片项识别前 ocrText 为 nil,识别后通过 withOCRText 写入
+        // 图片项识别前 ocrText 为 nil
         let imgData = Data([0x89, 0x50, 0x4E, 0x47])
         let image = PasteboardModel(
             pasteboardType: .png, data: imgData, showData: nil,
@@ -276,13 +284,15 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(image.ocrText)
         XCTAssertEqual(image.type, .image)
 
-        let recognized = image.withOCRText("图片里的文字")
-        // 识别后类型仍是图片(附属字段不改变展示类型)
+        // 带上识别出的文字后类型仍是图片(附属字段不改变展示类型)
+        let recognized = PasteboardModel(
+            pasteboardType: .png, data: imgData, showData: nil,
+            hashValue: imgData.hashValue, date: Date(),
+            appPath: "/Applications/Safari.app", appName: "Safari",
+            dataString: "", length: 0, ocrText: "图片里的文字"
+        )
         XCTAssertEqual(recognized.type, .image)
         XCTAssertEqual(recognized.ocrText, "图片里的文字")
-        // 关键字段不变,仍与源图相等(hashValue 一致)
-        XCTAssertEqual(recognized.hashValue, image.hashValue)
-        XCTAssertEqual(recognized, image)
     }
 
     @MainActor
@@ -301,6 +311,22 @@ final class PasteDirectTests: XCTestCase {
         XCTAssertNil(a.ocrText)
     }
 
+    func testKindFilterAndCounts() async {
+        let manager = await makeTempManager()
+        for text in ["https://a.com/\(UUID().uuidString)", "#FF5733", "plain \(UUID().uuidString)"] {
+            await manager.insert(item: makeTextModel(string: text))
+        }
+        let links = await manager.fetchPage(keyword: "", state: FilterState(selectedType: .link), limit: 20).items
+        XCTAssertEqual(links.count, 1)
+        XCTAssertEqual(links.first?.type, .link)
+        let colors = await manager.fetchPage(keyword: "", state: FilterState(selectedType: .color), limit: 20).items
+        XCTAssertEqual(colors.map(\.type), [.color])
+        let counts = await manager.typeCounts()
+        XCTAssertEqual(counts.text, 3)
+        XCTAssertEqual(counts.count(for: .link), 1)
+        XCTAssertEqual(counts.count(for: .color), 1)
+    }
+
     func testSQLManagerOCRTextColumnRoundTrip() async {
         let manager = await makeTempManager()
         let unique = "ocr-col-\(UUID().uuidString)"
@@ -313,7 +339,7 @@ final class PasteDirectTests: XCTestCase {
         await manager.insert(item: model)
 
         // 能把 ocrText 原样读回
-        let results = await manager.search(limit: 200, offset: 0)
+        let results = await manager.fetchPage(limit: 200).items
         let fetched = results.first(where: { $0.hashValue == unique.hashValue })
         XCTAssertEqual(fetched?.ocrText, unique, "ocrText 应能持久化并读回")
     }
@@ -333,26 +359,26 @@ final class PasteDirectTests: XCTestCase {
 
         // 关键字此时搜不到(图片本身无文本)
         var state = FilterState.empty
-        let before = await manager.searchWithParams(
-            keyword: String(keyword), state: state, limit: 100, offset: 0
-        )
+        let before = await manager.fetchPage(
+            keyword: String(keyword), state: state, limit: 100
+        ).items
         XCTAssertFalse(before.contains(where: { $0.hashValue == hash }),
                        "识别前不应被关键字命中")
 
         // 回写 OCR 文本后,关键字应能命中这张图片
         await manager.updateOCRText("含有关键字 \(keyword) 的内容", forHash: hash)
-        let after = await manager.searchWithParams(
-            keyword: String(keyword), state: state, limit: 100, offset: 0
-        )
+        let after = await manager.fetchPage(
+            keyword: String(keyword), state: state, limit: 100
+        ).items
         let hit = after.first(where: { $0.hashValue == hash })
         XCTAssertNotNil(hit, "识别后应能按 OCR 文本搜到图片")
         XCTAssertEqual(hit?.type, .image, "命中项仍是图片类型")
 
         // 图片筛选仍应包含它
         state.selectedType = .image
-        let byImage = await manager.searchWithParams(
-            keyword: "", state: state, limit: 200, offset: 0
-        )
+        let byImage = await manager.fetchPage(
+            keyword: "", state: state, limit: 200
+        ).items
         XCTAssertTrue(byImage.contains(where: { $0.hashValue == hash }))
     }
 
@@ -442,7 +468,7 @@ final class PasteDirectTests: XCTestCase {
             imageWidth: 800, imageHeight: 450
         )
         await manager.insert(item: model)
-        let results = await manager.search(limit: 200, offset: 0)
+        let results = await manager.fetchPage(limit: 200).items
         let fetched = results.first(where: { $0.hashValue == hash })
         XCTAssertEqual(fetched?.imageWidth, 800)
         XCTAssertEqual(fetched?.imageHeight, 450)
@@ -492,9 +518,303 @@ final class PasteDirectTests: XCTestCase {
         await manager.insert(item: recaptured)
 
         // 去重插入后应仍保持置顶,且只有一行
-        let results = await manager.search(limit: 100, offset: 0)
+        let results = await manager.fetchPage(limit: 100).items
         let fetched = results.filter { $0.hashValue == hash }
         XCTAssertEqual(fetched.count, 1, "去重插入后应只有一行")
         XCTAssertNotNil(fetched.first?.pinnedDate, "去重插入应继承旧行的置顶状态")
+    }
+
+    // MARK: - 表结构修复（清空数据后仍可写入）
+
+    /// 回归：清空所有数据后新内容仍能写入（曾因重建的表缺 kindCode 列而全部插入失败）。
+    func testClearAllDataThenInsertStillWorks() async {
+        let manager = await makeTempManager()
+        await manager.insert(item: makeTextModel(string: "清空前 \(UUID().uuidString)"))
+        let before = await manager.totalCount
+        XCTAssertEqual(before, 1)
+
+        await manager.clearAllData()
+        let afterClear = await manager.totalCount
+        XCTAssertEqual(afterClear, 0)
+
+        let newItem = makeTextModel(string: "#123456")
+        let inserted = await manager.insert(item: newItem)
+        XCTAssertTrue(inserted, "清空数据后仍应能写入")
+
+        let afterInsert = await manager.totalCount
+        XCTAssertEqual(afterInsert, 1)
+
+        let results = await manager.fetchPage(limit: 10).items
+        XCTAssertEqual(results.first?.hashValue, newItem.hashValue, "清空后写入的条目应能读回")
+        XCTAssertEqual(results.first?.type, .color, "kindCode 应随写入落库")
+    }
+
+    /// 回归：清空后重启应用（同一路径重新 setup）仍能写入。
+    func testClearAllDataThenRestartStillWorks() async {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+
+        let first = PasteSQLManager(dbPath: path)
+        await first.setup()
+        await first.insert(item: makeTextModel(string: "重启前"))
+        await first.clearAllData()
+
+        // 模拟重启：同一路径新建 manager 并 setup
+        let second = PasteSQLManager(dbPath: path)
+        await second.setup()
+
+        let inserted = await second.insert(item: makeTextModel(string: "重启后"))
+        XCTAssertTrue(inserted, "重启后仍应能写入")
+
+        let count = await second.totalCount
+        XCTAssertEqual(count, 1)
+    }
+
+    /// 幂等：重复 setup 不应因「列已存在 / 索引已存在」而失败。
+    func testSetupIsIdempotent() async {
+        let manager = await makeTempManager()
+        await manager.setup()
+        await manager.setup()
+
+        let inserted = await manager.insert(item: makeTextModel(string: "幂等"))
+        XCTAssertTrue(inserted)
+    }
+
+    /// 自愈：历史 bug 留下「表缺 kindCode、user_version 却已是 2」的库，
+    /// setup 应按 PRAGMA 自检补列并回填，之后可正常写入。
+    func testSetupRepairsLegacyDatabaseMissingKindCode() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        try makeLegacyBrokenDatabase(at: path, text: "#FF5733")
+
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+
+        // 补列后应回填旧数据的 kindCode(#FF5733 是颜色)
+        let legacyRows = await manager.fetchPage(limit: 10).items
+        XCTAssertEqual(legacyRows.count, 1)
+        XCTAssertEqual(legacyRows.first?.type, .color, "旧数据应被回填为颜色类型")
+
+        // 新写入不再触发「no such column: kindCode」
+        let inserted = await manager.insert(item: makeTextModel(string: "修复后新内容"))
+        XCTAssertTrue(inserted)
+
+        let count = await manager.totalCount
+        XCTAssertEqual(count, 2)
+    }
+
+    // MARK: - 写入事务
+
+    /// 回归：重新捕获相同内容时写入失败，旧行不能丢。
+    func testInsertFailureRollsBackAndKeepsOldRow() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+
+        let hash = 424_242
+        let original = PasteboardModel(
+            pasteboardType: .string, data: Data("原始内容".utf8), showData: nil,
+            hashValue: hash, date: Date(), appPath: "", appName: "Test",
+            dataString: "原始内容", length: 4
+        )
+        let firstInsert = await manager.insert(item: original)
+        XCTAssertTrue(firstInsert)
+
+        // 用触发器让后续 INSERT 必然失败，而 DELETE 仍会正常执行：
+        // 不包事务时旧行就已被删掉，复现「旧行没了、新行没插上」的净丢失。
+        try executeSQL(at: path, """
+            CREATE TRIGGER fail_insert BEFORE INSERT ON pasteContent
+            BEGIN SELECT RAISE(ABORT, 'insert blocked for test'); END;
+            """)
+        defer { try? executeSQL(at: path, "DROP TRIGGER IF EXISTS fail_insert;") }
+
+        let recaptured = PasteboardModel(
+            pasteboardType: .string, data: Data("新内容".utf8), showData: nil,
+            hashValue: hash, date: Date(), appPath: "", appName: "Test",
+            dataString: "新内容", length: 3
+        )
+        let failed = await manager.insert(item: recaptured)
+        XCTAssertFalse(failed, "被触发器拦截时应报告写入失败")
+
+        let count = await manager.totalCount
+        XCTAssertEqual(count, 1, "事务回滚后应仍有一条")
+
+        let rows = await manager.fetchPage(limit: 10).items
+        XCTAssertEqual(rows.first?.dataString, "原始内容", "旧行必须保留，不能被删掉")
+    }
+
+    // MARK: - 游标分页 / upsert 去重
+
+    private func makeDatedModel(_ text: String, minutesAgo: Double) -> PasteboardModel {
+        let data = Data(text.utf8)
+        return PasteboardModel(
+            pasteboardType: .string, data: data, showData: nil,
+            hashValue: data.contentHash, date: Date(timeIntervalSinceNow: -minutesAgo * 60),
+            appPath: "", appName: "Test", dataString: text, length: text.count
+        )
+    }
+
+    /// 游标翻页：两页之间没有重叠和遗漏，顺序是置顶在前、其余按时间倒序
+    func testCursorPaginationCoversAllRowsInOrder() async {
+        let manager = await makeTempManager()
+        for i in 0..<25 {
+            await manager.insert(item: makeDatedModel("item-\(i)", minutesAgo: Double(i)))
+        }
+        let pinned = makeDatedModel("item-24", minutesAgo: 24)
+        await manager.updatePinned(Date(), forHash: pinned.hashValue)
+
+        let first = await manager.fetchPage(limit: 20)
+        XCTAssertEqual(first.items.count, 20)
+        XCTAssertTrue(first.hasMore)
+        XCTAssertEqual(first.items.first?.dataString, "item-24", "置顶项应排在最前")
+
+        let second = await manager.fetchPage(after: first.cursor, limit: 20)
+        XCTAssertEqual(second.items.count, 5)
+        XCTAssertFalse(second.hasMore)
+
+        let all = (first.items + second.items).map(\.dataString)
+        XCTAssertEqual(Set(all).count, 25, "两页合起来应正好覆盖全部行，没有重复")
+        let unpinned = all.dropFirst()
+        XCTAssertEqual(Array(unpinned), (0..<24).map { "item-\($0)" }, "未置顶项应按时间倒序")
+    }
+
+    /// 回归：翻页中途有新内容进来，下一页不能跳过或重复（OFFSET 分页会错位）
+    func testCursorPaginationStableWhenNewItemInserted() async {
+        let manager = await makeTempManager()
+        for i in 0..<30 {
+            await manager.insert(item: makeDatedModel("item-\(i)", minutesAgo: Double(i + 1)))
+        }
+        let first = await manager.fetchPage(limit: 20)
+        await manager.insert(item: makeDatedModel("新内容", minutesAgo: 0))
+        let second = await manager.fetchPage(after: first.cursor, limit: 20)
+        XCTAssertEqual(second.items.map(\.dataString), (20..<30).map { "item-\($0)" })
+    }
+
+    /// fetchThrough 取到游标（含）为止，用于原地刷新已加载范围
+    func testFetchThroughStopsAtCursor() async {
+        let manager = await makeTempManager()
+        for i in 0..<10 {
+            await manager.insert(item: makeDatedModel("item-\(i)", minutesAgo: Double(i + 1)))
+        }
+        let page = await manager.fetchPage(limit: 4)
+        await manager.insert(item: makeDatedModel("新内容", minutesAgo: 0))
+        let through = await manager.fetchThrough(keyword: "", state: .empty, cursor: page.cursor)
+        XCTAssertEqual(through.map(\.dataString), ["新内容", "item-0", "item-1", "item-2", "item-3"])
+    }
+
+    /// upsert：重新捕获相同内容只更新这一行，时间刷新、行数不变
+    func testInsertSameContentUpdatesDate() async {
+        let manager = await makeTempManager()
+        let old = makeDatedModel("重复内容", minutesAgo: 60)
+        await manager.insert(item: old)
+        await manager.insert(item: makeDatedModel("其他", minutesAgo: 30))
+        await manager.insert(item: makeDatedModel("重复内容", minutesAgo: 0))
+
+        let rows = await manager.fetchPage(limit: 10).items
+        XCTAssertEqual(rows.count, 2)
+        XCTAssertEqual(rows.first?.dataString, "重复内容", "重新捕获后应排到最前")
+    }
+
+    /// 旧库 hashKey 只有普通索引且有重复行：setup 合并重复行（保留置顶）并建唯一索引
+    func testSetupDeduplicatesLegacyRows() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+        let stringType = NSPasteboard.PasteboardType.string.rawValue
+        try executeSQL(at: path, """
+            DROP INDEX index_pastecontent_on_hashkey;
+            CREATE INDEX index_pastecontent_on_hashkey ON pasteContent(hashKey);
+            INSERT INTO pasteContent(hashKey, type, data, date, appPath, appName, dataString, length, pinnedDate)
+            VALUES (777, '\(stringType)', x'00', '2026-11-01T10:00:00.000', '', 'A', '旧', 1, '2026-11-02T10:00:00.000'),
+                   (777, '\(stringType)', x'00', '2026-11-03T10:00:00.000', '', 'A', '新', 1, NULL);
+            """)
+
+        let reopened = PasteSQLManager(dbPath: path)
+        await reopened.setup()
+        let rows = await reopened.fetchPage(limit: 10).items
+        XCTAssertEqual(rows.count, 1, "重复行应合并为一行")
+        XCTAssertEqual(rows.first?.dataString, "新", "应保留最新的一行")
+        XCTAssertNotNil(rows.first?.pinnedDate, "合并时应保留置顶状态")
+
+        let inserted = await reopened.insert(item: PasteboardModel(
+            pasteboardType: .string, data: Data([0]), showData: nil, hashValue: 777, date: Date(),
+            appPath: "", appName: "A", dataString: "再次捕获", length: 4
+        ))
+        XCTAssertTrue(inserted, "建好唯一索引后 upsert 应能写入")
+        let count = await reopened.totalCount
+        XCTAssertEqual(count, 1)
+    }
+
+    /// 首页和翻页都要按 (pinnedDate, date) 复合索引的顺序读，不能退化成全表扫描加临时排序。
+    /// 翻页的游标条件用不上索引定位（计划里是 SCAN 而不是 SEARCH），这里只保证排序走索引
+    func testListOrderUsesCompositeIndex() async throws {
+        let path = NSTemporaryDirectory().appending("pd-tests-\(UUID().uuidString)/paste.sqlite3")
+        let manager = PasteSQLManager(dbPath: path)
+        await manager.setup()
+        let order = #"ORDER BY "pinnedDate" DESC, "date" DESC, "id" DESC LIMIT 20"#
+        let firstPage = try queryPlan(at: path, #"SELECT * FROM "pasteContent" "# + order)
+        let nextPage = try queryPlan(at: path, #"SELECT * FROM "pasteContent" WHERE (COALESCE("pinnedDate", ''), "date", "id") < ('', '2026-11-01T10:00:00.000', 5) "# + order)
+        for plan in [firstPage, nextPage] {
+            XCTAssertTrue(plan.contains("index_pastecontent_on_pinneddate_date"), "应使用复合索引：\(plan)")
+            XCTAssertFalse(plan.contains("TEMP B-TREE"), "不应再临时排序：\(plan)")
+        }
+    }
+
+    // MARK: - 测试辅助（造坏库 / 直连 SQL）
+
+    /// 造一个「历史 bug 遗留」的坏库：表缺 kindCode 列，但 user_version 已是 2。
+    /// 用系统 SQLite C API 直接建库，模拟旧版本 clearAllData 留下的真实状态。
+    private func makeLegacyBrokenDatabase(at path: String, text: String) throws {
+        let dir = (path as NSString).deletingLastPathComponent
+        try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+
+        let stringType = NSPasteboard.PasteboardType.string.rawValue
+        // date / pinnedDate 由 SQLite.swift 以 TEXT 存储(yyyy-MM-dd'T'HH:mm:ss.SSS)，
+        // 这里必须写同格式字符串，否则读回时 Date 解码失败、整行被丢弃。
+        try executeSQL(at: path, """
+            PRAGMA user_version = 2;
+            CREATE TABLE pasteContent(
+                id INTEGER PRIMARY KEY, hashKey INTEGER, type TEXT, data BLOB, showData BLOB,
+                date TEXT, appPath TEXT, appName TEXT, dataString TEXT, length INTEGER,
+                ocrText TEXT, imgW INTEGER, imgH INTEGER, pinnedDate TEXT
+            );
+            INSERT INTO pasteContent(hashKey, type, data, date, appPath, appName, dataString, length)
+            VALUES (123456, '\(stringType)', x'00', '2026-11-01T10:00:00.000', '', 'Legacy', '\(text)', 7);
+            """)
+    }
+
+    /// 直接对库执行 SQL（造触发器、写 PRAGMA 等测试专用操作）。
+    /// 读取 EXPLAIN QUERY PLAN 的 detail 列，拼成一行便于断言
+    private func queryPlan(at path: String, _ sql: String) throws -> String {
+        var handle: OpaquePointer?
+        guard sqlite3_open(path, &handle) == SQLITE_OK, let handle else {
+            throw NSError(domain: "PasteDirectTests", code: 1, userInfo: [NSLocalizedDescriptionKey: "无法打开测试数据库"])
+        }
+        defer { sqlite3_close(handle) }
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(handle, "EXPLAIN QUERY PLAN " + sql, -1, &stmt, nil) == SQLITE_OK else {
+            throw NSError(domain: "PasteDirectTests", code: 3, userInfo: [NSLocalizedDescriptionKey: String(cString: sqlite3_errmsg(handle))])
+        }
+        defer { sqlite3_finalize(stmt) }
+        var details: [String] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            if let text = sqlite3_column_text(stmt, 3) { details.append(String(cString: text)) }
+        }
+        return details.joined(separator: " | ")
+    }
+
+    private func executeSQL(at path: String, _ sql: String) throws {
+        var handle: OpaquePointer?
+        guard sqlite3_open(path, &handle) == SQLITE_OK, let handle else {
+            throw NSError(domain: "PasteDirectTests", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "无法打开测试数据库"])
+        }
+        defer { sqlite3_close(handle) }
+
+        var errorPointer: UnsafeMutablePointer<CChar>?
+        guard sqlite3_exec(handle, sql, nil, nil, &errorPointer) == SQLITE_OK else {
+            let message = errorPointer.map { String(cString: $0) } ?? "unknown"
+            if let errorPointer { sqlite3_free(errorPointer) }
+            throw NSError(domain: "PasteDirectTests", code: 2,
+                          userInfo: [NSLocalizedDescriptionKey: message])
+        }
     }
 }

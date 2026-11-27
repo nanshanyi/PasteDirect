@@ -22,6 +22,7 @@ final class PasteMainPanel: NSPanel {
         self.contentViewController = contentViewController
         level = .statusBar
         hasShadow = false
+        isOpaque = false
         backgroundColor = .clear
         hidesOnDeactivate = false
         isMovableByWindowBackground = false

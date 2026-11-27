@@ -23,22 +23,79 @@ extension NSColor {
 
 struct HexColorValidator {
 
-    // 支持的格式：#RGB, #RRGGBB, RGB, RRGGBB, 0xRRGGBB, #RRGGBBAA, #AARRGGBB, 0xAARRGGBB
-    private static let hexPattern = "^(?:#|0x)?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$"
+    // 支持的格式：#RGB, #RRGGBB, 0xRRGGBB, #RRGGBBAA, #AARRGGBB, 0xAARRGGBB
+    // 必须带 # 或 0x 前缀，避免 123456、deadbeef、bad 等普通文本被误判为颜色
+    private static let hexRegex = try? NSRegularExpression(
+        pattern: "^(?:#|0x)([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$")
 
     /// 严格模式：检查字符串是否完全是 hex 颜色
     static func isValidHexColor(_ text: String) -> String? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        // 正则匹配
-        guard let regex = try? NSRegularExpression(pattern: hexPattern),
+        guard let regex = hexRegex,
               regex.firstMatch(in: trimmed, range: NSRange(location: 0, length: trimmed.utf16.count)) != nil else {
-            return nil
+            return parseCSSFunction(trimmed)
         }
 
         // 验证是否能成功解析为 NSColor
         return parseColor(from: trimmed)
+    }
+
+    private static let cssFunctionRegex = try? NSRegularExpression(
+        pattern: "^(rgba?|hsla?)\\(\\s*([^()]+?)\\s*\\)$", options: .caseInsensitive)
+
+    /// 解析 rgb()/rgba()/hsl()/hsla()（逗号或空格分隔，alpha 被忽略），返回 #RRGGBB
+    static func parseCSSFunction(_ text: String) -> String? {
+        let range = NSRange(location: 0, length: text.utf16.count)
+        guard let match = cssFunctionRegex?.firstMatch(in: text, range: range),
+              let nameRange = Range(match.range(at: 1), in: text),
+              let argsRange = Range(match.range(at: 2), in: text) else { return nil }
+        let isHSL = text[nameRange].lowercased().hasPrefix("hsl")
+        let tokens = text[argsRange]
+            .split(whereSeparator: { ", /".contains($0) })
+            .map(String.init)
+        guard tokens.count == 3 || tokens.count == 4 else { return nil }
+
+        // 数字或百分数，百分数按 percentScale 换算
+        func value(_ token: String, percentScale: Double) -> Double? {
+            if token.hasSuffix("%") {
+                return Double(token.dropLast()).map { $0 / 100 * percentScale }
+            }
+            return Double(token)
+        }
+        if tokens.count == 4, value(tokens[3], percentScale: 1) == nil { return nil }
+
+        let r, g, b: Double
+        if isHSL {
+            let hueToken = tokens[0].lowercased().hasSuffix("deg") ? String(tokens[0].dropLast(3)) : tokens[0]
+            guard let h = Double(hueToken),
+                  tokens[1].hasSuffix("%"), tokens[2].hasSuffix("%"),
+                  let s = value(tokens[1], percentScale: 1),
+                  let l = value(tokens[2], percentScale: 1) else { return nil }
+            let sat = min(max(s, 0), 1), light = min(max(l, 0), 1)
+            let hue = (h.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360)
+            let c = (1 - abs(2 * light - 1)) * sat
+            let x = c * (1 - abs((hue / 60).truncatingRemainder(dividingBy: 2) - 1))
+            let m = light - c / 2
+            let (r1, g1, b1): (Double, Double, Double)
+            switch hue {
+            case ..<60: (r1, g1, b1) = (c, x, 0)
+            case ..<120: (r1, g1, b1) = (x, c, 0)
+            case ..<180: (r1, g1, b1) = (0, c, x)
+            case ..<240: (r1, g1, b1) = (0, x, c)
+            case ..<300: (r1, g1, b1) = (x, 0, c)
+            default: (r1, g1, b1) = (c, 0, x)
+            }
+            (r, g, b) = ((r1 + m) * 255, (g1 + m) * 255, (b1 + m) * 255)
+        } else {
+            guard let rv = value(tokens[0], percentScale: 255),
+                  let gv = value(tokens[1], percentScale: 255),
+                  let bv = value(tokens[2], percentScale: 255) else { return nil }
+            (r, g, b) = (rv, gv, bv)
+        }
+        func byte(_ v: Double) -> Int { Int(min(max(v, 0), 255).rounded()) }
+        return String(format: "#%02X%02X%02X", byte(r), byte(g), byte(b))
     }
 
     /// 解析 hex 字符串为 NSColor

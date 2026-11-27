@@ -57,16 +57,6 @@
         }
       }
     },
-    "A new version is available" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "发现新版本"
-          }
-        }
-      }
-    },
     "About" : {
       "localizations" : {
         "zh-Hans" : {
@@ -83,6 +73,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "关于 PasteDirect"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
           }
         }
       }
@@ -117,12 +117,22 @@
         }
       }
     },
-    "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu." : {
+    "Automatically check for updates" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启后,复制的图片可通过搜索图中文字找到。关闭后不可搜索,但仍可在图片右键菜单中手动取用文字。"
+            "value" : "自动检查更新"
+          }
+        }
+      }
+    },
+    "Automatically download updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动下载更新"
           }
         }
       }
@@ -148,6 +158,7 @@
       }
     },
     "Check for updates on launch" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -244,6 +255,16 @@
         }
       }
     },
+    "Copy Text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制文字"
+          }
+        }
+      }
+    },
     "Current height" : {
       "localizations" : {
         "zh-Hans" : {
@@ -294,32 +315,12 @@
         }
       }
     },
-    "Copy Text" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "复制文字"
-          }
-        }
-      }
-    },
     "Do not save content copied from the following applications" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "不要保存从以下应用程序复制的内容。"
-          }
-        }
-      }
-    },
-    "Download" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下载"
           }
         }
       }
@@ -384,6 +385,16 @@
         }
       }
     },
+    "Link" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "链接"
+          }
+        }
+      }
+    },
     "Last 30 Days" : {
       "localizations" : {
         "zh-Hans" : {
@@ -405,6 +416,7 @@
       }
     },
     "Later" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -495,6 +507,16 @@
         }
       }
     },
+    "Open in Browser (⌘+Click)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在浏览器中打开（⌘+单击）"
+          }
+        }
+      }
+    },
     "Paste as #RRGGBB" : {
       "localizations" : {
         "zh-Hans" : {
@@ -569,37 +591,6 @@
     "PasteDirect" : {
 
     },
-    "PasteDirect %@ is available — you have %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "PasteDirect %1$@ is available — you have %2$@."
-          }
-        }
-      }
-    },
-    "PasteDirect %@ is the latest version." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PasteDirect %@ 已经是最新版本。"
-          }
-        }
-      }
-    },
-    "PasteDirect %1$@ is available — you have %2$@." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PasteDirect %1$@ 已发布 — 你当前版本为 %2$@。"
-          }
-        }
-      }
-    },
     "PasteDirect requires accessibility permissions" : {
       "localizations" : {
         "zh-Hans" : {
@@ -610,22 +601,22 @@
         }
       }
     },
+    "Pin" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "置顶"
+          }
+        }
+      }
+    },
     "pixels" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "像素"
-          }
-        }
-      }
-    },
-    "Please check your network connection and try again." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请检查网络连接后重试。"
           }
         }
       }
@@ -730,16 +721,6 @@
         }
       }
     },
-    "Skip this version" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "跳过此版本"
-          }
-        }
-      }
-    },
     "Storage size" : {
       "localizations" : {
         "zh-Hans" : {
@@ -766,6 +747,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "文本"
+          }
+        }
+      }
+    },
+    "Text Detected" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可识别文字"
           }
         }
       }
@@ -830,22 +821,22 @@
         }
       }
     },
-    "Unable to check for updates" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法检查更新"
-          }
-        }
-      }
-    },
     "Unknown" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "未知"
+          }
+        }
+      }
+    },
+    "Unpin" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消置顶"
           }
         }
       }
@@ -871,6 +862,16 @@
         }
       }
     },
+    "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后,复制的图片可通过搜索图中文字找到。关闭后不可搜索,但仍可在图片右键菜单中手动取用文字。"
+          }
+        }
+      }
+    },
     "Yesterday" : {
       "localizations" : {
         "zh-Hans" : {
@@ -887,36 +888,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "您有比新的历史限制更旧的项目。是否要删除这些较旧的项目并应用新的限制？"
-          }
-        }
-      }
-    },
-    "You're up to date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已是最新版本"
-          }
-        }
-      }
-    },
-    "Pin" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "置顶"
-          }
-        }
-      }
-    },
-    "Unpin" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消置顶"
           }
         }
       }

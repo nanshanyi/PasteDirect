@@ -26,10 +26,6 @@ enum PrefKey: String, CaseIterable {
     case lastClearDate
     /// 忽略的APP
     case ignoreList
-    /// 启动时自动检查更新
-    case autoCheckUpdate
-    /// 用户选择忽略的版本号
-    case ignoredUpdateVersion
     /// 面板高度
     case panelHeight
     /// 自动识别图片中的文字

@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04E8E72CC5C047C89504A2EF /* AppColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E390B0B9BF1B42569699869A /* AppColor.swift */; };
 		1980B54B25F34F2EB1781FA9 /* PasteEmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */; };
 		BB1A5E47239B42BC8043DA79 /* UpdateCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */; };
 		CB0AB0022F10A00000ABOUT2 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0AB0012F10A00000ABOUT1 /* AboutView.swift */; };
 		CB2CDF002924E8D900E81836 /* PasteDirectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDEFF2924E8D900E81836 /* PasteDirectTests.swift */; };
 		CB2CDF0A2924E8D900E81836 /* PasteDirectUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF092924E8D900E81836 /* PasteDirectUITests.swift */; };
 		CB2CDF0C2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2CDF0B2924E8D900E81836 /* PasteDirectUITestsLaunchTests.swift */; };
+		CB5A1E000000000000000A03 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = CB5A1E000000000000000A02 /* Sparkle */; };
 		CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */; };
 		CB8423112FCD6DC100DCFDAA /* ImageOCRExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */; };
 		CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = CB9986F52925FF46007E585C /* KeyboardShortcuts */; };
@@ -20,11 +22,9 @@
 		CB99870229260372007E585C /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = CB99870129260372007E585C /* SnapKit */; };
 		CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */; };
 		CBAAAA0000000000DCFDAA03 /* ImageThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */; };
-		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
 		CBAAAA0000000000DCFDAA05 /* Data+ContentHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */; };
-		CBD1CACA2F87B2A6003ACBD7 /* UIImageColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */; };
+		CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAAAA0000000000DCFDAB02 /* DataMigration.swift */; };
 		CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA92F87B2A6003ACBD7 /* RulesDetailView.swift */; };
-		CBD1CACC2F87B2A6003ACBD7 /* PasteEffectImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA932F87B2A6003ACBD7 /* PasteEffectImageView.swift */; };
 		CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAAB2F87B2A6003ACBD7 /* SettingsView.swift */; };
 		CBD1CACE2F87B2A6003ACBD7 /* PasteSettingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAA32F87B2A6003ACBD7 /* PasteSettingWindowController.swift */; };
 		CBD1CACF2F87B2A6003ACBD7 /* NSAttributeString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAB12F87B2A6003ACBD7 /* NSAttributeString+Extension.swift */; };
@@ -59,6 +59,7 @@
 		CBD1CAEC2F87B2A6003ACBD7 /* PastePreviewPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */; };
 		CBD1CAED2F87B2A6003ACBD7 /* PasteMainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA962F87B2A6003ACBD7 /* PasteMainViewController.swift */; };
 		CBD1CAEE2F87B2A6003ACBD7 /* PasteCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */; };
+		BEFBB8E86259F69BC24175C4 /* PasteCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F188785B5FE75F05B260DF /* PasteCardComponents.swift */; };
 		CBD1CAEF2F87B2A6003ACBD7 /* Helps.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CABA2F87B2A6003ACBD7 /* Helps.swift */; };
 		CBD1CAF02F87B2A6003ACBD7 /* PasteAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CA8A2F87B2A6003ACBD7 /* PasteAppDelegate.swift */; };
 		CBD1CAF12F87B2A6003ACBD7 /* NSCollectionView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CAB22F87B2A6003ACBD7 /* NSCollectionView+Extension.swift */; };
@@ -76,7 +77,7 @@
 		CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */; };
 		CBD1CB022F87BC00003ACBD7 /* PanelResizeHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD1CB032F87BC00003ACBD7 /* PanelResizeHandle.swift */; };
 		CBFBD03FF895FA43D29D8996 /* PasteCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */; };
-		D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */; };
+		DE30DA7A0000000000000001 /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE30DA7A0000000000000002 /* DemoData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,7 +110,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCoordinator.swift; sourceTree = "<group>"; };
 		BB6DA203B45A4EB68B82DF28 /* PasteEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEmptyStateView.swift; sourceTree = "<group>"; };
 		CB0AB0012F10A00000ABOUT1 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -123,8 +123,8 @@
 		CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOCRExtractor.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlobStore.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageThumbnail.swift; sourceTree = "<group>"; };
-		CBAAAA0000000000DCFDAB02 /* DataMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigration.swift; sourceTree = "<group>"; };
 		CBAAAA0000000000DCFDAA06 /* Data+ContentHash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+ContentHash.swift"; sourceTree = "<group>"; };
+		CBAAAA0000000000DCFDAB02 /* DataMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataMigration.swift; sourceTree = "<group>"; };
 		CBC0392CA8952F41A89C682F /* PasteCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionView.swift; sourceTree = "<group>"; };
 		CBD1CA862F87B2A6003ACBD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CBD1CA872F87B2A6003ACBD7 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -136,7 +136,7 @@
 		CBD1CA8F2F87B2A6003ACBD7 /* PasteBoardType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteBoardType.swift; sourceTree = "<group>"; };
 		CBD1CA902F87B2A6003ACBD7 /* PasteboardWritingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardWritingItem.swift; sourceTree = "<group>"; };
 		CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCollectionViewItem.swift; sourceTree = "<group>"; };
-		CBD1CA932F87B2A6003ACBD7 /* PasteEffectImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteEffectImageView.swift; sourceTree = "<group>"; };
+		D4F188785B5FE75F05B260DF /* PasteCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteCardComponents.swift; sourceTree = "<group>"; };
 		CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterItem.swift; sourceTree = "<group>"; };
 		CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteFilterView.swift; sourceTree = "<group>"; };
 		CBD1CA962F87B2A6003ACBD7 /* PasteMainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteMainViewController.swift; sourceTree = "<group>"; };
@@ -173,13 +173,14 @@
 		CBD1CABF2F87B2A6003ACBD7 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteUserDefaults.swift; sourceTree = "<group>"; };
 		CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefKey.swift; sourceTree = "<group>"; };
-		CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageColors.swift; sourceTree = "<group>"; };
 		CBD1CAC32F87B2A6003ACBD7 /* UserInterfaceItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceItemIdentifier.swift; sourceTree = "<group>"; };
 		CBD1CAC62F87B2A6003ACBD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CBD1CAC72F87B2A6003ACBD7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		CBD1CAC82F87B2A6003ACBD7 /* PasteDirect.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PasteDirect.entitlements; sourceTree = "<group>"; };
 		CBD1CB002F87BB49003ACBD7 /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		CBD1CB032F87BC00003ACBD7 /* PanelResizeHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelResizeHandle.swift; sourceTree = "<group>"; };
+		DE30DA7A0000000000000002 /* DemoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoData.swift; sourceTree = "<group>"; };
+		E390B0B9BF1B42569699869A /* AppColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +191,7 @@
 				CB9986FF29260015007E585C /* SQLite in Frameworks */,
 				CB9986F62925FF46007E585C /* KeyboardShortcuts in Frameworks */,
 				CB99870229260372007E585C /* SnapKit in Frameworks */,
+				CB5A1E000000000000000A03 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,7 +292,7 @@
 			isa = PBXGroup;
 			children = (
 				CBD1CA922F87B2A6003ACBD7 /* PasteCollectionViewItem.swift */,
-				CBD1CA932F87B2A6003ACBD7 /* PasteEffectImageView.swift */,
+				D4F188785B5FE75F05B260DF /* PasteCardComponents.swift */,
 				CBD1CA942F87B2A6003ACBD7 /* PasteFilterItem.swift */,
 				CBD1CA952F87B2A6003ACBD7 /* PasteFilterView.swift */,
 				CBD1CA972F87B2A6003ACBD7 /* PastePreviewPanel.swift */,
@@ -325,17 +327,28 @@
 		CBD1CAA22F87B2A6003ACBD7 /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
+				7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */,
+				CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */,
+				CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */,
+				CBD1CABB2F87B2A6003ACBD7 /* HexColorValidator.swift */,
+				CBD1CABC2F87B2A6003ACBD7 /* ImageColorExtractor.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		DA7A0000000000000000D001 /* Data */ = {
+			isa = PBXGroup;
+			children = (
 				CB84230E2FCD6BD600DCFDAA /* OCRCache.swift */,
+				DE30DA7A0000000000000002 /* DemoData.swift */,
 				CBAAAA0000000000DCFDAA02 /* ImageBlobStore.swift */,
 				CBAAAA0000000000DCFDAB02 /* DataMigration.swift */,
 				CBD1CA9E2F87B2A6003ACBD7 /* ColorCache.swift */,
-				CBD1CA9F2F87B2A6003ACBD7 /* PasteBoard.swift */,
 				CBD1CAA02F87B2A6003ACBD7 /* PasteDataStore.swift */,
 				CBD1CAA12F87B2A6003ACBD7 /* PasteSQLManager.swift */,
-				21AB4EB9E2C149F7A8F97650 /* UpdateChecker.swift */,
-				7A282C49C3784432B3522C4D /* UpdateCoordinator.swift */,
 			);
-			path = Service;
+			path = Data;
 			sourceTree = "<group>";
 		};
 		CBD1CAA42F87B2A6003ACBD7 /* Controller */ = {
@@ -405,19 +418,15 @@
 		CBD1CAC42F87B2A6003ACBD7 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				CB8423102FCD6DC100DCFDAA /* ImageOCRExtractor.swift */,
-				CBAAAA0000000000DCFDAA04 /* ImageThumbnail.swift */,
 				CBD1CAB72F87B2A6003ACBD7 /* Extension */,
 				CBD1CAB92F87B2A6003ACBD7 /* UIComponent */,
 				CBD1CABA2F87B2A6003ACBD7 /* Helps.swift */,
-				CBD1CABB2F87B2A6003ACBD7 /* HexColorValidator.swift */,
-				CBD1CABC2F87B2A6003ACBD7 /* ImageColorExtractor.swift */,
 				CBD1CABD2F87B2A6003ACBD7 /* KeyHelper.swift */,
 				CBD1CABE2F87B2A6003ACBD7 /* Layout.swift */,
+				E390B0B9BF1B42569699869A /* AppColor.swift */,
 				CBD1CABF2F87B2A6003ACBD7 /* Log.swift */,
 				CBD1CAC02F87B2A6003ACBD7 /* PasteUserDefaults.swift */,
 				CBD1CAC12F87B2A6003ACBD7 /* PrefKey.swift */,
-				CBD1CAC22F87B2A6003ACBD7 /* UIImageColors.swift */,
 				CBD1CAC32F87B2A6003ACBD7 /* UserInterfaceItemIdentifier.swift */,
 			);
 			path = Utility;
@@ -428,6 +437,7 @@
 			children = (
 				CBD1CA8D2F87B2A6003ACBD7 /* App */,
 				CBD1CA9D2F87B2A6003ACBD7 /* Main */,
+				DA7A0000000000000000D001 /* Data */,
 				CBD1CAA22F87B2A6003ACBD7 /* Service */,
 				CBD1CAAE2F87B2A6003ACBD7 /* Setting */,
 				CBD1CAC42F87B2A6003ACBD7 /* Utility */,
@@ -476,6 +486,7 @@
 				CB9986F52925FF46007E585C /* KeyboardShortcuts */,
 				CB9986FE29260015007E585C /* SQLite */,
 				CB99870129260372007E585C /* SnapKit */,
+				CB5A1E000000000000000A02 /* Sparkle */,
 			);
 			productName = PasteDirect;
 			productReference = CB2CDEEA2924E8D500E81836 /* PasteDirect.app */;
@@ -525,7 +536,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1410;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					CB2CDEE92924E8D500E81836 = {
 						CreatedOnToolsVersion = 14.1;
@@ -554,6 +565,7 @@
 				CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				CB9986FD29260015007E585C /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 				CB99870029260372007E585C /* XCRemoteSwiftPackageReference "SnapKit" */,
+				CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = CB2CDEEB2924E8D500E81836 /* Products */;
 			projectDirPath = "";
@@ -599,11 +611,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBD1CACA2F87B2A6003ACBD7 /* UIImageColors.swift in Sources */,
 				CBD1CACB2F87B2A6003ACBD7 /* RulesDetailView.swift in Sources */,
-				CBD1CACC2F87B2A6003ACBD7 /* PasteEffectImageView.swift in Sources */,
 				CBD1CACD2F87B2A6003ACBD7 /* SettingsView.swift in Sources */,
 				CB84230F2FCD6BD700DCFDAA /* OCRCache.swift in Sources */,
+				DE30DA7A0000000000000001 /* DemoData.swift in Sources */,
 				CBAAAA0000000000DCFDAA01 /* ImageBlobStore.swift in Sources */,
 				CBAAAA0000000000DCFDAB01 /* DataMigration.swift in Sources */,
 				CBD1CACE2F87B2A6003ACBD7 /* PasteSettingWindowController.swift in Sources */,
@@ -614,7 +625,6 @@
 				CBD1CAD22F87B2A6003ACBD7 /* PasteboardModel.swift in Sources */,
 				CBD1CAD32F87B2A6003ACBD7 /* Then.swift in Sources */,
 				CBD1CAD42F87B2A6003ACBD7 /* PasteSQLManager.swift in Sources */,
-				D1034E7D0ED247429B4A9EB4 /* UpdateChecker.swift in Sources */,
 				BB1A5E47239B42BC8043DA79 /* UpdateCoordinator.swift in Sources */,
 				CBD1CAD52F87B2A6003ACBD7 /* PasteFilterView.swift in Sources */,
 				CBD1CAD62F87B2A6003ACBD7 /* Date+Extension.swift in Sources */,
@@ -643,12 +653,14 @@
 				CBAAAA0000000000DCFDAA05 /* Data+ContentHash.swift in Sources */,
 				CBD1CAE82F87B2A6003ACBD7 /* PasteFilterItem.swift in Sources */,
 				CBD1CAE92F87B2A6003ACBD7 /* Layout.swift in Sources */,
+				04E8E72CC5C047C89504A2EF /* AppColor.swift in Sources */,
 				CBD1CAEA2F87B2A6003ACBD7 /* SettingsModels.swift in Sources */,
 				CBD1CAEB2F87B2A6003ACBD7 /* PrefKey.swift in Sources */,
 				CBD1CAEC2F87B2A6003ACBD7 /* PastePreviewPanel.swift in Sources */,
 				CBD1CAED2F87B2A6003ACBD7 /* PasteMainViewController.swift in Sources */,
 				CBD1CB012F87BB49003ACBD7 /* AppCoordinator.swift in Sources */,
 				CBD1CAEE2F87B2A6003ACBD7 /* PasteCollectionViewItem.swift in Sources */,
+				BEFBB8E86259F69BC24175C4 /* PasteCardComponents.swift in Sources */,
 				CBD1CAEF2F87B2A6003ACBD7 /* Helps.swift in Sources */,
 				CBD1CAF02F87B2A6003ACBD7 /* PasteAppDelegate.swift in Sources */,
 				CBD1CAF12F87B2A6003ACBD7 /* NSCollectionView+Extension.swift in Sources */,
@@ -832,7 +844,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "PasteDirect Code Signing Certificate";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11002;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
@@ -848,7 +860,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.5.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -868,9 +880,10 @@
 				CODE_SIGN_ENTITLEMENTS = PasteDirect/PasteDirect.entitlements;
 				CODE_SIGN_IDENTITY = "PasteDirect Code Signing Certificate";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "PasteDirect Code Signing Certificate";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11002;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
@@ -896,7 +909,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 3.5.0;
+				MARKETING_VERSION = 4.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nanshanyi.PasteDirect;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -949,6 +962,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = nanshanyi.PasteDirectUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -965,6 +979,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = nanshanyi.PasteDirectUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1016,6 +1031,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
 		CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -1043,6 +1066,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CB5A1E000000000000000A02 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB5A1E000000000000000A01 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		CB9986F52925FF46007E585C /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CB9986F42925FF46007E585C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;

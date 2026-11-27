@@ -25,10 +25,6 @@ enum PasteUserDefaults {
     static var lastClearDate
     @UserDefaultsWrapper(.ignoreList, defaultValue: [String]())
     static var ignoreList
-    @UserDefaultsWrapper(.autoCheckUpdate, defaultValue: true)
-    static var autoCheckUpdate
-    @UserDefaultsWrapper(.ignoredUpdateVersion, defaultValue: "")
-    static var ignoredUpdateVersion
     @UserDefaultsWrapper(.panelHeight, defaultValue: Double(0))
     static var panelHeight: Double
     @UserDefaultsWrapper(.autoOCRImages, defaultValue: true)

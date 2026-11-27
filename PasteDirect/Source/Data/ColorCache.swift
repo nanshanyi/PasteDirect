@@ -22,7 +22,7 @@ actor ColorCache {
         }
 
         let task = Task<NSColor?, Never> {
-            await ImageColorExtractor.extractAverageColor(from: icon)
+            await ImageColorExtractor.extractAccentColor(from: icon)
         }
 
         ongoingTasks[key] = task
