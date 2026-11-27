@@ -6,6 +6,22 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [4.1.0] - 2026-11-27
+
+Pinned items move out of the list and into a bar on the left of the panel: frequently used clips no longer take up the first screen of the list, which now always starts with your latest copy. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
+
+### Pinned bar
+- Pinned items are tucked into a bar on the left, showing a pin, a vertical "Pinned" label, the count, source app icons and a disclosure arrow. Hover it to list every pinned item immediately; click to expand them into cards and click again to collapse; the cards and the orange background animate together.
+- Hold ⌥: when collapsed a popover lists the pinned items as ⌥1–⌥9, and when expanded the numbers appear directly on the cards — press a number to paste. ⌘1–⌘9 now numbers only visible items that aren't pinned, so the two sets never overlap.
+- New setting "Show pinned items when opening the panel": when on, pinned items are expanded every time the panel opens; when off (default) they stay in the bar until you click it.
+- When every item is pinned and the bar is collapsed, the list stays empty but the bar is still shown, so the "No history yet" empty state no longer appears by mistake.
+
+### Changed
+- The panel and its first page of data are prepared at launch, so opening the panel for the first time no longer queries the database and builds cards inside the slide-in animation — the animation no longer stutters at the start.
+- Panel corner radius is now 26 (matching macOS 26 windows) instead of 32; the pinned group background is concentric with the cards (18 + 8 = 26), uses a light fill when collapsed, and deepens when you hover the bar.
+- Card numbers now update while you scroll with ⌘ / ⌥ held, so cards that scroll into view carry their number right away.
+- The settings window now moves to the active Space before it appears; previously, opening it from another desktop left it hidden on the old one.
+
 ## [4.0.0] - 2026-11-26
 
 Second 4.0 beta: fixes new clips becoming unsavable after "Clear All Data", and polishes the panel shadow and list scrolling; this release includes everything from beta1. Please report any problems at https://github.com/nanshanyi/PasteDirect/issues
