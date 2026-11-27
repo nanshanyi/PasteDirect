@@ -32,6 +32,7 @@ final class SettingsStore: ObservableObject {
             .lastClearDate: PasteUserDefaults.lastClearDate,
             .ignoreList: PasteUserDefaults.ignoreList,
             .autoOCRImages: PasteUserDefaults.autoOCRImages,
+            .pinsExpandedByDefault: PasteUserDefaults.pinsExpandedByDefault,
         ]
     }
     

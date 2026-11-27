@@ -19,7 +19,8 @@ final class PasteMainViewModel {
     /// 全部置顶项，给置顶折叠条用。只在默认列表（无搜索、无筛选）时有值，其余时候置顶项照常混在结果里
     @Published private(set) var pinnedItems: [PasteboardModel] = []
     /// 置顶折叠条是否展开：展开时置顶卡片排在列表开头，收起时列表只有未置顶的条目
-    private(set) var pinsExpanded = PasteUserDefaults.pinsExpanded
+    /// 起始状态取设置里的「置顶项默认展开」，每次打开面板都回到它；点竖条切换只在这次打开期间有效
+    private(set) var pinsExpanded = PasteUserDefaults.pinsExpandedByDefault
 
     /// 列表更新事件。列表本身由 diffable 数据源按 hash 计算差异，这里只带额外信息。
     struct ListUpdate {
@@ -29,6 +30,8 @@ final class PasteMainViewModel {
         var pinChanged: [PasteboardModel] = []
         var animated = false
         var scrollToBeginning = false
+        /// 由展开/收起置顶折叠条引起：竖条和列表的取舍要跟这次的新数据一起切换
+        var pinsToggled = false
         /// 选中的条目已不在列表里（被删），需要把新的选中项滚到可见
         var scrollToSelection = false
         /// 由数据库内容变化引起（而不是翻页、搜索），类型计数需要重新统计
@@ -178,7 +181,7 @@ extension PasteMainViewModel {
         }
     }
 
-    private func apply(_ list: [PasteboardModel], animated: Bool, scrollToBeginning: Bool = false, dataChanged: Bool = false) {
+    private func apply(_ list: [PasteboardModel], animated: Bool, scrollToBeginning: Bool = false, dataChanged: Bool = false, pinsToggled: Bool = false) {
         // diffable 数据源遇到重复标识会直接崩溃。正常情况下 hashKey 唯一索引保证不重复，
         // 这里兜底：唯一索引没建成的库、或翻页与刷新交错时，同一条只保留第一次出现的位置
         var seen = Set<Int>()
@@ -186,6 +189,7 @@ extension PasteMainViewModel {
         let old = Dictionary(items.map { ($0.hashValue, $0) }, uniquingKeysWith: { first, _ in first })
         let selectedHash = item(at: selectedIndexPath)?.hashValue
         var update = ListUpdate(animated: animated, scrollToBeginning: scrollToBeginning, dataChanged: dataChanged)
+        update.pinsToggled = pinsToggled
         for model in newItems {
             guard let previous = old[model.hashValue] else { continue }
             if previous.date != model.date || previous.ocrText != model.ocrText || previous.appPath != model.appPath {
@@ -225,11 +229,40 @@ extension PasteMainViewModel {
         reload()
     }
 
-    /// 展开/收起置顶折叠条，按新的取舍从第一页重新加载
+    /// 展开/收起置顶折叠条。置顶项本来就全在 pinnedItems 里，只需在列表开头插入或拿掉它们，
+    /// 不用回数据库重查：结果同步出来，竖条、底色和卡片能在同一帧一起开始动画。
+    /// 游标不用动：展开时它停在最后一张未置顶卡；收起时即使停在置顶项上，
+    /// 按排序键所有未置顶行都排在它后面，下一页照样从第一张未置顶卡接上
     func togglePinsExpanded() {
-        pinsExpanded.toggle()
-        PasteUserDefaults.pinsExpanded = pinsExpanded
-        reload(keyword: keyword, state: queryState)
+        setPinsExpanded(!pinsExpanded, animated: true)
+    }
+
+    /// 面板即将出现时回到设置里的默认展开状态。此时窗口还没显示，直接切换、不做动画
+    func applyDefaultPinsExpansion() {
+        let expanded = PasteUserDefaults.pinsExpandedByDefault
+        guard expanded != pinsExpanded else { return }
+        setPinsExpanded(expanded, animated: false)
+    }
+
+    private func setPinsExpanded(_ expanded: Bool, animated: Bool) {
+        pinsExpanded = expanded
+        // 搜索或筛选时列表本来就含置顶项、折叠条也不显示，取舍不变
+        guard isDefaultQuery else { return }
+        // 在途的查询是按旧取舍发的，结果对不上新列表：作废它，换完之后按新取舍重新刷一次
+        let hadPendingFetch = isLoading
+        if hadPendingFetch {
+            generation += 1
+            fetchTask?.cancel()
+            isLoading = false
+        }
+        let unpinned = items.filter { !$0.isPinned }
+        apply(pinsExpanded ? pinnedItems + unpinned : unpinned, animated: animated, scrollToBeginning: true, pinsToggled: true)
+        if hadPendingFetch {
+            refreshLoaded()
+        } else if !pinsExpanded, unpinned.count < store.pageSize, hasMore {
+            // 已加载的大多是置顶项时，收起后可能不足一屏，横向列表滚不动就触发不了翻页，主动补一页
+            loadNextPage()
+        }
     }
 
     func updateFilter(_ state: FilterState) {

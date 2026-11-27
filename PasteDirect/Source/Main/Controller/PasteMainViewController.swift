@@ -116,8 +116,11 @@ final class PasteMainViewController: NSViewController {
     private var isPeekHovered = false
     /// 按住 ⌥ 时弹出置顶清单显示 ⌥1–9
     private var isOptionHeld = false
-    /// 悬停一小会儿才弹出清单，鼠标只是划过时不打扰
-    private var peekShowTask: Task<Void, Never>?
+    /// 展开/收起置顶的动画进行中：底色正跟着卡片伸缩，其他地方（滚动、布局）不要把它直接设到终点
+    private var isAnimatingPinsToggle = false
+    /// 展开/收起的动画参数，卡片和底色共用，两者才能同步：设计稿的 .32s cubic-bezier(.3,.7,.2,1)
+    private static let pinsToggleDuration: TimeInterval = 0.32
+    private static let pinsToggleTiming = CAMediaTimingFunction(controlPoints: 0.3, 0.7, 0.2, 1)
 }
 
 // MARK: - 生命周期
@@ -172,6 +175,12 @@ extension PasteMainViewController {
         }
         // 面板高度变化会改卡片尺寸，分组底色跟着重算
         updatePinnedGroupBackground()
+    }
+
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        // 每次打开面板回到设置里的默认展开状态；窗口还没显示，切换不做动画
+        viewModel.applyDefaultPinsExpansion()
     }
 
     override func viewDidAppear() {
@@ -352,6 +361,11 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func applyListUpdate(_ update: PasteMainViewModel.ListUpdate) {
+        if update.pinsToggled {
+            // 竖条外观、列表自带的置顶底色开关和新数据在同一次更新里切换，不会出现新旧状态混在一起的一帧
+            isAnimatingPinsToggle = update.animated
+            updatePinRail(items: viewModel.pinnedItems, animated: update.animated)
+        }
         var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
         snapshot.appendSections([0])
         snapshot.appendItems(viewModel.items.map(\.hashValue))
@@ -365,14 +379,16 @@ extension PasteMainViewController {
         }
         if update.animated {
             NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.35
-                ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                ctx.duration = update.pinsToggled ? Self.pinsToggleDuration : 0.35
+                ctx.timingFunction = update.pinsToggled ? Self.pinsToggleTiming : CAMediaTimingFunction(name: .easeInEaseOut)
                 dataSource.apply(snapshot, animatingDifferences: true)
             } completionHandler: { [weak self] in
                 MainActor.assumeIsolated {
-                    self?.refreshShortcutHints()
+                    guard let self else { return }
+                    self.isAnimatingPinsToggle = false
+                    self.refreshShortcutHints()
                     // 动画期间卡片还在移动，等落位后再把分组底色收拢到最后一张置顶卡
-                    self?.updatePinnedGroupBackground()
+                    self.updatePinnedGroupBackground()
                 }
             }
         } else {
@@ -394,7 +410,13 @@ extension PasteMainViewController {
             refreshTypeCounts()
         }
         updateEmptyState()
-        updatePinnedGroupBackground()
+        if update.pinsToggled {
+            // 快照已换、也滚回了开头：先让布局算出卡片的新位置，底色再跟卡片一起长出去/收回来
+            collectionView.layoutSubtreeIfNeeded()
+            updatePinnedGroupBackground(animated: update.animated)
+        } else {
+            updatePinnedGroupBackground()
+        }
     }
 
     private func makeItem(_ collectionView: NSCollectionView, at indexPath: IndexPath) -> NSCollectionViewItem {
@@ -606,29 +628,35 @@ extension PasteMainViewController {
         pinRail.onClick = { [weak self] in
             guard let self else { return }
             self.closePinPeek()
+            // 新列表同步发出，竖条和底色在 applyListUpdate 里跟着一起切换
             self.viewModel.togglePinsExpanded()
-            self.updatePinRail(items: self.viewModel.pinnedItems)
+            // 收起后鼠标还停在竖条上：不会再收到进入事件，主动把清单再弹出来，和收起动画同时开始
+            if !self.viewModel.pinsExpanded, self.isRailHovered {
+                self.showPinPeek()
+            }
         }
         pinRail.onHoverChange = { [weak self] hovered in
             guard let self else { return }
             self.isRailHovered = hovered
+            self.updatePinnedGroupDimming()
             if hovered {
-                self.schedulePinPeek()
+                // 展开时置顶卡片就在旁边，不需要清单
+                if !self.viewModel.pinsExpanded { self.showPinPeek() }
             } else {
-                self.peekShowTask?.cancel()
                 self.closePinPeekIfIdle()
             }
         }
     }
 
-    private func updatePinRail(items: [PasteboardModel]) {
+    private func updatePinRail(items: [PasteboardModel], animated: Bool = true) {
         let visible = !items.isEmpty
         pinRail.isHidden = !visible
-        pinRail.configure(items: items, expanded: viewModel.pinsExpanded)
+        pinRail.configure(items: items, expanded: viewModel.pinsExpanded, animated: animated)
         // 收起和展开铺的是同一块底色（PinnedGroupBackgroundView），收起时只有竖条那么宽；
         // 展开时它连置顶卡片一起框住，列表自带的置顶分组底色就不用再画了
         let coversCards = visible && viewModel.pinsExpanded
         pinnedGroupBackground.isHidden = !visible
+        updatePinnedGroupDimming()
         if let layout = collectionView.collectionViewLayout as? PasteFlowLayout,
            layout.showsPinnedBackground != !coversCards {
             layout.showsPinnedBackground = !coversCards
@@ -646,8 +674,11 @@ extension PasteMainViewController {
     }
 
     /// 竖条 + 置顶卡片的外接矩形，右边缘跟着最后一张置顶卡片走（横向滚动时实时更新）。
-    /// 收起时只框住竖条，上下补到与装饰视图一样高，两种状态下底色完全一致
-    private func updatePinnedGroupBackground() {
+    /// 收起时只框住竖条，上下补到与装饰视图一样高，两种状态下底色完全一致。
+    /// 展开/收起时传 animated，让底色跟着卡片一起长出去/收回来，而不是等动画结束再跳
+    private func updatePinnedGroupBackground(animated: Bool = false) {
+        // 展开/收起动画期间只接受那一次带动画的更新，滚动、布局触发的直接设置会把底色钉到终点
+        guard animated || !isAnimatingPinsToggle else { return }
         guard !pinnedGroupBackground.isHidden, pinRail.frame.width > 0 else { return }
         var rect = pinRail.frame.insetBy(dx: 0, dy: -Layout.itemShadowMargin)
         if viewModel.pinsExpanded {
@@ -661,16 +692,21 @@ extension PasteMainViewController {
         }
         // 置顶卡片滚出列表后不要把底色露到列表外面
         rect.size.width = max(0, min(rect.width, scrollView.frame.maxX - rect.minX))
-        pinnedGroupBackground.frame = rect
+        guard animated, pinnedGroupBackground.frame != rect else {
+            pinnedGroupBackground.frame = rect
+            return
+        }
+        // 和卡片用同一组时长和曲线，一起长出去/收回来
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = Self.pinsToggleDuration
+            ctx.timingFunction = Self.pinsToggleTiming
+            pinnedGroupBackground.animator().frame = rect
+        }
     }
 
-    private func schedulePinPeek() {
-        peekShowTask?.cancel()
-        peekShowTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(250))
-            guard !Task.isCancelled, let self, self.isRailHovered, !self.viewModel.pinsExpanded else { return }
-            self.showPinPeek()
-        }
+    /// 收起时底色平时用淡色，鼠标在竖条上才加深；展开时连着卡片，一直用常规色
+    private func updatePinnedGroupDimming() {
+        pinnedGroupBackground.isDimmed = !viewModel.pinsExpanded && !isRailHovered
     }
 
     private func setOptionHeld(_ held: Bool) {
@@ -714,7 +750,6 @@ extension PasteMainViewController {
     }
 
     private func closePinPeek() {
-        peekShowTask?.cancel()
         isPeekHovered = false
         pinPeekPopover?.close()
         pinPeekPopover = nil

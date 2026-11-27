@@ -21,6 +21,8 @@ class PasteSettingWindowController: NSWindowController {
         let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: false)
         window.titleVisibility = .visible
         window.titlebarSeparatorStyle = .automatic
+        // 设置窗口之前开在别的桌面时，再打开要挪到当前桌面，而不是留在原处看不见
+        window.collectionBehavior.insert(.moveToActiveSpace)
         super.init(window: window)
         window.contentViewController = hostingController
     }
@@ -32,11 +34,6 @@ class PasteSettingWindowController: NSWindowController {
 
     public func show(category: SettingCategory? = nil) {
         Task { await PasteDataStore.main.updateStorageSize() }
-        if #available(macOS 14, *) {
-            NSApp.activate()
-        } else {
-            NSApp.activate(ignoringOtherApps: true)
-        }
         if let category {
             settingsViewModel.selectedCategory = category
         }
@@ -48,5 +45,14 @@ class PasteSettingWindowController: NSWindowController {
             window?.center()
         }
         showWindow(self)
+        // macOS 14 起激活只是请求，前台 app 没让出焦点时系统可能不理会；
+        // 本 app 没有 Dock 图标，激活没成功时 showWindow 不会把窗口提到其他 app 的窗口上面。
+        // 先不论激活与否把窗口放到最前，再请求激活让它成为 key window
+        window?.orderFrontRegardless()
+        if #available(macOS 14, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 }

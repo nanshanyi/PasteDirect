@@ -30,8 +30,8 @@ enum PrefKey: String, CaseIterable {
     case panelHeight
     /// 自动识别图片中的文字
     case autoOCRImages
-    /// 置顶折叠条是否展开
-    case pinsExpanded
+    /// 每次打开面板时置顶折叠条是否展开
+    case pinsExpandedByDefault
 }
 
 enum HistoryTime: Int {

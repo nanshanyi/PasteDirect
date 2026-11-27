@@ -93,6 +93,16 @@ final class PasteFlowLayout: NSCollectionViewFlowLayout {
 
 /// 置顶分组背景:系统橙 22% 填充 + 45% 描边
 final class PinnedGroupBackgroundView: NSView, NSCollectionViewElement {
+    /// 折叠条收起、鼠标不在上面时用淡色；鼠标移上去加深到常规色
+    var isDimmed = false {
+        didSet {
+            guard isDimmed != oldValue else { return }
+            animatesNextColorChange = true
+            needsDisplay = true
+        }
+    }
+    private var animatesNextColorChange = false
+
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
@@ -104,10 +114,26 @@ final class PinnedGroupBackgroundView: NSView, NSCollectionViewElement {
 
     override func updateLayer() {
         guard let layer else { return }
-        layer.cornerRadius = Layout.itemCornerRadius + Layout.itemShadowMargin
+        // 圆角从面板向内推:底色底边离面板 8pt,26 − 8 = 18,底面与面板左下角同心。
+        // 这个值同时等于卡片圆角,折叠成 56pt 竖条时也还是设计稿的圆角矩形
+        layer.cornerRadius = Layout.itemCornerRadius
         layer.cornerCurve = .continuous
-        layer.backgroundColor = AppColor.pinnedGroupFill.cgColor
-        layer.borderColor = AppColor.pinnedGroupBorder.cgColor
+        let fill = (isDimmed ? AppColor.pinnedGroupFillDimmed : AppColor.pinnedGroupFill).cgColor
+        let border = (isDimmed ? AppColor.pinnedGroupBorderDimmed : AppColor.pinnedGroupBorder).cgColor
+        if animatesNextColorChange {
+            animatesNextColorChange = false
+            // 设计稿 .pin-rail 的 transition: background .15s
+            for (key, value) in [("backgroundColor", fill), ("borderColor", border)] {
+                let animation = CABasicAnimation(keyPath: key)
+                animation.fromValue = layer.value(forKey: key)
+                animation.toValue = value
+                animation.duration = 0.15
+                animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                layer.add(animation, forKey: key)
+            }
+        }
+        layer.backgroundColor = fill
+        layer.borderColor = border
         layer.borderWidth = 1
     }
 

@@ -266,7 +266,7 @@ extension PasteCollectionViewItem {
     /// 面板高度变化时按卡片高度等比缩放头部(高度、图标、字号),
     /// 避免拖得很高时头部显得又矮又小。
     func updateLayout(cardHeight: CGFloat) {
-        headerHeightConstraint?.constant = Layout.scaled(Layout.itemHeaderHeight, for: cardHeight, in: 30...48)
+        headerHeightConstraint?.constant = Layout.itemHeaderHeight(for: cardHeight)
         let iconSide = Layout.scaled(18, for: cardHeight, in: 16...24)
         appIconSizeConstraints.forEach { $0.constant = iconSide }
         appNameLabel.font = .systemFont(ofSize: Layout.scaled(12, for: cardHeight, in: 11...14), weight: .semibold)

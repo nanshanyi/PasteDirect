@@ -10,7 +10,8 @@ import Foundation
 enum Layout {
     // MARK: - 屏幕 & 面板
     static let screenPadding: CGFloat = 6
-    static let cornerRadius: CGFloat = 32
+    /// 面板圆角。与 macOS 27 系统窗口的 20pt 相比留一点余地，取 26（即 macOS 26 Tahoe 的值）
+    static let cornerRadius: CGFloat = 26
     /// 窗口比面板四周各大出的透明边距。玻璃(NSGlassEffectView)会在圆角外画一圈阴影，
     /// 窗口和面板一样大时阴影来不及淡出就被窗口边界切成直角，所以要给它留出空间。
     /// 实测 24pt 处上方阴影不透明度约 0.4%，已看不出边界；再小上边缘会重新出现直边
@@ -42,6 +43,10 @@ enum Layout {
     /// 选中描边与卡片之间的间隙
     static let itemRingGap: CGFloat = 4
     static let itemHeaderHeight: CGFloat = 36
+    /// 卡片头部随卡片高度等比缩放后的高度；置顶折叠条的图钉也按它对齐到卡片头部的中线
+    static func itemHeaderHeight(for cardHeight: CGFloat) -> CGFloat {
+        scaled(itemHeaderHeight, for: cardHeight, in: 30...48)
+    }
     /// 卡片内容左右内边距
     static let itemInset: CGFloat = 12
     /// 卡片在 cell 内四周的留白:容纳阴影、选中外圈和悬停上浮,避免被裁切。

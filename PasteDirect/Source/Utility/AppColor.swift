@@ -134,4 +134,8 @@ enum AppColor {
     /// 置顶分组底色与描边
     static let pinnedGroupFill = NSColor.systemOrange.withAlphaComponent(0.22)
     static let pinnedGroupBorder = NSColor.systemOrange.withAlphaComponent(0.45)
+    /// 折叠条收起且鼠标不在上面时的淡色(设计稿 .pin-group 的 10% 底 + 22% 描边);
+    /// 悬停时设计稿再叠一层 14%,合起来约 22%,即上面的常规色
+    static let pinnedGroupFillDimmed = NSColor.systemOrange.withAlphaComponent(0.10)
+    static let pinnedGroupBorderDimmed = NSColor.systemOrange.withAlphaComponent(0.22)
 }

@@ -547,6 +547,26 @@
         }
       }
     },
+    "Show pinned items when opening the panel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开面板时显示置顶内容"
+          }
+        }
+      }
+    },
+    "When off, pinned items are tucked into the bar on the left. Click the bar to show them." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭时，置顶内容收在列表左侧的竖条里，点击竖条可以展开。"
+          }
+        }
+      }
+    },
     "Open in Browser (⌘+Click)" : {
       "localizations" : {
         "zh-Hans" : {

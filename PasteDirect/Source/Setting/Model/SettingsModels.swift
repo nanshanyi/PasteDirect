@@ -29,18 +29,20 @@ struct SettingCategory: Identifiable, Hashable {
                 .toggle("Paste to the currently active application", key: .pasteDirect),
                 .toggle("Always paste as plain text", key: .pasteOnlyText),
             ]),
-            SettingSection(title: "Paste history", items: [
-                .slider("", key: .historyTime, range: 0 ... 99, step: 33),
-                .text("Total number of items", storeKeyPath: \.totalCountString),
-                .text("Storage size", storeKeyPath: \.storageSizeString),
-                .button("Clear all clipboard history"),
+            SettingSection(title: "Panel", items: [
+                .toggle("Show pinned items when opening the panel", key: .pinsExpandedByDefault,
+                        subtitle: "When off, pinned items are tucked into the bar on the left. Click the bar to show them."),
+                .button("Reset panel height", label: \.panelHeightString),
             ]),
             SettingSection(title: "Image", items: [
                 .toggle("Auto-extract text from images", key: .autoOCRImages,
                         subtitle: "When on, copied images can be found by searching the text inside them. When off, images aren't searchable, but you can still pick text from an image via its right-click menu."),
             ]),
-            SettingSection(title: "Panel", items: [
-                .button("Reset panel height", label: \.panelHeightString),
+            SettingSection(title: "Paste history", items: [
+                .slider("", key: .historyTime, range: 0 ... 99, step: 33),
+                .text("Total number of items", storeKeyPath: \.totalCountString),
+                .text("Storage size", storeKeyPath: \.storageSizeString),
+                .button("Clear all clipboard history"),
             ]),
         ]
     )
