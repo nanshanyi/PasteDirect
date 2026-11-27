@@ -8,29 +8,21 @@
         <item>
             <title>Version 4.0.0</title>
             <sparkle:shortVersionString>4.0.0</sparkle:shortVersionString>
-            <sparkle:version>20008</sparkle:version>
-            <pubDate>Thu, 26 Nov 2026 05:18:08 +0000</pubDate>
+            <sparkle:version>20009</sparkle:version>
+            <pubDate>Fri, 27 Nov 2026 14:02:39 +0000</pubDate>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <description>&lt;p&gt;第二个 4.0 测试版（Beta）：修复了「清空所有数据」之后新内容再也存不进去的问题，面板阴影与列表滚动的手感也一并调整；本版包含 beta1 的全部内容。遇到问题请到 https://github.com/nanshanyi/PasteDirect/issues 反馈。&lt;/p&gt;
-&lt;h4&gt;修复（Beta 2）&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;修复「清空所有数据」之后，新复制的内容无法保存的问题：beta1 里点过这个按钮的用户，之后的复制全部写不进数据库，重启也无法恢复。现在已修复，且启动时会自动检查并修好被这个问题破坏的数据库——升级后不需要删除数据库或重装，复制的内容马上就能正常保存。（被清空的历史不会回来，那一步本来就是清空。）&lt;/li&gt;
-&lt;li&gt;修复面板四角阴影被窗口边缘切断、圆角外出现直角硬边的问题。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4&gt;列表与性能（Beta 2）&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;列表滚动改为按位置续取：翻页过程中复制了新内容，也不会出现条目被跳过或重复出现的情况。&lt;/li&gt;
-&lt;li&gt;列表排序改用覆盖排序字段的索引，历史条数越多，打开和滚动的差距越明显。&lt;/li&gt;
-&lt;/ul&gt;
+            <description>&lt;p&gt;4.0 正式版：界面整体重做，更新方式改为应用内自动更新。此前两个测试版（beta1 / beta2）的内容全部包含在这一版里，遇到问题请到 https://github.com/nanshanyi/PasteDirect/issues 反馈。&lt;/p&gt;
 &lt;h4&gt;全新 UI 设计&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;主面板整体重做：卡片头部取来源应用主色，悬停上浮、选中描边更清晰，置顶条目与普通历史分开成组，置顶分组底色与描边更醒目。&lt;/li&gt;
 &lt;li&gt;搜索框、预览弹窗、设置页统一到同一套视觉规则；深色与浅色模式分别调校，切换主题不再出现颜色跳变。&lt;/li&gt;
+&lt;li&gt;面板四角阴影不再被窗口边缘切断，圆角外也不再出现直角硬边。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h4&gt;应用内自动更新&lt;/h4&gt;
 &lt;ul&gt;
 &lt;li&gt;接入 &lt;a href="https://sparkle-project.org/"&gt;Sparkle&lt;/a&gt;：发现新版本后可在应用内直接下载、安装并重启，不必再手动下载 dmg 拖进「应用程序」。&lt;/li&gt;
 &lt;li&gt;新增「自动下载更新」：更新在后台静默下载，退出应用时自动安装；也可以跳过某个版本不再提示。&lt;/li&gt;
+&lt;li&gt;v3.5 的「启动时自动检查」「忽略版本」设置会自动迁移，无需重新配置。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h4&gt;更顺手的操作&lt;/h4&gt;
 &lt;ul&gt;
@@ -38,11 +30,20 @@
 &lt;li&gt;链接卡片可直接在浏览器中打开：右键菜单选择「在浏览器中打开」，或按住 ⌘ 单击卡片（按住 ⌘ 悬停时指针变为手型）。&lt;/li&gt;
 &lt;li&gt;颜色识别支持带 `#` / `0x` 前缀的 hex（含 3、6、8 位）以及 `rgb()` / `rgba()` / `hsl()` / `hsla()`；不带前缀的 `123456`、`deadbeef` 等普通文本不会被误判。选择「粘贴为纯文本」时仅 hex 写法会规范为 `#RRGGBB`，rgb / hsl 保持原文。&lt;/li&gt;
 &lt;li&gt;悬停卡片直接出现置顶 / 删除按钮；置顶、取消置顶时卡片带动画移动到新位置。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;列表与性能&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;列表滚动改为按位置续取：翻页过程中复制了新内容，也不会出现条目被跳过或重复出现。&lt;/li&gt;
+&lt;li&gt;列表查询改为游标分页、去重改为唯一索引，界面改用 diffable 数据源，排序走覆盖排序字段的索引——历史条数越多，打开和滚动的差距越明显。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;修复&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;修复「清空所有数据」之后新复制的内容无法保存的问题；启动时会自动检查并修好受影响的数据库，升级后无需删除数据或重装（被清空的历史不会回来）。&lt;/li&gt;
 &lt;/ul&gt;</description>
-            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0-beta2/PasteDirect-4.0.0.zip" sparkle:edSignature="gXjyz964Ah8cIwUdqUbNDq5LmyUplK11tcWesRqCmvKeOiZiK+guJ/PvIscQgKEvG7zGY2+Xp8i7XSBBVdWWCQ==" length="4894329" type="application/octet-stream" />
+            <enclosure url="https://github.com/nanshanyi/PasteDirect/releases/download/v4.0.0/PasteDirect-4.0.0.zip" sparkle:edSignature="UjvV6jFokEe2UZIKRRVxGtQCgGmm8GjmnYOVOlhRbVHaFUqdUI++DX88LcP5wdvVGibyhTkXR2JcBPj4FFkkBg==" length="4894342" type="application/octet-stream" />
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: L2aX57Hp99vrJY+4SD9pjTYthGhJrKXazItSnsA6XgsM3iAS5QJmnLpPAP0/y2mFED37eYFQ5Bn9/7Rs1cDxAg==
-length: 4183
+edSignature: gLbiMXqEujkz5E1rNNwrHbq0eoGVRqIqHUvRxXInR+WT/OXSvBJfZYjdzVbuApcMDVbfwxnrqqMwhX2ynO3gBA==
+length: 4080
 -->
