@@ -13,8 +13,6 @@ import SnapKit
 /// 底色不在这里画：收起和展开都是同一块 PinnedGroupBackgroundView，只是宽窄不同。
 final class PastePinRailView: NSView {
     static let width: CGFloat = 56
-    /// 折叠条与第一张卡片之间的距离
-    static let gap: CGFloat = 12
     private static let maxAppIcons = 6
     private static let appIconSize: CGFloat = 22
     /// 相邻图标叠压的高度，约一半，露出的部分足够认出是哪个 App

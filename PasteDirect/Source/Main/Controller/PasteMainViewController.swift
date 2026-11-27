@@ -16,7 +16,7 @@ final class PasteMainViewController: NSViewController {
     private var cancellables = Set<AnyCancellable>()
     private var previewPopover: PastePreviewPopover?
     private var keyEventMonitor: Any?
-    private var contentView: PanelContentView!
+    private var contentView: NSView!
     private var isBouncingBack = false
 
     // MARK: - lazy property
@@ -41,6 +41,8 @@ final class PasteMainViewController: NSViewController {
         $0.collectionViewLayout = flowLayout
         $0.isSelectable = true
         $0.register(PasteCollectionViewItem.self)
+        $0.register(PinRailHeaderView.self, forSupplementaryViewOfKind: NSCollectionView.elementKindSectionHeader,
+                    withIdentifier: PinRailHeaderView.identifier)
         $0.registerForDraggedTypes(PasteboardType.supportTypes)
         $0.setDraggingSourceOperationMask(.every, forLocal: true)
         $0.setDraggingSourceOperationMask(.every, forLocal: false)
@@ -49,6 +51,16 @@ final class PasteMainViewController: NSViewController {
     /// 以条目 hash 为标识，列表变化时自动计算插入/删除/移动动画
     private lazy var dataSource = NSCollectionViewDiffableDataSource<Int, Int>(collectionView: collectionView) { [weak self] collectionView, indexPath, _ in
         self?.makeItem(collectionView, at: indexPath)
+    }.then {
+        // 置顶折叠条是 section header：每次取到的容器可能是新建的，把同一个竖条放进去
+        $0.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
+            guard let self, kind == NSCollectionView.elementKindSectionHeader,
+                  let header = collectionView.makeSupplementaryView(
+                      ofKind: kind, withIdentifier: PinRailHeaderView.identifier, for: indexPath) as? PinRailHeaderView
+            else { return nil }
+            header.embed(self.pinRail)
+            return header
+        }
     }
 
     private lazy var scrollView = PasteScrollView().then {
@@ -106,19 +118,12 @@ final class PasteMainViewController: NSViewController {
         $0.isHidden = true
     }
 
-    /// 列表左边缘：有置顶折叠条时让出它的位置
-    private var scrollLeading: Constraint?
-    /// 展开时竖条和置顶卡片共用的那块底色：还是列表原来那个置顶分组装饰视图，
-    /// 只是 frame 由控制器从竖条左边缘算起（布局算的那块够不到竖条，会被列表左缘裁掉）
-    private let pinnedGroupBackground = PinnedGroupBackgroundView(frame: .zero)
     private var pinPeekPopover: NSPopover?
     private var isRailHovered = false
     private var isPeekHovered = false
     /// 按住 ⌥ 时弹出置顶清单显示 ⌥1–9
     private var isOptionHeld = false
-    /// 展开/收起置顶的动画进行中：底色正跟着卡片伸缩，其他地方（滚动、布局）不要把它直接设到终点
-    private var isAnimatingPinsToggle = false
-    /// 展开/收起的动画参数，卡片和底色共用，两者才能同步：设计稿的 .32s cubic-bezier(.3,.7,.2,1)
+    /// 展开/收起的动画参数：设计稿的 .32s cubic-bezier(.3,.7,.2,1)
     private static let pinsToggleDuration: TimeInterval = 0.32
     private static let pinsToggleTiming = CAMediaTimingFunction(controlPoints: 0.3, 0.7, 0.2, 1)
 }
@@ -127,11 +132,8 @@ final class PasteMainViewController: NSViewController {
 
 extension PasteMainViewController {
     override func loadView() {
-        let contentView = PanelContentView()
+        let contentView = NSView()
         contentView.wantsLayer = true
-        // 分组底色按竖条、列表的 frame 手算，必须等它们排好再算：
-        // 这里是三者共同的父视图，super.layout() 跑完它们都已是最终位置
-        contentView.onLayout = { [weak self] in self?.updatePinnedGroupBackground() }
         let panelView: NSView
         if #available(macOS 26.0, *) {
             let glassView = NSGlassEffectView()
@@ -198,7 +200,8 @@ extension PasteMainViewController {
     override func viewDidDisappear() {
         super.viewDidDisappear()
         closePreviewPopover()
-        isOptionHeld = false
+        // 走 setOptionHeld：关面板时还按着 ⌥，卡片上的 ⌥ 角标要一起收掉
+        setOptionHeld(false)
         closePinPeek()
         let hadSearchOrFilter = !searchBar.text.isEmpty || viewModel.filterIsActive
         searchBar.stringValue = ""
@@ -216,11 +219,8 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func initSubviews() {
-        // 置顶分组底色要铺在列表下面：先加它，再加滚动视图和竖条
-        pinnedGroupBackground.isHidden = true
-        contentView.addSubview(pinnedGroupBackground)
+        // 置顶折叠条和分组底色都在列表里（section header + 装饰视图），这里不用单独加
         contentView.addSubview(scrollView)
-        contentView.addSubview(pinRail)
         contentView.addSubview(emptyStateView)
         contentView.addSubview(searchBar)
         contentView.addSubview(settingButton)
@@ -234,8 +234,7 @@ extension PasteMainViewController {
         }
 
         scrollView.snp.makeConstraints { make in
-            scrollLeading = make.leading.equalToSuperview().constraint
-            make.trailing.equalToSuperview()
+            make.leading.trailing.equalToSuperview()
             // 上下各收 itemShadowMargin,抵消卡片内缩带来的额外间距,回到原视觉间距
             make.bottom.equalToSuperview().offset(-Layout.scrollViewBottom + Layout.itemShadowMargin)
             make.top.equalTo(searchBar.snp.bottom).offset(Layout.scrollViewTop - Layout.itemShadowMargin)
@@ -245,13 +244,6 @@ extension PasteMainViewController {
             make.edges.equalTo(scrollView)
         }
 
-        // 和卡片上下对齐：cell 上下各有 itemShadowMargin 的留白
-        pinRail.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(Layout.padding)
-            make.width.equalTo(PastePinRailView.width)
-            make.top.equalTo(scrollView).offset(Layout.itemShadowMargin)
-            make.bottom.equalTo(scrollView).offset(-Layout.itemShadowMargin)
-        }
         setupPinRail()
 
         searchBar.snp.makeConstraints { make in
@@ -366,8 +358,8 @@ extension PasteMainViewController {
 extension PasteMainViewController {
     private func applyListUpdate(_ update: PasteMainViewModel.ListUpdate) {
         if update.pinsToggled {
-            // 竖条外观、列表自带的置顶底色开关和新数据在同一次更新里切换，不会出现新旧状态混在一起的一帧
-            isAnimatingPinsToggle = update.animated
+            // 竖条外观、header 悬停开关和新数据在同一次更新里切换，不会出现新旧状态混在一起的一帧；
+            // 底色是装饰视图，和卡片在下面这次快照动画里一起伸缩
             updatePinRail(items: viewModel.pinnedItems, animated: update.animated)
         }
         var snapshot = NSDiffableDataSourceSnapshot<Int, Int>()
@@ -381,6 +373,12 @@ extension PasteMainViewController {
                 item.updatePinState(model: model)
             }
         }
+        if update.scrollToBeginning {
+            // 先回到开头、把开头的卡片建好，再换数据：动画是按换数据那一刻的可见区域算的。
+            // 滚远了再换，开头那批卡片在动画开始时还不存在，回到开头后要等动画结束才出来，中间是空白
+            collectionView.scroll(.zero)
+            collectionView.layoutSubtreeIfNeeded()
+        }
         if update.animated {
             NSAnimationContext.runAnimationGroup { ctx in
                 ctx.duration = update.pinsToggled ? Self.pinsToggleDuration : 0.35
@@ -388,11 +386,7 @@ extension PasteMainViewController {
                 dataSource.apply(snapshot, animatingDifferences: true)
             } completionHandler: { [weak self] in
                 MainActor.assumeIsolated {
-                    guard let self else { return }
-                    self.isAnimatingPinsToggle = false
-                    self.refreshShortcutHints()
-                    // 动画期间卡片还在移动，等落位后再把分组底色收拢到最后一张置顶卡
-                    self.updatePinnedGroupBackground()
+                    self?.refreshShortcutHints()
                 }
             }
         } else {
@@ -406,6 +400,7 @@ extension PasteMainViewController {
         }
         collectionView.selectionIndexPaths = viewModel.items.isEmpty ? [] : [selected]
         if update.scrollToBeginning {
+            // 换完数据再对齐一次：新列表变短时，前面那次滚动位置可能已经超出内容
             collectionView.scroll(.zero)
         } else if update.scrollToSelection {
             scrollTo(indexPath: selected)
@@ -414,13 +409,6 @@ extension PasteMainViewController {
             refreshTypeCounts()
         }
         updateEmptyState()
-        if update.pinsToggled {
-            // 快照已换、也滚回了开头：先让布局算出卡片的新位置，底色再跟卡片一起长出去/收回来
-            collectionView.layoutSubtreeIfNeeded()
-            updatePinnedGroupBackground(animated: update.animated)
-        } else {
-            updatePinnedGroupBackground()
-        }
     }
 
     private func makeItem(_ collectionView: NSCollectionView, at indexPath: IndexPath) -> NSCollectionViewItem {
@@ -449,16 +437,23 @@ extension PasteMainViewController {
     }
 
     private func scrollTo(indexPath: IndexPath) {
-        if let item = collectionView.layoutAttributesForItem(at: indexPath) {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.25
-                collectionView.animator().scrollToVisible(NSRect(x: item.frame.origin.x - Layout.lineSpacing, y: 0, width: item.frame.width + Layout.lineSpacing * 2, height: item.frame.height))
-            }
+        guard let item = collectionView.layoutAttributesForItem(at: indexPath),
+              let layout = collectionView.collectionViewLayout as? PasteFlowLayout else { return }
+        // 左边留出的距离：竖条悬停时要躲开它，卡片停在和列表开头一样的位置；
+        // 展开时第一张卡片前面是竖条，直接滚到最开头，不要把竖条切掉一半
+        let leadingRoom = layout.hasPinRail && layout.pinsRail
+            ? layout.headerReferenceSize.width + layout.sectionInset.left
+            : Layout.lineSpacing
+        let minX = indexPath.item == 0 ? 0 : max(0, item.frame.minX - leadingRoom)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25
+            collectionView.animator().scrollToVisible(NSRect(x: minX, y: 0, width: item.frame.maxX + Layout.lineSpacing - minX, height: item.frame.height))
         }
     }
 
     private func updateEmptyState() {
-        let isEmpty = viewModel.items.isEmpty
+        // 竖条在列表里：只要还有置顶（全部记录都置顶、收起时列表是空的），列表就得留着
+        let isEmpty = viewModel.items.isEmpty && pinRail.isHidden
         emptyStateView.isHidden = !isEmpty
         scrollView.isHidden = isEmpty
         if isEmpty {
@@ -524,11 +519,13 @@ extension PasteMainViewController {
         digitKeyCodes.firstIndex(of: Int(event.keyCode)).map { $0 + 1 }
     }
 
-    /// 可见卡片按顺序编号 1–9
+    /// ⌘1–9：可见的未置顶卡片按顺序编号。置顶卡片归 ⌥1–9（按置顶顺序），两套编号不重叠
     private func visibleShortcutIndexPaths() -> [IndexPath] {
         let visibleRect = scrollView.contentView.bounds
         return collectionView.indexPathsForVisibleItems()
             .filter { indexPath in
+                // 有折叠条时置顶卡片走 ⌥；搜索、筛选时没有折叠条，置顶卡片照常参与 ⌘ 编号
+                if !self.pinRail.isHidden, self.viewModel.item(at: indexPath)?.isPinned == true { return false }
                 guard let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame else { return false }
                 // 只给露出一半以上的卡片编号
                 return frame.intersection(visibleRect).width >= frame.width / 2
@@ -544,11 +541,24 @@ extension PasteMainViewController {
         refreshShortcutHints()
     }
 
+    /// 展开时按住 ⌥：置顶卡片直接显示 ⌥1–9，不弹清单
+    private var showsPinnedShortcutBadges: Bool {
+        isOptionHeld && viewModel.pinsExpanded && !pinRail.isHidden
+    }
+
     private func refreshShortcutHints() {
         let numbered = isShowingShortcuts ? visibleShortcutIndexPaths() : []
+        // 编号和折叠条、清单一致：第 N 条置顶就是 ⌥N
+        let pinnedNumbers: [Int: Int] = showsPinnedShortcutBadges
+            ? Dictionary(uniqueKeysWithValues: viewModel.pinnedItems.prefix(9).enumerated().map { ($1.hashValue, $0 + 1) })
+            : [:]
         for indexPath in collectionView.indexPathsForVisibleItems() {
             guard let item = collectionView.item(at: indexPath) as? PasteCollectionViewItem else { continue }
-            item.setShortcutNumber(numbered.firstIndex(of: indexPath).map { $0 + 1 })
+            if let hash = viewModel.item(at: indexPath)?.hashValue, let number = pinnedNumbers[hash] {
+                item.setShortcutNumber(number, modifier: "⌥")
+            } else {
+                item.setShortcutNumber(numbered.firstIndex(of: indexPath).map { $0 + 1 })
+            }
         }
     }
 
@@ -622,15 +632,6 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func setupPinRail() {
-        // 分组底色的右边缘跟着置顶卡片走，横向滚动时要重算
-        scrollView.contentView.postsBoundsChangedNotifications = true
-        NotificationCenter.default.addObserver(
-            forName: NSView.boundsDidChangeNotification,
-            object: scrollView.contentView,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.updatePinnedGroupBackground() }
-        }
         pinRail.onClick = { [weak self] in
             guard let self else { return }
             self.closePinPeek()
@@ -658,19 +659,14 @@ extension PasteMainViewController {
         let visible = !items.isEmpty
         pinRail.isHidden = !visible
         pinRail.configure(items: items, expanded: viewModel.pinsExpanded, animated: animated)
-        // 收起和展开铺的是同一块底色（PinnedGroupBackgroundView），收起时只有竖条那么宽；
-        // 展开时它连置顶卡片一起框住，列表自带的置顶分组底色就不用再画了
-        let coversCards = visible && viewModel.pinsExpanded
-        pinnedGroupBackground.isHidden = !visible
-        updatePinnedGroupDimming()
-        if let layout = collectionView.collectionViewLayout as? PasteFlowLayout,
-           layout.showsPinnedBackground != !coversCards {
-            layout.showsPinnedBackground = !coversCards
-            layout.invalidateLayout()
+        if let layout = collectionView.collectionViewLayout as? PasteFlowLayout {
+            layout.hasPinRail = visible
+            // 收起时竖条悬停在左边，卡片从它下面滑过；展开时竖条跟着列表滑走
+            layout.pinsRail = !viewModel.pinsExpanded
         }
-        let leading = visible ? Layout.padding + PastePinRailView.width + PastePinRailView.gap - Layout.lineSpacing : 0
-        scrollLeading?.update(offset: leading)
-        updatePinnedGroupBackground()
+        updatePinnedGroupDimming()
+        // 全部记录都置顶、收起时列表是空的：有竖条就不显示空状态
+        updateEmptyState()
         if !visible {
             closePinPeek()
         } else if let controller = pinPeekPopover?.contentViewController as? PastePinPeekViewController {
@@ -679,47 +675,19 @@ extension PasteMainViewController {
         }
     }
 
-    /// 竖条 + 置顶卡片的外接矩形，右边缘跟着最后一张置顶卡片走（横向滚动时实时更新）。
-    /// 收起时只框住竖条，上下补到与装饰视图一样高，两种状态下底色完全一致。
-    /// 展开/收起时传 animated，让底色跟着卡片一起长出去/收回来，而不是等动画结束再跳
-    private func updatePinnedGroupBackground(animated: Bool = false) {
-        // 展开/收起动画期间只接受那一次带动画的更新，滚动、布局触发的直接设置会把底色钉到终点
-        guard animated || !isAnimatingPinsToggle else { return }
-        guard !pinnedGroupBackground.isHidden, pinRail.frame.width > 0 else { return }
-        var rect = pinRail.frame.insetBy(dx: 0, dy: -Layout.itemShadowMargin)
-        if viewModel.pinsExpanded {
-            // 只算列表开头连续的置顶卡片：展开刚触发、新数据还没回来时这里是 0，
-            // 底色先跟竖条重合，不会错误地铺到普通卡片上
-            let pinnedCount = viewModel.items.prefix { $0.isPinned }.count
-            for index in 0..<pinnedCount {
-                guard let attributes = collectionView.layoutAttributesForItem(at: IndexPath(item: index, section: 0)) else { continue }
-                rect = rect.union(collectionView.convert(attributes.frame, to: contentView))
-            }
-        }
-        // 置顶卡片滚出列表后不要把底色露到列表外面
-        rect.size.width = max(0, min(rect.width, scrollView.frame.maxX - rect.minX))
-        guard animated, pinnedGroupBackground.frame != rect else {
-            pinnedGroupBackground.frame = rect
-            return
-        }
-        // 和卡片用同一组时长和曲线，一起长出去/收回来
-        NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = Self.pinsToggleDuration
-            ctx.timingFunction = Self.pinsToggleTiming
-            pinnedGroupBackground.animator().frame = rect
-        }
-    }
-
     /// 收起时底色平时用淡色，鼠标在竖条上才加深；展开时连着卡片，一直用常规色
     private func updatePinnedGroupDimming() {
-        pinnedGroupBackground.isDimmed = !viewModel.pinsExpanded && !isRailHovered
+        (collectionView.collectionViewLayout as? PasteFlowLayout)?.dimsPinnedBackground =
+            !viewModel.pinsExpanded && !isRailHovered
     }
 
     private func setOptionHeld(_ held: Bool) {
         guard held != isOptionHeld else { return }
         isOptionHeld = held
+        // 展开时置顶卡片就在列表里，直接在卡片上显示 ⌥1–9；收起时才弹清单
+        refreshShortcutHints()
         if held {
-            showPinPeek()
+            if !viewModel.pinsExpanded { showPinPeek() }
         } else {
             closePinPeekIfIdle()
         }
@@ -743,7 +711,14 @@ extension PasteMainViewController {
         popover.contentViewController = controller
         popover.contentSize = controller.preferredContentSize
         pinPeekPopover = popover
-        popover.show(relativeTo: pinRail.bounds, of: pinRail, preferredEdge: .maxX)
+        // 展开后竖条可能已经跟着列表滚出去了（按住 ⌥ 时），这时把清单挂到列表左边缘
+        let railVisible = pinRail.window != nil && !pinRail.visibleRect.isEmpty
+        if railVisible {
+            popover.show(relativeTo: pinRail.bounds, of: pinRail, preferredEdge: .maxX)
+        } else {
+            let anchor = NSRect(x: 0, y: 0, width: Layout.padding, height: scrollView.bounds.height)
+            popover.show(relativeTo: anchor, of: scrollView, preferredEdge: .maxX)
+        }
     }
 
     /// 鼠标从折叠条移到清单上要经过两者之间的空隙，稍等一下再判断是否真的离开了
@@ -1007,17 +982,5 @@ extension PasteMainViewController: NSPopoverDelegate {
         if (notification.object as? NSPopover) === previewPopover {
             previewPopover = nil
         }
-    }
-}
-
-// MARK: - 面板内容视图
-
-/// 面板的内容视图，布局完成后通知控制器：手动摆放的视图（置顶分组底色）要在子视图都排好之后再算
-private final class PanelContentView: NSView {
-    var onLayout: (() -> Void)?
-
-    override func layout() {
-        super.layout()
-        onLayout?()
     }
 }

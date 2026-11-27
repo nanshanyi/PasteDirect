@@ -241,7 +241,7 @@ final class PasteCollectionViewItem: NSCollectionViewItem {
         $0.alignment = .centerY
     }
 
-    /// 按住 ⌘ 时显示的快速粘贴编号
+    /// 按住 ⌘(未置顶卡)或 ⌥(展开时的置顶卡)时显示的快速粘贴编号
     private lazy var shortcutBadge = CardBadge(style: .accent).then {
         $0.isHidden = true
     }
@@ -275,10 +275,10 @@ extension PasteCollectionViewItem {
         footerLabel.font = .systemFont(ofSize: Layout.scaled(11, for: cardHeight, in: 10...13))
     }
 
-    /// 快速粘贴编号(1–9),nil 隐藏
-    func setShortcutNumber(_ number: Int?) {
+    /// 快速粘贴编号(1–9),nil 隐藏。modifier 是角标前面的修饰键符号:未置顶卡 ⌘,置顶卡 ⌥
+    func setShortcutNumber(_ number: Int?, modifier: String = "⌘") {
         if let number {
-            shortcutBadge.text = "⌘\(number)"
+            shortcutBadge.text = "\(modifier)\(number)"
             shortcutBadge.isHidden = false
         } else {
             shortcutBadge.isHidden = true
