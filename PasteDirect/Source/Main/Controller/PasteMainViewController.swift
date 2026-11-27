@@ -16,7 +16,7 @@ final class PasteMainViewController: NSViewController {
     private var cancellables = Set<AnyCancellable>()
     private var previewPopover: PastePreviewPopover?
     private var keyEventMonitor: Any?
-    private var contentView: NSView!
+    private var contentView: PanelContentView!
     private var isBouncingBack = false
 
     // MARK: - lazy property
@@ -127,8 +127,11 @@ final class PasteMainViewController: NSViewController {
 
 extension PasteMainViewController {
     override func loadView() {
-        let contentView = NSView()
+        let contentView = PanelContentView()
         contentView.wantsLayer = true
+        // 分组底色按竖条、列表的 frame 手算，必须等它们排好再算：
+        // 这里是三者共同的父视图，super.layout() 跑完它们都已是最终位置
+        contentView.onLayout = { [weak self] in self?.updatePinnedGroupBackground() }
         let panelView: NSView
         if #available(macOS 26.0, *) {
             let glassView = NSGlassEffectView()
@@ -173,8 +176,6 @@ extension PasteMainViewController {
         if isBouncingBack, let window = view.window {
             updateItemSize(for: Self.panelHeight(of: window))
         }
-        // 面板高度变化会改卡片尺寸，分组底色跟着重算
-        updatePinnedGroupBackground()
     }
 
     override func viewWillAppear() {
@@ -182,6 +183,9 @@ extension PasteMainViewController {
         // 每次打开面板回到设置里的默认展开状态；窗口还没显示，切换不做动画
         viewModel.applyDefaultPinsExpansion()
     }
+
+    /// 面板显示时默认获得焦点的视图
+    var initialFirstResponder: NSView { collectionView }
 
     override func viewDidAppear() {
         super.viewDidAppear()
@@ -469,7 +473,9 @@ extension PasteMainViewController {
 extension PasteMainViewController {
     private func setupKeyEventMonitor() {
         keyEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
-            guard let self else { return event }
+            // 本地监听收得到本 app 所有窗口的按键。面板启动时就创建了，没打开时不处理，
+            // 否则在设置窗口里按 ⌘1 也会触发粘贴
+            guard let self, self.view.window?.isVisible == true else { return event }
             if event.type == .flagsChanged {
                 let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
                 self.setShortcutHintsVisible(flags == .command)
@@ -1001,5 +1007,17 @@ extension PasteMainViewController: NSPopoverDelegate {
         if (notification.object as? NSPopover) === previewPopover {
             previewPopover = nil
         }
+    }
+}
+
+// MARK: - 面板内容视图
+
+/// 面板的内容视图，布局完成后通知控制器：手动摆放的视图（置顶分组底色）要在子视图都排好之后再算
+private final class PanelContentView: NSView {
+    var onLayout: (() -> Void)?
+
+    override func layout() {
+        super.layout()
+        onLayout?()
     }
 }

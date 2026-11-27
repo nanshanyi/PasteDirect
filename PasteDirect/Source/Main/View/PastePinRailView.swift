@@ -121,7 +121,10 @@ final class PastePinRailView: NSView {
         appStack.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.bottom.equalTo(chevronView.snp.top).offset(-Self.itemSpacing)
-            make.top.greaterThanOrEqualTo(badgeView.snp.bottom).offset(Self.itemSpacing)
+            // 优先级必须低于 windowSizeStayPut(500)：高于它的约束都会参与限制窗口大小，
+            // 图标栈的高度就成了整个面板的最小高度，拖动缩小时窗口会被撑回去。
+            // 放低后，变矮的那一帧图标栈先和徽章叠住，layout() 里随即按剩余空间减少图标
+            make.top.greaterThanOrEqualTo(badgeView.snp.bottom).offset(Self.itemSpacing).priority(.low)
         }
     }
 

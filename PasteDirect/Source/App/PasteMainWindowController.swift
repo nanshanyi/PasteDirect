@@ -16,7 +16,11 @@ final class PasteMainWindowController: NSWindowController {
     private var targetFrame: NSRect = .zero
 
     init() {
-        let panel = PasteMainPanel(contentViewController: PasteMainViewController())
+        let controller = PasteMainViewController()
+        let panel = PasteMainPanel(contentViewController: controller)
+        // 窗口第一次显示时 AppKit 会把焦点交给第一个可编辑的视图（搜索框），viewDidAppear 随后又切回列表。
+        // 搜索框拿焦点要初始化输入法、加载写作工具，白白占掉十来毫秒，直接从列表开始
+        panel.initialFirstResponder = controller.initialFirstResponder
         super.init(window: panel)
         panel.delegate = self
     }
@@ -43,6 +47,10 @@ final class PasteMainWindowController: NSWindowController {
         startFrame.origin.y -= targetFrame.height
         window.setFrame(startFrame, display: true)
         window.makeKeyAndOrderFront(nil)
+        // 先把第一帧画完、提交给渲染服务再开始滑入：第一次打开时这一帧要建全部卡片的图层，
+        // 留到动画开始后才做，动画的前几帧就被吞掉，面板看起来是跳出来的
+        window.displayIfNeeded()
+        CATransaction.flush()
 
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25

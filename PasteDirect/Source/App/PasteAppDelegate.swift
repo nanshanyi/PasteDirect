@@ -62,6 +62,9 @@ extension PasteAppDelegate {
         PasteBoard.main.startListening()
         /// 初始化DataStore
         PasteDataStore.main.setup()
+        /// 提前创建面板：首页数据在启动时就查好，第一次打开不用在滑入动画里查库、建卡片，
+        /// 否则主线程会在动画开头卡住几十毫秒，面板看起来像突然出现
+        _ = mainWindowController
         /// 记录是否第一次启动 设置开机自启
         if !PasteUserDefaults.appAlreadyLaunched {
 #if !DEBUG
