@@ -23,8 +23,8 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
-  <img alt="PasteDirect 主面板" src="docs/images/main-light.jpg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main_dark.png">
+  <img alt="PasteDirect 主面板" src="docs/images/main_light.png">
 </picture>
 
 ## 特性
@@ -35,7 +35,17 @@
 - **颜色识别** — 自动识别带 `#` / `0x` 前缀的 Hex 以及 `rgb()` / `hsl()` 颜色值，卡片直接显示色块
 - **链接识别** — 单个 http(s) 链接自动归为链接，右键或 `⌘` + 单击即可在浏览器中打开
 - **图片文字识别（OCR）** — 基于系统 Vision 框架在本地识别图中文字，图片也能被搜索到
-- **条目置顶** — 常用内容一键置顶，始终排在最前，不受历史清理影响
+- **条目置顶** — 常用内容一键置顶后收进左侧竖条，列表始终从最新复制开始，置顶项也不受历史清理影响；悬停竖条即列出全部置顶，点击展开成卡片
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/pin_pop_dark.png">
+  <img alt="悬停左侧竖条列出全部置顶" src="docs/images/pin_pop_light.png">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/pin_expand_dark.png">
+  <img alt="点击竖条展开，置顶卡片排在列表最前" src="docs/images/pin_expand_light.png">
+</picture>
 
 ### 🔍 很快就能找到
 
@@ -57,6 +67,7 @@
 
 - **多种粘贴方式** — 双击、回车，或直接拖拽到目标位置
 - **⌘1–9 快速粘贴** — 按住 `⌘` 显示卡片序号，按对应数字即可粘贴
+- **⌥1–9 快速粘贴置顶** — 按住 `⌥` 时，收起的置顶项弹出清单、展开的卡片直接显示序号，按数字即可粘贴
 - **纯文本粘贴** — 右键「以纯文本粘贴」，或在设置中开启「始终以纯文本粘贴」
 - **直接粘贴** — 选中后自动粘贴回之前的应用，无需再按 `⌘V`
 
@@ -98,7 +109,9 @@
 | `←` `→` | 切换选中项 |
 | `Enter` / 双击 | 粘贴选中项 |
 | `⌘` + 单击 | 在浏览器中打开链接卡片 |
-| `⌘1` – `⌘9` | 粘贴对应序号的卡片（按住 `⌘` 显示序号） |
+| 点击左侧竖条 | 展开 / 收起置顶项，悬停可直接预览置顶清单 |
+| `⌘1` – `⌘9` | 粘贴对应序号的卡片（按住 `⌘` 显示序号，置顶项不参与编号） |
+| `⌥1` – `⌥9` | 粘贴第 N 条置顶（收起时按住 `⌥` 弹出清单，展开时卡片上直接显示序号） |
 | `Space` | 预览选中项 |
 | `Delete` | 删除选中项 |
 | `Esc` | 依次关闭预览 / 筛选弹窗 / 清空搜索 / 关闭面板 |
@@ -119,6 +132,7 @@
 | 状态栏图标 | 显示 / 隐藏菜单栏图标 |
 | 直接粘贴 | 选中后自动粘贴到当前应用 |
 | 始终以纯文本粘贴 | 去除格式，仅粘贴纯文本 |
+| 打开面板时显示置顶内容 | 关闭时置顶项收进左侧竖条，点击竖条才展开；开启则每次打开面板都展开 |
 | 自动识别图片中的文字 | 对复制的图片做 OCR；关闭后仍可在右键菜单中手动取用 |
 | 历史保留时长 | 1 天 / 1 周 / 1 月 / 永久 |
 | 忽略应用 | 不记录这些应用复制的内容 |

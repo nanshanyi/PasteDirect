@@ -23,8 +23,8 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main-dark.jpg">
-  <img alt="PasteDirect main panel" src="docs/images/main-light.jpg">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/main_dark.png">
+  <img alt="PasteDirect main panel" src="docs/images/main_light.png">
 </picture>
 
 ## Features
@@ -35,7 +35,17 @@
 - **Color detection** — Hex values (with a `#` or `0x` prefix) and `rgb()` / `hsl()` colors are recognized and shown as swatches
 - **Link detection** — A single http(s) URL is classified as a link; open it in your browser from the right-click menu or with `⌘` + click
 - **Image text recognition (OCR)** — Text in images is recognized on-device with Apple's Vision framework, so images are searchable too
-- **Pinned items** — Pin frequently used items so they always stay first and are never auto-cleaned
+- **Pinned items** — Pin frequently used items and they tuck into the bar on the left, so the list always starts with your latest copy; pinned items are never auto-cleaned. Hover the bar to list them all, click to expand them into cards
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/pin_pop_dark.png">
+  <img alt="Hover the pinned bar to list every pinned item" src="docs/images/pin_pop_light.png">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/pin_expand_dark.png">
+  <img alt="Click the bar to expand pinned items into cards at the front of the list" src="docs/images/pin_expand_light.png">
+</picture>
 
 ### 🔍 Finds things fast
 
@@ -57,6 +67,7 @@
 
 - **Multiple ways to paste** — Double-click, press Return, or drag to the destination
 - **⌘1–9 quick paste** — Hold `⌘` to reveal card numbers, then press a number to paste
+- **⌥1–9 quick paste for pinned items** — Hold `⌥` to get a popover of pinned items when they're collapsed, or numbers right on the cards when expanded
 - **Plain text** — Choose "Paste as Plain Text" from the context menu, or enable "Always paste as plain text" in Settings
 - **Direct paste** — Pastes straight into the previous app after you pick an item, no extra `⌘V` needed
 
@@ -98,7 +109,9 @@ Press `⌘⇧V` (customizable) to open the panel, then:
 | `←` `→` | Move the selection |
 | `Return` / double-click | Paste the selected item |
 | `⌘` + click | Open a link card in your browser |
-| `⌘1` – `⌘9` | Paste the card with that number (hold `⌘` to show numbers) |
+| Click the bar on the left | Expand / collapse pinned items; hover it to preview the list |
+| `⌘1` – `⌘9` | Paste the card with that number (hold `⌘` to show numbers; pinned items aren't numbered) |
+| `⌥1` – `⌥9` | Paste the Nth pinned item (hold `⌥` for the list when collapsed; numbers show on cards when expanded) |
 | `Space` | Preview the selected item |
 | `Delete` | Delete the selected item |
 | `Esc` | Close preview / filter popover / clear search / close panel, in that order |
@@ -119,6 +132,7 @@ Hovering over a card reveals pin / delete buttons for quick access.
 | Menu bar icon | Show / hide the menu bar icon |
 | Direct paste | Automatically paste into the current app after selection |
 | Always paste as plain text | Strip formatting and paste plain text only |
+| Show pinned items when opening the panel | When off, pinned items are tucked into the bar on the left; click the bar to show them |
 | Recognize text in images | Run OCR on copied images; when off, text is still available from the context menu |
 | History retention | 1 day / 1 week / 1 month / forever |
 | Ignored apps | Don't record content copied from these apps |
