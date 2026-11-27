@@ -632,6 +632,18 @@ extension PasteMainViewController {
 
 extension PasteMainViewController {
     private func setupPinRail() {
+        // 按住 ⌘ / ⌥ 时滚动列表：按新的可见区域刷新角标（⌘ 编号会跟着重排）
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            forName: NSView.boundsDidChangeNotification,
+            object: scrollView.contentView,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.isShowingShortcuts || self.isOptionHeld else { return }
+                self.refreshShortcutHints()
+            }
+        }
         pinRail.onClick = { [weak self] in
             guard let self else { return }
             self.closePinPeek()
